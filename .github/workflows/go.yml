@@ -24,14 +24,25 @@ jobs:
     - name: Build
       run: go build -v ./...
 
-    - name: Check formatting with gofmt
+    - name: Run gofmt
       run: |
         files=$(gofmt -l .)
         if [ -n "$files" ]; then
-          echo "The following files are not formatted correctly:"
+          echo "The following files need formatting:"
           echo "$files"
-          exit 1
+          gofmt -w .
+        else
+          echo "No formatting issues found."
         fi
+
+    - name: Commit and push changes
+      if: success() && steps.format-code.outputs.changed == 'true'
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add .
+        git commit -m "chore: auto-format code"
+        git push
 
       #    - name: Test
       #      run: go test -v ./...
