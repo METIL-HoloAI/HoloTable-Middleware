@@ -30,6 +30,7 @@ jobs:
         if [ -n "$files" ]; then
           echo "The following files are not formatted correctly:"
           echo "$files"
+          echo "Please run go fmt ./..."
           exit 1
         fi
 
