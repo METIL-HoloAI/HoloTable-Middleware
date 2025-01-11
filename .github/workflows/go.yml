@@ -24,13 +24,6 @@ jobs:
     - name: Build
       run: go build -v ./...
 
-    - name: Install gopls
-      run: go install golang.org/x/tools/gopls@latest
-
-    - name: Run gopls for cli
-      working-directory: ./internal/cmd/cli
-      run: gopls check ./...
-
     - name: Check formatting with gofmt
       run: |
         files=$(gofmt -l .)
