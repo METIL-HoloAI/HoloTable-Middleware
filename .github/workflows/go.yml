@@ -10,8 +10,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-
-  build:
+  go-checks:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -23,6 +22,11 @@ jobs:
 
     - name: Build
       run: go build -v ./...
+
+    - name: golangci-lint
+      uses: golangci/golangci-lint-action@v6
+      with:
+        version: latest
 
     - name: Check formatting with gofmt
       run: |
