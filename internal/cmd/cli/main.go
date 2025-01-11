@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	
+
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/configloader"
 )
 
@@ -17,9 +17,9 @@ func main() {
 
 	// Check how user wants to listen for input
 	// and start that listener
-	if(settings.Listener == "cli") {
+	if settings.Listener == "cli" {
 		fmt.Println("CLI Listener")
-	} else if(settings.Listener == "text") {
+	} else if settings.Listener == "text" {
 		fmt.Println("Text Listener")
 	} else {
 		fmt.Println("Invalid listener option in general.yaml")
