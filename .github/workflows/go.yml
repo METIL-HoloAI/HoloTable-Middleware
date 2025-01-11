@@ -24,19 +24,17 @@ jobs:
     - name: Build
       run: go build -v ./...
 
-    - name: Run gofmt
+    - name: Check for changes
+      id: check_changes
       run: |
-        files=$(gofmt -l .)
-        if [ -n "$files" ]; then
-          echo "The following files need formatting:"
-          echo "$files"
-          gofmt -w .
+        if git diff --quiet; then
+          echo "changed=false" >> $GITHUB_ENV
         else
-          echo "No formatting issues found."
+          echo "changed=true" >> $GITHUB_ENV
         fi
 
     - name: Commit and push changes
-      if: success() && steps.format-code.outputs.changed == 'true'
+      if: env.changed == 'true'
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
