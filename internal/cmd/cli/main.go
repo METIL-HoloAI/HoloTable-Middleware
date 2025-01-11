@@ -5,11 +5,11 @@ import (
 )
 
 func main() {
-    fmt.Println("Hello, World!")
+	fmt.Println("Hello, World!")
 	fmt.Println("Hello World2!")
 
-    // Load yaml
+	// Load yaml
 
-    // Check how user wants to listen for input
-    // and start that listener
+	// Check how user wants to listen for input
+	// and start that listener
 }
