@@ -17,8 +17,8 @@ func main() {
 
 	// Check how user wants to listen for input
 	// and start that listener
-	if settings.Listener == "cli" {
-		fmt.Println("CLI Listener")
+	if settings.Listener == "mic" {
+		fmt.Println("Microphone Listener")
 	} else if settings.Listener == "text" {
 		fmt.Println("Text Listener")
 	} else {
