@@ -8,7 +8,7 @@ import (
 
 func main() {
 	// Load yaml
-	settings, err := configloader.LoadGeneral()
+	settings, err := configloader.GetGeneral()
 	if err != nil {
 		fmt.Println("Error loading general settings")
 		fmt.Println(err)

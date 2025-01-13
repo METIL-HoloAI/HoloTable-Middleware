@@ -7,7 +7,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func LoadGeneral() (structs.GeneralSettings, error) {
+func GetGeneral() (structs.GeneralSettings, error) {
 
 	file, err := os.ReadFile("config/general.yaml")
 	if err != nil {
