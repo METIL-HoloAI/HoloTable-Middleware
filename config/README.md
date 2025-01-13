@@ -6,7 +6,6 @@
 
 Which listener to use. It can be `mic` or `text`
 
-
 ## Intent Detection
 
 ### `apiUrl`
