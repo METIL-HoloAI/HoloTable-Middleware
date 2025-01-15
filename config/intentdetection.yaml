@@ -1,0 +1,4 @@
+apiUrl: "foo"
+seedPrompt: "bar"
+headers: "foo"
+auth: "bar"
