@@ -1,8 +1,8 @@
 package structs
 
-import ()
+import _ "gopkg.in/yaml.v3"
 
 type GeneralSettings struct {
-	Listener string
-	DataDir  string
+	Listener string `yaml:"listener"`
+	DataDir  string `yaml:"dataDir"`
 }

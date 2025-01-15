@@ -25,8 +25,6 @@ func main() {
 	}
 	defer db.Close()
 
-	fmt.Println(db.Stats())
-
 	// Check how user wants to listen for input
 	// and start that listener
 	if settings.Listener == "mic" {
