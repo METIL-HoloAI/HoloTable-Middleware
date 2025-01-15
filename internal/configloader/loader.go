@@ -21,3 +21,18 @@ func GetGeneral() (structs.GeneralSettings, error) {
 
 	return settings, nil
 }
+
+func GetIntentDetection() (structs.IntentDetectionSettings, error) {
+
+	file, err := os.ReadFile("config/intentdetection.yaml")
+	if err != nil {
+		return structs.IntentDetectionSettings{}, err
+	}
+
+	var settings structs.IntentDetectionSettings
+	if err := yaml.Unmarshal(file, &settings); err != nil {
+		return structs.IntentDetectionSettings{}, err
+	}
+
+	return settings, nil
+}

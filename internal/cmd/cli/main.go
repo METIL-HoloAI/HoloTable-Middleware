@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/configloader"
+	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/listeners"
 )
 
 func main() {
@@ -20,7 +21,7 @@ func main() {
 	if settings.Listener == "mic" {
 		fmt.Println("Microphone Listener")
 	} else if settings.Listener == "text" {
-		fmt.Println("Text Listener")
+		listeners.StartTextListener()
 	} else {
 		fmt.Println("Invalid listener option in general.yaml")
 	}
