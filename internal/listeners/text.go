@@ -8,7 +8,10 @@ func StartTextListener() {
 		fmt.Println("(q)uit, (r)eload yaml")
 
 		var input string
-		fmt.Scanln(&input)
+		_, err := fmt.Scanln(&input)
+		if err != nil {
+			fmt.Println(err)
+		}
 
 		if input == "q" {
 			return
