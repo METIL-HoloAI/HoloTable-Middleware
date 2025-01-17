@@ -1,9 +1,9 @@
 package structs
 
 type APIConfig struct {
-	Endpoint           string
-	Method             string
-	Headers            map[string]string
-	RequiredParameters map[string]string
-	OptionalParameters map[string]string
+	Endpoint           string            `yaml:"endpoint"`
+	Method             string            `yaml:"method"`
+	Headers            map[string]string `yaml:"headers"`
+	RequiredParameters map[string]string `yaml:"requiredParameters"`
+	OptionalParameters map[string]string `yaml:"optionalParameters"`
 }
