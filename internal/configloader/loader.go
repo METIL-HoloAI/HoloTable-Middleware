@@ -37,8 +37,8 @@ func GetIntentDetection() (structs.IntentDetectionSettings, error) {
 	return settings, nil
 }
 
-func GetImageGeneration() (structs.APIConfig, error) {
-	file, err := os.ReadFile("config/contentgeneration/imagegeneration.yaml")
+func GetImage() (structs.APIConfig, error) {
+	file, err := os.ReadFile("config/contentgen/imagegen.yaml")
 	if err != nil {
 		return structs.APIConfig{}, err
 	}
@@ -51,8 +51,8 @@ func GetImageGeneration() (structs.APIConfig, error) {
 	return settings, nil
 }
 
-func GetVideoGeneration() (structs.APIConfig, error) {
-	file, err := os.ReadFile("config/contentgeneration/videogeneration.yaml")
+func GetVideo() (structs.APIConfig, error) {
+	file, err := os.ReadFile("config/contentgen/videogen.yaml")
 	if err != nil {
 		return structs.APIConfig{}, err
 	}
@@ -65,8 +65,8 @@ func GetVideoGeneration() (structs.APIConfig, error) {
 	return settings, nil
 }
 
-func GetGifGeneration() (structs.APIConfig, error) {
-	file, err := os.ReadFile("config/contentgeneration/gifgeneration.yaml")
+func GetGif() (structs.APIConfig, error) {
+	file, err := os.ReadFile("config/contentgen/gifgen.yaml")
 	if err != nil {
 		return structs.APIConfig{}, err
 	}
@@ -79,8 +79,8 @@ func GetGifGeneration() (structs.APIConfig, error) {
 	return settings, nil
 }
 
-func Get3dGeneration() (structs.APIConfig, error) {
-	file, err := os.ReadFile("config/contentgeneration/3dgeneration.yaml")
+func Get3d() (structs.APIConfig, error) {
+	file, err := os.ReadFile("config/contentgen/3dgen.yaml")
 	if err != nil {
 		return structs.APIConfig{}, err
 	}
