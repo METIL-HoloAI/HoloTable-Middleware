@@ -17,7 +17,7 @@ optionalParameters:
     options: ["dall-e-2", "dall-e-3"]
   n:
     default: 1
-    description: "The number of images to generate. Must be between 1 and 10."
+    description: "The number of images to generate. Must be between 1 and 10. Dall-e 3 Only supports 1 image per call"
     options: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
   quality:
     default: "standard"
