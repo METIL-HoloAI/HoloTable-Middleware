@@ -18,17 +18,17 @@ func LoadIntentDetectionResponse(JSONData []byte) {
 	}
 
 	//load content gen yaml based off JSON data
-	var yamlConfig structs.APIConfig
+	var apiConfig structs.APIConfig
 	var err error
 	switch intentDetectionResponse.ContentType {
 	case "image":
-		yamlConfig, err = configloader.GetImage()
+		apiConfig, err = configloader.GetImage()
 	case "video":
-		yamlConfig, err = configloader.GetVideo()
+		apiConfig, err = configloader.GetVideo()
 	case "gif":
-		yamlConfig, err = configloader.GetGif()
+		apiConfig, err = configloader.GetGif()
 	case "3d":
-		yamlConfig, err = configloader.Get3d()
+		apiConfig, err = configloader.Get3d()
 	default:
 		fmt.Println("Intent detection provided invalid content type")
 		return
@@ -40,12 +40,12 @@ func LoadIntentDetectionResponse(JSONData []byte) {
 		return
 	}
 
-	BuildAPICall(intentDetectionResponse, yamlConfig)
+	BuildAPICall(intentDetectionResponse, apiConfig)
 }
 
-func BuildAPICall(intentDetectionResponse structs.IntentDetectionResponse, yamlConfig structs.APIConfig) {
+func BuildAPICall(intentDetectionResponse structs.IntentDetectionResponse, apiConfig structs.APIConfig) {
 	// Build API call using intentDetectionResponse and yamlConfig
 	fmt.Println(intentDetectionResponse)
-	fmt.Println(yamlConfig)
+	fmt.Println(apiConfig)
 
 }

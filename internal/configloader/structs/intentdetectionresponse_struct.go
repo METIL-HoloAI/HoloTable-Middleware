@@ -1,8 +1,8 @@
 package structs
 
 type IntentDetectionResponse struct {
-	ContentType string
-	SeedPrompt  string
-	Headers     string
-	Auth        string
+	ContentType        string
+	Prompt             string
+	RequiredParamaters map[string]string
+	OptionalParameters map[string]string
 }
