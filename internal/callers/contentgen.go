@@ -45,7 +45,7 @@ func LoadIntentDetectionResponse(JSONData []byte) {
 
 func BuildAPICall(intentDetectionResponse structs.IntentDetectionResponse, apiConfig structs.APIConfig) {
 	// Build API call using intentDetectionResponse and yamlConfig
-	fmt.Println(intentDetectionResponse)
-	fmt.Println(apiConfig)
+	//fmt.Println(intentDetectionResponse)
+	//fmt.Println(apiConfig)
 
 }
