@@ -1,4 +1,6 @@
 #Paramaters for OpenAI's Image Generation API
+#The APIConfig struct assumes that each required and optional paramater has a description
+# a (possibly nonexistent) List of options and a (possibly nonexistent) default val.
 #For more details see https://platform.openai.com/docs/api-reference/images/create
 
 endpoint: "https://api.openai.com/v1/images/generations"
@@ -21,7 +23,7 @@ optionalParameters:
     options: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
   quality:
     default: "standard"
-    description: "The quality of the generated image. "hd" Only supported for dall-e-3."
+    description: "The quality of the generated image. hd Only supported for dall-e-3."
     options: ["standard", "hd"]
   response_format:
     default: "url"

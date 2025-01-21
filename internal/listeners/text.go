@@ -1,6 +1,10 @@
 package listeners
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/callers"
+)
 
 func StartTextListener() {
 	for {
@@ -21,6 +25,8 @@ func StartTextListener() {
 			fmt.Println("TODO")
 		}
 
-		fmt.Print("\033[H\033[2J")
+		//fmt.Print("\033[H\033[2J")
+
+		callers.LoadIntentDetectionResponse()
 	}
 }

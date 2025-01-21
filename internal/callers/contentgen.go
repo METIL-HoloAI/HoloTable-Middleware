@@ -1,38 +1,47 @@
 package callers
 
 import (
-	"encoding/json"
+	//"encoding/json"
 	"fmt"
 
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/configloader"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/configloader/structs"
 )
 
-func LoadIntentDetectionResponse(JSONData []byte) {
-	//read in JSON data from intent detection
-	var intentDetectionResponse structs.IntentDetectionResponse
-	if err := json.Unmarshal(JSONData, &intentDetectionResponse); err != nil {
-		fmt.Println("Error unmarshalling intent detection response")
-		fmt.Println(err)
-		return
-	}
+func LoadIntentDetectionResponse( /*JSONData []byte*/ ) {
+	/*
+		//read in JSON data from intent detection
+		var intentDetectionResponse structs.IntentDetectionResponse
+		if err := json.Unmarshal(JSONData, &intentDetectionResponse); err != nil {
+			fmt.Println("Error unmarshalling intent detection response")
+			fmt.Println(err)
+			return
+		}
 
-	//load content gen yaml based off JSON data
+		//load content gen yaml based off JSON data
+		var apiConfig structs.APIConfig
+		var err error
+		switch intentDetectionResponse.ContentType {
+		case "image":
+			apiConfig, err = configloader.GetImage()
+		case "video":
+			apiConfig, err = configloader.GetVideo()
+		case "gif":
+			apiConfig, err = configloader.GetGif()
+		case "3d":
+			apiConfig, err = configloader.Get3d()
+		default:
+			fmt.Println("Intent detection provided invalid content type")
+			return
+		}
+	*/
+
 	var apiConfig structs.APIConfig
 	var err error
-	switch intentDetectionResponse.ContentType {
-	case "image":
-		apiConfig, err = configloader.GetImage()
-	case "video":
-		apiConfig, err = configloader.GetVideo()
-	case "gif":
-		apiConfig, err = configloader.GetGif()
-	case "3d":
-		apiConfig, err = configloader.Get3d()
-	default:
-		fmt.Println("Intent detection provided invalid content type")
-		return
-	}
+
+	apiConfig, err = configloader.GetImage()
+
+	fmt.Println(apiConfig)
 
 	if err != nil {
 		fmt.Println("Error loading content gen settings")
@@ -40,7 +49,7 @@ func LoadIntentDetectionResponse(JSONData []byte) {
 		return
 	}
 
-	BuildAPICall(intentDetectionResponse, apiConfig)
+	//BuildAPICall(intentDetectionResponse, apiConfig)
 }
 
 func BuildAPICall(intentDetectionResponse structs.IntentDetectionResponse, apiConfig structs.APIConfig) {
