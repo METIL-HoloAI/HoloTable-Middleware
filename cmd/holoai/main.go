@@ -8,6 +8,7 @@ import (
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/configloader"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/listeners"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/joho/godotenv"
 )
 
 func main() {
@@ -25,6 +26,12 @@ func main() {
 		log.Fatalln(err)
 	}
 	defer db.Close()
+
+	// Load API keys
+	err = godotenv.Load()
+	if err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
+	}
 
 	// Check how user wants to listen for input
 	// and start that listener
