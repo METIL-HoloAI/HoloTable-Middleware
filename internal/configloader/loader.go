@@ -68,3 +68,58 @@ func GetIntentDetection() (structs.IntentDetectionSettings, error) {
 	return settings, nil
 }
 
+func GetImage() (structs.APIConfig, error) {
+	file, err := os.ReadFile("config/contentgen/imagegen.yaml")
+	if err != nil {
+		return structs.APIConfig{}, err
+	}
+
+	var settings structs.APIConfig
+	if err := yaml.Unmarshal(file, &settings); err != nil {
+		return structs.APIConfig{}, err
+	}
+
+	return settings, nil
+}
+
+func GetVideo() (structs.APIConfig, error) {
+	file, err := os.ReadFile("config/contentgen/videogen.yaml")
+	if err != nil {
+		return structs.APIConfig{}, err
+	}
+
+	var settings structs.APIConfig
+	if err := yaml.Unmarshal(file, &settings); err != nil {
+		return structs.APIConfig{}, err
+	}
+
+	return settings, nil
+}
+
+func GetGif() (structs.APIConfig, error) {
+	file, err := os.ReadFile("config/contentgen/gifgen.yaml")
+	if err != nil {
+		return structs.APIConfig{}, err
+	}
+
+	var settings structs.APIConfig
+	if err := yaml.Unmarshal(file, &settings); err != nil {
+		return structs.APIConfig{}, err
+	}
+
+	return settings, nil
+}
+
+func Get3d() (structs.APIConfig, error) {
+	file, err := os.ReadFile("config/contentgen/3dgen.yaml")
+	if err != nil {
+		return structs.APIConfig{}, err
+	}
+
+	var settings structs.APIConfig
+	if err := yaml.Unmarshal(file, &settings); err != nil {
+		return structs.APIConfig{}, err
+	}
+
+	return settings, nil
+}

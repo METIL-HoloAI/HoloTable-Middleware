@@ -1,7 +1,5 @@
 package structs
 
-import ()
-
 type IntentDetectionSettings struct {
 	ApiUrl     string
 	SeedPrompt string
