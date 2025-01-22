@@ -3,29 +3,49 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"log"
+	"os"
+
+	// "log"
 	"strconv"
 	"testing"
 
-	// "github.com/METIL-HoloAI/HoloTable-Middleware/internal/configloader"
+	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/configloader"
 	// "github.com/METIL-HoloAI/HoloTable-Middleware/internal/listeners"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 // public function for initializatin the database
 func TestDatabaseInit(t *testing.T) {
-	db, err := sql.Open("sqlite3", "./testdatabase.db")
+	// Load yaml
+	settings, err := configloader.GetGeneral()
 	if err != nil {
-		log.Fatalln(err)
+		t.Fatal("Error loading general settings")
+		t.Fatal(err)
+		return
 	}
-	// defer db.Close()
 
-	statement, _ := db.Prepare("CREATE TABLE IF NOT EXISTS testdb (id INTEGER PRIMARY KEY, firstname TEXT, lastname TEXT)")
+	os.MkdirAll(settings.DataDir, os.ModePerm)
+	db, err := sql.Open("sqlite3", settings.DataDir+"test.db")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+
+	statement, err := db.Prepare("CREATE TABLE IF NOT EXISTS testdb (id INTEGER PRIMARY KEY, firstname TEXT, lastname TEXT)")
+	if err != nil {
+		t.Fatal(err)
+	}
 	statement.Exec()
-	statement, _ = db.Prepare("INSERT INTO testdb (firstname, lastname) VALUES (?, ?)")
+	statement, err = db.Prepare("INSERT INTO testdb (firstname, lastname) VALUES (?, ?)")
+	if err != nil {
+		t.Fatal(err)
+	}
 	statement.Exec("Enrique", "Romero")
 
-	rows, _ := db.Query("SELECT id, firstname, lastname FROM testdb")
+	rows, err := db.Query("SELECT id, firstname, lastname FROM testdb")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	var id int
 	var firstname string
