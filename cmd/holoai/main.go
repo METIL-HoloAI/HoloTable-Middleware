@@ -7,8 +7,8 @@ import (
 
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/configloader"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/listeners"
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/joho/godotenv"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
