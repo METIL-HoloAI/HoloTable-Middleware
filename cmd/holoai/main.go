@@ -37,10 +37,10 @@ func main() {
 		fmt.Println("Invalid listener option in general.yaml")
 	}
 
-	callers.InitializeChat()
+	// callers.InitializeChat()
 
 	prompt := "A futuristic cityscape at sunset"
-	jsonData, err := LoadPrompt(prompt)
+	jsonData, err := callers.LoadPrompt(prompt) // for testing purposes
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
