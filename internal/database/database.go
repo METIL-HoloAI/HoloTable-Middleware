@@ -12,6 +12,8 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+var db *sql.DB
+
 // public function for initializing the database
 func Init() {
 	// Load yaml
@@ -22,9 +24,7 @@ func Init() {
 		return
 	}
 
-	// also remove all testing stuff
-	os.MkdirAll(settings.DataDir, os.ModePerm)
-	db, err := sql.Open("sqlite3", settings.DataDir+"filelocations.db")
+	db, err = sql.Open("sqlite3", settings.DataDir+"filelocations.db")
 	if err != nil {
 		log.Fatal(err)
 	}
