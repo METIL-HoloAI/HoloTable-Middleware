@@ -46,12 +46,18 @@ func Init() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		statement.Exec()
+		_, err = statement.Exec()
+		if err != nil {
+			log.Fatal(err)
+		}
 		statement, err = db.Prepare("INSERT INTO" + fileTypes[i] + "(filepath) VALUES (?)")
 		if err != nil {
 			log.Fatal(err)
 		}
-		statement.Exec("some filepath")
+		_, err = statement.Exec("some filepath")
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		rows, err := db.Query("SELECT id, filepath FROM" + fileTypes[i])
 		if err != nil {
@@ -62,8 +68,13 @@ func Init() {
 		var filepath string
 
 		for rows.Next() {
-			rows.Scan(&id, &filepath)
-			fmt.Println(strconv.Itoa(id) + " : " + filepath + " ")
+			if err := rows.Scan(&id, &filepath); err != nil {
+				log.Printf("Error scanning row: %v", err)
+				continue
+			}
+			if _, err := fmt.Println(strconv.Itoa(id) + " : " + filepath + " "); err != nil {
+				log.Printf("Error writing output: %v", err)
+			}
 		}
 	}
 }
