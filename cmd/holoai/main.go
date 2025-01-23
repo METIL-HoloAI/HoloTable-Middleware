@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/callers"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/configloader"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/listeners"
 	_ "github.com/mattn/go-sqlite3"
@@ -36,4 +37,33 @@ func main() {
 		fmt.Println("Invalid listener option in general.yaml")
 	}
 
+	callers.InitializeChat()
+
+	prompt := "A futuristic cityscape at sunset"
+	jsonData, err := LoadPrompt(prompt)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	fmt.Println("Generated JSON Data:", string(jsonData))
+
+	// // call contentgen.go (this is a shortcut for testing prior to intent detection being completed)
+	// fakeJSONData := []byte(`{
+	// 	"ContentType": "image",
+	// 	"requiredParameters": {
+	// 		"prompt": "A futuristic cityscape at sunset"
+	// 	},
+	// 	"optionalParameters": {
+	// 		"model": "dall-e-2",
+	// 		"n": 3,
+	// 		"quality": "standard",
+	// 		"response_format": "url",
+	// 		"size": "1024x1024",
+	// 		"style": "vivid",
+	// 		"user": "user1234"
+	// 	}
+	// }`)
+
+	// callers.LoadIntentDetectionResponse(fakeJSONData) // testing
+	// // callers.LoadIntentDetectionResponse(jsonData) // actual
 }

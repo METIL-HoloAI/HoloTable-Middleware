@@ -92,3 +92,17 @@ func Get3d() (structs.APIConfig, error) {
 
 	return settings, nil
 }
+
+func GetChat() (structs.APIConfig, error) {
+	file, err := os.ReadFile("config/chatgen.yaml")
+	if err != nil {
+		return structs.APIConfig{}, err
+	}
+
+	var settings structs.APIConfig
+	if err := yaml.Unmarshal(file, &settings); err != nil {
+		return structs.APIConfig{}, err
+	}
+
+	return settings, nil
+}
