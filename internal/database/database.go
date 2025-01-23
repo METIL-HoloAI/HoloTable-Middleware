@@ -50,7 +50,7 @@ func Init() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		statement.Exec("somewhere")
+		statement.Exec("some filepath")
 
 		rows, err := db.Query("SELECT id, filepath FROM" + fileTypes[i])
 		if err != nil {
