@@ -18,7 +18,7 @@ func main() {
 		return
 	}
 
-	database.InitDatabase()
+	database.Init()
 
 	// Check how user wants to listen for input
 	// and start that listener
