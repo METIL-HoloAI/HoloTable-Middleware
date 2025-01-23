@@ -30,6 +30,7 @@ func Init() {
 	}
 	defer db.Close()
 
+	// TODO:
 	// need table for each type of thing (image, video, gifs, 3dmodels)
 	// store their location on file system
 	// need a location column in each table
@@ -37,31 +38,31 @@ func Init() {
 	// is location stored as like filepath? as text?
 
 	fileTypes := []string{"image", "video", "gif", "model"}
-		// iterates through the four file types and creates a table for each
-		// each table contains id and filepath
-		for i:= 0; i < len(fileTypes); i++ { 
-			statement, err := db.Prepare("CREATE TABLE IF NOT EXISTS" +fileTypes[i]+ "(id INTEGER PRIMARY KEY, filepath TEXT)")
-			if err != nil {
-				log.Fatal(err)
-			}
-			statement.Exec()
-			statement, err = db.Prepare("INSERT INTO" +fileTypes[i]+ "(filepath) VALUES (?)")
-			if err != nil {
-				log.Fatal(err)
-			}
-			statement.Exec("somewhere")
-
-			rows, err := db.Query("SELECT id, filepath FROM" +fileTypes[i])
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			var id int
-			var filepath string
-
-			for rows.Next() {
-				rows.Scan(&id, &filepath)
-				fmt.Println(strconv.Itoa(id) + " : " + filepath + " ")
-			}
+	// iterates through the four file types and creates a table for each
+	// each table contains id and filepath
+	for i := 0; i < len(fileTypes); i++ {
+		statement, err := db.Prepare("CREATE TABLE IF NOT EXISTS" + fileTypes[i] + "(id INTEGER PRIMARY KEY, filepath TEXT)")
+		if err != nil {
+			log.Fatal(err)
 		}
+		statement.Exec()
+		statement, err = db.Prepare("INSERT INTO" + fileTypes[i] + "(filepath) VALUES (?)")
+		if err != nil {
+			log.Fatal(err)
+		}
+		statement.Exec("somewhere")
+
+		rows, err := db.Query("SELECT id, filepath FROM" + fileTypes[i])
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		var id int
+		var filepath string
+
+		for rows.Next() {
+			rows.Scan(&id, &filepath)
+			fmt.Println(strconv.Itoa(id) + " : " + filepath + " ")
+		}
+	}
 }
