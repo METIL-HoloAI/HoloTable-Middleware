@@ -13,7 +13,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-// public function for initializatin the database
+// public function for initializing the database
 func TestDatabaseInit(t *testing.T) {
 	// Load yaml
 	settings, err := configloader.GetGeneral()
