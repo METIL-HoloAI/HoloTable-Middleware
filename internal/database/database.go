@@ -32,10 +32,8 @@ func Init() {
 
 	// TODO:
 	// need table for each type of thing (image, video, gifs, 3dmodels)
-	// store their location on file system
-	// need a location column in each table
-	// not necissarily storing those generated things in the tables, but their location on the file system
-	// is location stored as like filepath? as text?
+	// store file location
+	// store filename
 
 	fileTypes := []string{"image", "video", "gif", "model"}
 	// iterates through the four file types and creates a table for each
