@@ -23,7 +23,9 @@ func TestDatabaseInit(t *testing.T) {
 		return
 	}
 
-	os.MkdirAll(settings.DataDir, os.ModePerm)
+	if err := os.MkdirAll(settings.DataDir, os.ModePerm); err != nil {
+		t.Fatal("Failed to create data directory:", err)
+	}
 	db, err := sql.Open("sqlite3", settings.DataDir+"test.db")
 	if err != nil {
 		t.Fatal(err)
@@ -34,12 +36,18 @@ func TestDatabaseInit(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	statement.Exec()
+	_, err = statement.Exec()
+	if err != nil {
+		t.Fatal(err)
+	}
 	statement, err = db.Prepare("INSERT INTO testdb (firstname, lastname) VALUES (?, ?)")
 	if err != nil {
 		t.Fatal(err)
 	}
-	statement.Exec("Enrique", "Romero")
+	_, err = statement.Exec("Enrique", "Romero")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	rows, err := db.Query("SELECT id, firstname, lastname FROM testdb")
 	if err != nil {
@@ -51,7 +59,10 @@ func TestDatabaseInit(t *testing.T) {
 	var lastname string
 
 	for rows.Next() {
-		rows.Scan(&id, &firstname, &lastname)
+		err := rows.Scan(&id, &firstname, &lastname)
+		if err != nil {
+			t.Fatal(err)
+		}
 		fmt.Println(strconv.Itoa(id) + " : " + firstname + " " + lastname)
 	}
 
