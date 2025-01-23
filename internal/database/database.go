@@ -24,6 +24,9 @@ func Init() {
 		return
 	}
 
+	if err := os.MkdirAll(settings.DataDir, os.ModePerm); err != nil {
+		log.Fatal("Failed to create data directory:", err)
+	}
 	db, err = sql.Open("sqlite3", settings.DataDir+"filelocations.db")
 	if err != nil {
 		log.Fatal(err)
