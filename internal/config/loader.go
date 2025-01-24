@@ -32,7 +32,7 @@ func LoadYaml() {
 
 	// NOTE: These are commented out for the time being while the yaml files
 	// are written to match the struct they are meant to be. As the yaml files
-	// are written, uncomment these to correctly load them
+	// are written, uncomment the call, variable corresponding function to correctly load them
 	//
 	// ImageGen, err = getImage()
 	// if err != nil {
@@ -113,78 +113,78 @@ func getIntentDetection() (structs.IntentDetectionSettings, error) {
 	return settings, nil
 }
 
-func getImage() (structs.APIConfig, error) {
-	configPath, err := getConfigPath("/contentgen/imagegen.yaml")
-	if err != nil {
-		return structs.APIConfig{}, err
-	}
-
-	file, err := os.ReadFile(configPath)
-	if err != nil {
-		return structs.APIConfig{}, err
-	}
-
-	var settings structs.APIConfig
-	if err := yaml.Unmarshal(file, &settings); err != nil {
-		return structs.APIConfig{}, err
-	}
-
-	return settings, nil
-}
-
-func getVideo() (structs.APIConfig, error) {
-	configPath, err := getConfigPath("/contentgen/videogen.yaml")
-	if err != nil {
-		return structs.APIConfig{}, err
-	}
-
-	file, err := os.ReadFile(configPath)
-	if err != nil {
-		return structs.APIConfig{}, err
-	}
-
-	var settings structs.APIConfig
-	if err := yaml.Unmarshal(file, &settings); err != nil {
-		return structs.APIConfig{}, err
-	}
-
-	return settings, nil
-}
-
-func getGif() (structs.APIConfig, error) {
-	configPath, err := getConfigPath("/contentgen/gifgen.yaml")
-	if err != nil {
-		return structs.APIConfig{}, err
-	}
-
-	file, err := os.ReadFile(configPath)
-	if err != nil {
-		return structs.APIConfig{}, err
-	}
-
-	var settings structs.APIConfig
-	if err := yaml.Unmarshal(file, &settings); err != nil {
-		return structs.APIConfig{}, err
-	}
-
-	return settings, nil
-}
-
-func get3d() (structs.APIConfig, error) {
-	configPath, err := getConfigPath("/contentgen/3dgen.yaml")
-	if err != nil {
-		return structs.APIConfig{}, err
-	}
-
-	file, err := os.ReadFile(configPath)
-	if err != nil {
-		return structs.APIConfig{}, err
-	}
-
-	var settings structs.APIConfig
-	if err := yaml.Unmarshal(file, &settings); err != nil {
-		return structs.APIConfig{}, err
-	}
-
-	return settings, nil
-}
+// func getImage() (structs.APIConfig, error) {
+// 	configPath, err := getConfigPath("/contentgen/imagegen.yaml")
+// 	if err != nil {
+// 		return structs.APIConfig{}, err
+// 	}
+//
+// 	file, err := os.ReadFile(configPath)
+// 	if err != nil {
+// 		return structs.APIConfig{}, err
+// 	}
+//
+// 	var settings structs.APIConfig
+// 	if err := yaml.Unmarshal(file, &settings); err != nil {
+// 		return structs.APIConfig{}, err
+// 	}
+//
+// 	return settings, nil
+// }
+//
+// func getVideo() (structs.APIConfig, error) {
+// 	configPath, err := getConfigPath("/contentgen/videogen.yaml")
+// 	if err != nil {
+// 		return structs.APIConfig{}, err
+// 	}
+//
+// 	file, err := os.ReadFile(configPath)
+// 	if err != nil {
+// 		return structs.APIConfig{}, err
+// 	}
+//
+// 	var settings structs.APIConfig
+// 	if err := yaml.Unmarshal(file, &settings); err != nil {
+// 		return structs.APIConfig{}, err
+// 	}
+//
+// 	return settings, nil
+// }
+//
+// func getGif() (structs.APIConfig, error) {
+// 	configPath, err := getConfigPath("/contentgen/gifgen.yaml")
+// 	if err != nil {
+// 		return structs.APIConfig{}, err
+// 	}
+//
+// 	file, err := os.ReadFile(configPath)
+// 	if err != nil {
+// 		return structs.APIConfig{}, err
+// 	}
+//
+// 	var settings structs.APIConfig
+// 	if err := yaml.Unmarshal(file, &settings); err != nil {
+// 		return structs.APIConfig{}, err
+// 	}
+//
+// 	return settings, nil
+// }
+//
+// func get3d() (structs.APIConfig, error) {
+// 	configPath, err := getConfigPath("/contentgen/3dgen.yaml")
+// 	if err != nil {
+// 		return structs.APIConfig{}, err
+// 	}
+//
+// 	file, err := os.ReadFile(configPath)
+// 	if err != nil {
+// 		return structs.APIConfig{}, err
+// 	}
+//
+// 	var settings structs.APIConfig
+// 	if err := yaml.Unmarshal(file, &settings); err != nil {
+// 		return structs.APIConfig{}, err
+// 	}
+//
+// 	return settings, nil
+// }
