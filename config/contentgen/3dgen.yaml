@@ -1,40 +1,40 @@
-#Paramaters for OpenAI's Image Generation API
-#For more details see https://platform.openai.com/docs/api-reference/images/create
+# Parameters for Meshy 3D API
+# For more details see https://meshy.com/docs/api-reference
 
-endpoint: "https://api.openai.com/v1/images/generations"
+endpoint: "https://api.meshy.com/v1/generate"
 method: "POST"
 headers:
-  Authorization: "Bearer $IMAGEGEN_API_KEY"
+  Authorization: "Bearer $MESHY_API_KEY"
   Content-Type: "application/json"
 requiredParameters:
   prompt:
-    description: "A text description of the desired 3d asset(s)."
+    description: "A text description of the desired 3D asset(s)."
     options: [] 
 optionalParameters:
   model:
-    default: "dall-e-2"
-    description: "The model to use for image generation."
-    options: ["dall-e-2", "dall-e-3"]
+    default: "meshy-v2"
+    description: "The model to use for 3D asset generation."
+    options: ["meshy-v1", "meshy-v2"]
   n:
     default: 1
-    description: "The number of 3d to generate. Must be between 1 and 10. Dall-e 3 Only supports 1 image per call"
-    options: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    description: "The number of 3D assets to generate. Must be between 1 and 5."
+    options: [1, 2, 3, 4, 5]
   quality:
     default: "standard"
-    description: "The quality of the generated image. hd Only supported for dall-e-3."
-    options: ["standard", "hd"]
+    description: "The quality of the generated 3D model."
+    options: ["standard", "high"]
   response_format:
     default: "url"
-    description: "The format in which the generated images are returned."
-    options: ["url", "b64_json"]
+    description: "The format in which the generated 3D models are returned."
+    options: ["url", "obj", "gltf"]
   size:
-    default: "1024x1024"
-    description: "The size of the generated images."
-    options: ["256x256", "512x512", "1024x1024", "1024x1024", "1792x1024", "1024x1792"]
+    default: "medium"
+    description: "The scale of the generated 3D model."
+    options: ["small", "medium", "large"]
   style:
-    default: "vivid"
-    description: "The style of the generated images. Only supported for dall-e-3."
-    options: ["vivid", "natural"]
+    default: "realistic"
+    description: "The style of the generated 3D model."
+    options: ["realistic", "cartoon", "low-poly"]
   user:
     description: "A unique identifier representing your end-user."
     options: [] 

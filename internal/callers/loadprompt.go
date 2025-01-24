@@ -1,5 +1,7 @@
 package callers
 
+// use jsonData, err := callers.LoadPrompt(prompt) to call this function
+
 import (
 	"bytes"
 	"encoding/json"
