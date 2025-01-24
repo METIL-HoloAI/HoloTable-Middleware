@@ -1,11 +1,10 @@
-package database
+package database_test
 
 import (
 	"database/sql"
 	"fmt"
 	"os"
 
-	// "log"
 	"strconv"
 	"testing"
 
@@ -15,6 +14,7 @@ import (
 
 // public function for initializing the database
 func TestDatabaseInit(t *testing.T) {
+	config.LoadYaml()
 	if err := os.MkdirAll(config.General.DataDir, os.ModePerm); err != nil {
 		t.Fatal("Failed to create data directory:", err)
 	}
