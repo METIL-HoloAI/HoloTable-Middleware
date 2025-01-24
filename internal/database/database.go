@@ -42,7 +42,7 @@ func Init() {
 	// iterates through the four file types and creates a table for each
 	// each table contains id and filepath
 	for i := 0; i < len(fileTypes); i++ {
-		statement, err := db.Prepare("CREATE TABLE IF NOT EXISTS" + fileTypes[i] + "(id INTEGER PRIMARY KEY, filepath TEXT)")
+		statement, err := db.Prepare("CREATE TABLE IF NOT EXISTS " + fileTypes[i] + " (id INTEGER PRIMARY KEY, filepath TEXT)")
 		if err != nil {
 			log.Fatalf("Failed to prepare CREATE TABLE statement for '%s': %v", fileTypes[i], err)
 		}
@@ -50,7 +50,7 @@ func Init() {
 		if err != nil {
 			log.Fatalf("Failed to execute CREATE TABLE statement for '%s': %v", fileTypes[i], err)
 		}
-		statement, err = db.Prepare("INSERT INTO" + fileTypes[i] + "(filepath) VALUES (?)")
+		statement, err = db.Prepare("INSERT INTO " + fileTypes[i] + " (filepath) VALUES (?)")
 		if err != nil {
 			log.Fatalf("Failed to prepare INSERT statement for '%s': %v", fileTypes[i], err)
 		}
@@ -59,7 +59,7 @@ func Init() {
 			log.Fatalf("Failed to execute INSERT statement for '%s': %v", fileTypes[i], err)
 		}
 
-		rows, err := db.Query("SELECT id, filepath FROM" + fileTypes[i])
+		rows, err := db.Query("SELECT id, filepath FROM " + fileTypes[i])
 		if err != nil {
 			log.Fatalf("Failed to query SELECT statement for '%s': %v", fileTypes[i], err)
 		}
