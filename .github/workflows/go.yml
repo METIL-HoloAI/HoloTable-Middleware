@@ -19,7 +19,15 @@ jobs:
       uses: actions/setup-go@v4
       with:
         go-version: '1.23.4'
+    
+    # Clean Go modules cache to avoid stale dependencies
+    - name: Clean Go cache
+      run: go clean -cache -modcache -i -r
 
+    # Tidy up go.mod and go.sum to remove any residual references
+    - name: Tidy Go modules
+      run: go mod tidy
+   
     - name: Build
       run: go build -v ./...
 
@@ -38,5 +46,5 @@ jobs:
           exit 1
         fi
 
-      #    - name: Test
-      #      run: go test -v ./...
+    - name: Test
+      run: go test -v ./...
