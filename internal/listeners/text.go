@@ -23,9 +23,9 @@ func StartTextListener() {
 
 		if input == "r" {
 			config.LoadYaml()
+			fmt.Println("Reloaded yaml...")
 		}
 
-		fmt.Print("\033[H\033[2J")
-		fmt.Println("Reloaded YAML")
+		fmt.Println()
 	}
 }
