@@ -1,6 +1,10 @@
 package listeners
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config"
+)
 
 func StartTextListener() {
 	for {
@@ -18,9 +22,10 @@ func StartTextListener() {
 		}
 
 		if input == "r" {
-			fmt.Println("TODO")
+			config.LoadYaml()
 		}
 
 		fmt.Print("\033[H\033[2J")
+		fmt.Println("Reloaded YAML")
 	}
 }
