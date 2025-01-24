@@ -2,11 +2,8 @@ package database
 
 import (
 	"database/sql"
-	"fmt"
-	"os"
-
 	"log"
-	"strconv"
+	"os"
 
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/configloader"
 	_ "github.com/mattn/go-sqlite3"
@@ -71,9 +68,6 @@ func Init() {
 			if err := rows.Scan(&id, &filepath); err != nil {
 				log.Printf("Error scanning row: %v", err)
 				continue
-			}
-			if _, err := fmt.Println(strconv.Itoa(id) + " : " + filepath + " "); err != nil {
-				log.Printf("Error writing output: %v", err)
 			}
 		}
 	}
