@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/configloader"
+	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -13,18 +13,12 @@ var db *sql.DB
 
 // public function for initializing the database
 func Init() {
-	// Load yaml
-	settings, err := configloader.GetGeneral()
-	if err != nil {
-		log.Fatal("Error loading general settings")
-		log.Fatal(err)
-		return
-	}
-
-	if err := os.MkdirAll(settings.DataDir, os.ModePerm); err != nil {
+	if err := os.MkdirAll(config.General.DataDir, os.ModePerm); err != nil {
 		log.Fatal("Failed to create data directory:", err)
 	}
-	db, err = sql.Open("sqlite3", settings.DataDir+"filelocations.db")
+
+	var err error
+	db, err = sql.Open("sqlite3", config.General.DataDir+"filelocations.db")
 	if err != nil {
 		log.Fatal("Failed to open database:", err)
 	}
