@@ -29,7 +29,7 @@ func Init() {
 	}
 	db, err = sql.Open("sqlite3", settings.DataDir+"filelocations.db")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Failed to open database:", err)
 	}
 	defer db.Close()
 
@@ -44,24 +44,24 @@ func Init() {
 	for i := 0; i < len(fileTypes); i++ {
 		statement, err := db.Prepare("CREATE TABLE IF NOT EXISTS" + fileTypes[i] + "(id INTEGER PRIMARY KEY, filepath TEXT)")
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalf("Failed to prepare CREATE TABLE statement for '%s': %v", fileTypes[i], err)
 		}
 		_, err = statement.Exec()
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalf("Failed to execute CREATE TABLE statement for '%s': %v", fileTypes[i], err)
 		}
 		statement, err = db.Prepare("INSERT INTO" + fileTypes[i] + "(filepath) VALUES (?)")
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalf("Failed to prepare INSERT statement for '%s': %v", fileTypes[i], err)
 		}
 		_, err = statement.Exec("some filepath")
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalf("Failed to execute INSERT statement for '%s': %v", fileTypes[i], err)
 		}
 
 		rows, err := db.Query("SELECT id, filepath FROM" + fileTypes[i])
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalf("Failed to query SELECT statement for '%s': %v", fileTypes[i], err)
 		}
 
 		var id int
