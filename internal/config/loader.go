@@ -30,25 +30,29 @@ func LoadYaml() {
 		log.Fatal("Error parsing intentdetection.yaml: ", err)
 	}
 
-	ImageGen, err = getImage()
-	if err != nil {
-		log.Fatal("Error parsing imagegen.yaml: ", err)
-	}
-
-	VideoGen, err = getVideo()
-	if err != nil {
-		log.Fatal("Error parsing videogen.yaml: ", err)
-	}
-
-	GifGen, err = getGif()
-	if err != nil {
-		log.Fatal("Error parsing gifgen.yaml: ", err)
-	}
-
-	ModelGen, err = get3d()
-	if err != nil {
-		log.Fatal("Error parsing 3dgen.yaml: ", err)
-	}
+	// NOTE: These are commented out for the time being while the yaml files
+	// are written to match the struct they are meant to be. As the yaml files
+	// are written, uncomment these to correctly load them
+	//
+	// ImageGen, err = getImage()
+	// if err != nil {
+	// 	log.Fatal("Error parsing imagegen.yaml: ", err)
+	// }
+	//
+	// VideoGen, err = getVideo()
+	// if err != nil {
+	// 	log.Fatal("Error parsing videogen.yaml: ", err)
+	// }
+	//
+	// GifGen, err = getGif()
+	// if err != nil {
+	// 	log.Fatal("Error parsing gifgen.yaml: ", err)
+	// }
+	//
+	// ModelGen, err = get3d()
+	// if err != nil {
+	// 	log.Fatal("Error parsing 3dgen.yaml: ", err)
+	// }
 }
 
 // This is a workaround to make sure filepaths are always pulled relative
@@ -110,7 +114,7 @@ func getIntentDetection() (structs.IntentDetectionSettings, error) {
 }
 
 func getImage() (structs.APIConfig, error) {
-	configPath, err := getConfigPath("imagegen.yaml")
+	configPath, err := getConfigPath("/contentgen/imagegen.yaml")
 	if err != nil {
 		return structs.APIConfig{}, err
 	}
@@ -129,7 +133,7 @@ func getImage() (structs.APIConfig, error) {
 }
 
 func getVideo() (structs.APIConfig, error) {
-	configPath, err := getConfigPath("videogen.yaml")
+	configPath, err := getConfigPath("/contentgen/videogen.yaml")
 	if err != nil {
 		return structs.APIConfig{}, err
 	}
@@ -148,7 +152,7 @@ func getVideo() (structs.APIConfig, error) {
 }
 
 func getGif() (structs.APIConfig, error) {
-	configPath, err := getConfigPath("gifgen.yaml")
+	configPath, err := getConfigPath("/contentgen/gifgen.yaml")
 	if err != nil {
 		return structs.APIConfig{}, err
 	}
@@ -167,7 +171,7 @@ func getGif() (structs.APIConfig, error) {
 }
 
 func get3d() (structs.APIConfig, error) {
-	configPath, err := getConfigPath("3dgen.yaml")
+	configPath, err := getConfigPath("/contentgen/3dgen.yaml")
 	if err != nil {
 		return structs.APIConfig{}, err
 	}
