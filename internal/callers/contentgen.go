@@ -11,15 +11,14 @@ import (
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config/structs"
 )
 
-func LoadIntentDetectionResponse( /*JSONData []byte*/ ) {
-	/*
-		//read in JSON data from intent detection
-		var intentDetectionResponse structs.IntentDetectionResponse
-		if err := json.Unmarshal(JSONData, &intentDetectionResponse); err != nil {
-			fmt.Println("Error unmarshalling intent detection response")
-			fmt.Println(err)
-			return
-		}
+func LoadIntentDetectionResponse(JSONData []byte) {
+	//read in JSON data from intent detection
+	var intentDetectionResponse structs.IntentDetectionResponse
+	if err := json.Unmarshal(JSONData, &intentDetectionResponse); err != nil {
+		fmt.Println("Error unmarshalling intent detection response")
+		fmt.Println(err)
+		return
+	}
 
 	//load content gen yaml based off JSON data
 	var apiConfig structs.APIConfig
@@ -37,7 +36,7 @@ func LoadIntentDetectionResponse( /*JSONData []byte*/ ) {
 		return
 	}
 
-	//BuildAPICall(intentDetectionResponse, apiConfig)
+	BuildAPICall(intentDetectionResponse, apiConfig)
 }
 
 func BuildAPICall(intentDetectionResponse structs.IntentDetectionResponse, apiConfig structs.APIConfig) {
