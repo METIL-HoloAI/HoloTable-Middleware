@@ -1,2 +1,2 @@
 listener: text
-dataDir: "database"
+dataDir: "./datastorage/"

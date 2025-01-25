@@ -1,8 +1,7 @@
 package structs
 
 type IntentDetectionResponse struct {
-	ContentType        string
-	Prompt             string
-	RequiredParamaters map[string]string
-	OptionalParameters map[string]string
+	ContentType        string                 `json:"contentType"`
+	RequiredParameters map[string]string      `json:"requiredParameters"`
+	OptionalParameters map[string]interface{} `json:"optionalParameters"`
 }

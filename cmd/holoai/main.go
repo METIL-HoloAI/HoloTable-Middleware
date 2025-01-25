@@ -1,11 +1,10 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
-	"log"
 
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/configloader"
+	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/database"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/listeners"
 	"github.com/joho/godotenv"
 	_ "github.com/mattn/go-sqlite3"
@@ -20,12 +19,7 @@ func main() {
 		return
 	}
 
-	// Load database
-	db, err := sql.Open("sqlite3", settings.DataDir+"/db.db")
-	if err != nil {
-		log.Fatalln(err)
-	}
-	defer db.Close()
+	database.Init()
 
 	// Load API keys
 	err = godotenv.Load()
