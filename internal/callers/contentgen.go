@@ -7,8 +7,8 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/configloader"
-	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/configloader/structs"
+	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config"
+	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config/structs"
 )
 
 func LoadIntentDetectionResponse( /*JSONData []byte*/ ) {
@@ -21,34 +21,19 @@ func LoadIntentDetectionResponse( /*JSONData []byte*/ ) {
 			return
 		}
 
-		//load content gen yaml based off JSON data
-		var apiConfig structs.APIConfig
-		var err error
-		switch intentDetectionResponse.ContentType {
-		case "image":
-			apiConfig, err = configloader.GetImage()
-		case "video":
-			apiConfig, err = configloader.GetVideo()
-		case "gif":
-			apiConfig, err = configloader.GetGif()
-		case "3d":
-			apiConfig, err = configloader.Get3d()
-		default:
-			fmt.Println("Intent detection provided invalid content type")
-			return
-		}
-	*/
-
+	//load content gen yaml based off JSON data
 	var apiConfig structs.APIConfig
-	var err error
-
-	apiConfig, err = configloader.GetImage()
-
-	fmt.Println(apiConfig)
-
-	if err != nil {
-		fmt.Println("Error loading content gen settings")
-		fmt.Println(err)
+	switch intentDetectionResponse.ContentType {
+	case "image":
+		apiConfig = config.ImageGen
+	case "video":
+		apiConfig = config.VideoGen
+	case "gif":
+		apiConfig = config.GifGen
+	case "3d":
+		apiConfig = config.ModelGen
+	default:
+		fmt.Println("Intent detection provided invalid content type")
 		return
 	}
 

@@ -3,7 +3,7 @@ package listeners
 import (
 	"fmt"
 
-	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/callers"
+	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config"
 )
 
 func StartTextListener() {
@@ -22,11 +22,10 @@ func StartTextListener() {
 		}
 
 		if input == "r" {
-			fmt.Println("TODO")
+			config.LoadYaml()
+			fmt.Println("Reloaded yaml...")
 		}
 
-		//fmt.Print("\033[H\033[2J")
-
-		callers.LoadIntentDetectionResponse()
+		fmt.Println()
 	}
 }
