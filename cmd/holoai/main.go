@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"os"
 
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/database"
@@ -16,10 +18,14 @@ func main() {
 	database.Init()
 
 	// Load API keys
-	err = godotenv.Load()
+	err := godotenv.Load("../../.env")
 	if err != nil {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
+
+	// Test
+	imageGenkey := os.Getenv("IMAGE_API_KEY")
+	fmt.Println("Image API Key:", imageGenkey)
 
 	// Check how user wants to listen for input
 	// and start that listener
