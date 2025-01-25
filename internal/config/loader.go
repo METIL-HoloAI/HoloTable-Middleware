@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
+    "reflect"
 	"path/filepath"
 	"runtime"
 
@@ -127,6 +129,18 @@ func getImage() (structs.APIConfig, error) {
 	var settings structs.APIConfig
 	if err := yaml.Unmarshal(file, &settings); err != nil {
 		return structs.APIConfig{}, err
+	}
+
+	reflectSettings := reflect.ValueOf(&settings).Elem()
+	for i := 0; i < reflectSettings.NumField(); i++ {
+		field := reflectSettings.Field(i)
+		if field.Kind() == reflect.String && strings.HasPrefix(field.String(), "$") {
+			newValue := os.Getenv("IMAGE_API_KEY")
+			field.SetString("$" + newValue)
+			
+			// Test
+			fmt.Printf("Updated field %s: %s\n", reflectSettings.Type().Field(i).Name, field.String())
+		}
 	}
 
 	return settings, nil
