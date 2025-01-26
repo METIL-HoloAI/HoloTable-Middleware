@@ -24,9 +24,6 @@ func Init() {
 	}
 	defer db.Close()
 
-	// TODO:
-	// store filename
-
 	tables := []string{
 		`CREATE TABLE IF NOT EXISTS image (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
