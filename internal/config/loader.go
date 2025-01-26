@@ -14,7 +14,7 @@ import (
 )
 
 var General structs.GeneralSettings
-var IntentDetection structs.IntentDetectionSettings
+var IntentDetection structs.APIConfig
 var ImageGen structs.APIConfig
 var VideoGen structs.APIConfig
 var GifGen structs.APIConfig
@@ -29,7 +29,7 @@ func LoadYaml() {
 
 	IntentDetection, err = getIntentDetection()
 	if err != nil {
-		log.Fatal("Error parsing intentdetection.yaml: ", err)
+		log.Fatal("Error parsing chatgen.yaml: ", err)
 	}
 
 	ImageGen, err = getImage()
@@ -96,21 +96,70 @@ func getGeneral() (structs.GeneralSettings, error) {
 	return settings, nil
 }
 
-func getIntentDetection() (structs.IntentDetectionSettings, error) {
-	configPath, err := getConfigPath("intentdetection.yaml")
+func getIntentDetection() (structs.APIConfig, error) {
+	configPath, err := getConfigPath("chatgen.yaml")
 	if err != nil {
-		return structs.IntentDetectionSettings{}, err
+		return structs.APIConfig{}, err
 	}
 
 	file, err := os.ReadFile(configPath)
 	if err != nil {
-		return structs.IntentDetectionSettings{}, err
+		return structs.APIConfig{}, err
 	}
 
-	var settings structs.IntentDetectionSettings
+	var settings structs.APIConfig
 	if err := yaml.Unmarshal(file, &settings); err != nil {
-		return structs.IntentDetectionSettings{}, err
+		return structs.APIConfig{}, err
 	}
+
+	// Recursive function to process fields
+	var processFields func(reflect.Value)
+	processFields = func(v reflect.Value) {
+		switch v.Kind() {
+		case reflect.Ptr:
+			if !v.IsNil() {
+				processFields(v.Elem()) // Dereference and process
+			}
+		case reflect.Struct:
+			for i := 0; i < v.NumField(); i++ {
+				processFields(v.Field(i))
+			}
+		case reflect.Map:
+			for _, key := range v.MapKeys() {
+				val := v.MapIndex(key)
+				if val.Kind() == reflect.String && strings.Contains(val.String(), "$CHATGEN_API_KEY") {
+					// Update map value if it contains $
+					newValue := os.Getenv("INTENT_DETECTION_API_KEY")
+
+					// Test print
+					fmt.Println("newValue:", newValue)
+					//
+
+					v.SetMapIndex(key, reflect.ValueOf(strings.ReplaceAll(val.String(), "$CHATGEN_API_KEY", newValue)))
+
+					// Test print
+					fmt.Printf("Updated map value %s: %s\n", key, v.MapIndex(key))
+					//
+
+				} else {
+					processFields(val) // Process nested values
+				}
+			}
+		case reflect.Slice:
+			for i := 0; i < v.Len(); i++ {
+				processFields(v.Index(i))
+			}
+		case reflect.String:
+			if strings.Contains(v.String(), "$CHATGEN_API_KEY") {
+				// Update string if it contains $
+				newValue := os.Getenv("INTENT_DETECTION_API_KEY")
+				v.SetString(strings.ReplaceAll(v.String(), "$CHATGEN_API_KEY", newValue))
+			}
+		}
+	}
+
+	// Start processing the fields of the settings struct
+	processFields(reflect.ValueOf(&settings).Elem())
 
 	return settings, nil
 }
@@ -169,10 +218,10 @@ func getImage() (structs.APIConfig, error) {
 				processFields(v.Index(i))
 			}
 		case reflect.String:
-			if strings.Contains(v.String(), "$") {
+			if strings.Contains(v.String(), "$IMAGEGEN_API_KEY") {
 				// Update string if it contains $
 				newValue := os.Getenv("IMAGE_API_KEY")
-				v.SetString(strings.ReplaceAll(v.String(), "$", newValue))
+				v.SetString(strings.ReplaceAll(v.String(), "$IMAGEGEN_API_KEY", newValue))
 			}
 		}
 	}
