@@ -3,26 +3,14 @@ package database
 import (
 	"database/sql"
 	"log"
-	"os"
 
-	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 var db *sql.DB
 
-// public function for initializing the database
-func Init() {
-	if err := os.MkdirAll(config.General.DataDir, os.ModePerm); err != nil {
-		log.Fatal("Failed to create data directory:", err)
-	}
-
-	var err error
-	db, err = sql.Open("sqlite3", config.General.DataDir+"filelocations.db")
-	if err != nil {
-		log.Fatal("Failed to open database:", err)
-	}
-	defer db.Close()
+func Init(userDB *sql.DB) {
+	db = userDB
 
 	tables := []string{
 		`CREATE TABLE IF NOT EXISTS image (
@@ -61,20 +49,20 @@ func Insert(tableName, filename, filepath string) error {
 	return err
 }
 
-func GetPathByFilename(db *sql.DB, tableName, filename string) (string, error) {
+func GetPathByFilename(tableName, filename string) (string, error) {
 	query := "SELECT filepath FROM " + tableName + " WHERE filename = ?"
 	var filepath string
 	err := db.QueryRow(query, filename).Scan(&filepath)
 	return filepath, err
 }
 
-func DeleteRecordByFilename(db *sql.DB, tableName, filename string) error {
+func DeleteRecordByFilename(tableName, filename string) error {
 	query := "DELETE FROM " + tableName + " WHERE filename = ?"
 	_, err := db.Exec(query, filename)
 	return err
 }
 
-func ListAllFilenames(db *sql.DB, tableName string) ([]string, error) {
+func ListAllFilenames(tableName string) ([]string, error) {
 	query := "SELECT filename FROM " + tableName
 	rows, err := db.Query(query)
 	if err != nil {

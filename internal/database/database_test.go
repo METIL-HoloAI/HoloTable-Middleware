@@ -1,7 +1,9 @@
 package database_test
 
 import (
+	"database/sql"
 	"log"
+	"os"
 
 	"testing"
 
@@ -13,9 +15,20 @@ import (
 // public function for initializing the database
 func TestDatabaseInit(t *testing.T) {
 	config.LoadYaml()
-	database.Init()
 
-	err := database.Insert("image", "test", "test")
+	if err := os.MkdirAll(config.General.DataDir, os.ModePerm); err != nil {
+		t.Fatal("Failed to create data directory:", err)
+	}
+
+	db, err := sql.Open("sqlite3", config.General.DataDir+"test.db")
+	if err != nil {
+		t.Fatal("Failed to open database:", err)
+	}
+	defer db.Close()
+
+	database.Init(db)
+
+	err = database.Insert("image", "test", "test")
 	if err != nil {
 		t.Fatal("Failed to insert into image, ", err)
 	}
