@@ -114,19 +114,19 @@ func getIntentDetection() (structs.APIConfig, error) {
 
 	// Recursive function to process fields
 	var processFields func(reflect.Value)
-	processFields = func(v reflect.Value) {
-		switch v.Kind() {
+	processFields = func(reflectedItem reflect.Value) {
+		switch reflectedItem.Kind() {
 		case reflect.Ptr:
-			if !v.IsNil() {
-				processFields(v.Elem()) // Dereference and process
+			if !reflectedItem.IsNil() {
+				processFields(reflectedItem.Elem()) // Dereference and process
 			}
 		case reflect.Struct:
-			for i := 0; i < v.NumField(); i++ {
-				processFields(v.Field(i))
+			for i := 0; i < reflectedItem.NumField(); i++ {
+				processFields(reflectedItem.Field(i))
 			}
 		case reflect.Map:
-			for _, key := range v.MapKeys() {
-				val := v.MapIndex(key)
+			for _, key := range reflectedItem.MapKeys() {
+				val := reflectedItem.MapIndex(key)
 				if val.Kind() == reflect.String && strings.Contains(val.String(), "$CHATGEN_API_KEY") {
 					// Update map value if it contains $
 					newValue := os.Getenv("INTENT_DETECTION_API_KEY")
@@ -135,10 +135,10 @@ func getIntentDetection() (structs.APIConfig, error) {
 					fmt.Println("newValue:", newValue)
 					//
 
-					v.SetMapIndex(key, reflect.ValueOf(strings.ReplaceAll(val.String(), "$CHATGEN_API_KEY", newValue)))
+					reflectedItem.SetMapIndex(key, reflect.ValueOf(strings.ReplaceAll(val.String(), "$CHATGEN_API_KEY", newValue)))
 
 					// Test print
-					fmt.Printf("Updated map value %s: %s\n", key, v.MapIndex(key))
+					fmt.Printf("Updated map value %s: %s\n", key, reflectedItem.MapIndex(key))
 					//
 
 				} else {
@@ -146,14 +146,14 @@ func getIntentDetection() (structs.APIConfig, error) {
 				}
 			}
 		case reflect.Slice:
-			for i := 0; i < v.Len(); i++ {
-				processFields(v.Index(i))
+			for i := 0; i < reflectedItem.Len(); i++ {
+				processFields(reflectedItem.Index(i))
 			}
 		case reflect.String:
-			if strings.Contains(v.String(), "$CHATGEN_API_KEY") {
+			if strings.Contains(reflectedItem.String(), "$CHATGEN_API_KEY") {
 				// Update string if it contains $
 				newValue := os.Getenv("INTENT_DETECTION_API_KEY")
-				v.SetString(strings.ReplaceAll(v.String(), "$CHATGEN_API_KEY", newValue))
+				reflectedItem.SetString(strings.ReplaceAll(reflectedItem.String(), "$CHATGEN_API_KEY", newValue))
 			}
 		}
 	}
@@ -182,19 +182,19 @@ func getImage() (structs.APIConfig, error) {
 
 	// Recursive function to process fields
 	var processFields func(reflect.Value)
-	processFields = func(v reflect.Value) {
-		switch v.Kind() {
+	processFields = func(reflectedItem reflect.Value) {
+		switch reflectedItem.Kind() {
 		case reflect.Ptr:
-			if !v.IsNil() {
-				processFields(v.Elem()) // Dereference and process
+			if !reflectedItem.IsNil() {
+				processFields(reflectedItem.Elem()) // Dereference and process
 			}
 		case reflect.Struct:
-			for i := 0; i < v.NumField(); i++ {
-				processFields(v.Field(i))
+			for i := 0; i < reflectedItem.NumField(); i++ {
+				processFields(reflectedItem.Field(i))
 			}
 		case reflect.Map:
-			for _, key := range v.MapKeys() {
-				val := v.MapIndex(key)
+			for _, key := range reflectedItem.MapKeys() {
+				val := reflectedItem.MapIndex(key)
 				if val.Kind() == reflect.String && strings.Contains(val.String(), "$IMAGEGEN_API_KEY") {
 					// Update map value if it contains $
 					newValue := os.Getenv("IMAGE_API_KEY")
@@ -203,10 +203,10 @@ func getImage() (structs.APIConfig, error) {
 					fmt.Println("newValue:", newValue)
 					//
 
-					v.SetMapIndex(key, reflect.ValueOf(strings.ReplaceAll(val.String(), "$IMAGEGEN_API_KEY", newValue)))
+					reflectedItem.SetMapIndex(key, reflect.ValueOf(strings.ReplaceAll(val.String(), "$IMAGEGEN_API_KEY", newValue)))
 
 					// Test print
-					fmt.Printf("Updated map value %s: %s\n", key, v.MapIndex(key))
+					fmt.Printf("Updated map value %s: %s\n", key, reflectedItem.MapIndex(key))
 					//
 
 				} else {
@@ -214,14 +214,14 @@ func getImage() (structs.APIConfig, error) {
 				}
 			}
 		case reflect.Slice:
-			for i := 0; i < v.Len(); i++ {
-				processFields(v.Index(i))
+			for i := 0; i < reflectedItem.Len(); i++ {
+				processFields(reflectedItem.Index(i))
 			}
 		case reflect.String:
-			if strings.Contains(v.String(), "$IMAGEGEN_API_KEY") {
+			if strings.Contains(reflectedItem.String(), "$IMAGEGEN_API_KEY") {
 				// Update string if it contains $
 				newValue := os.Getenv("IMAGE_API_KEY")
-				v.SetString(strings.ReplaceAll(v.String(), "$IMAGEGEN_API_KEY", newValue))
+				reflectedItem.SetString(strings.ReplaceAll(reflectedItem.String(), "$IMAGEGEN_API_KEY", newValue))
 			}
 		}
 	}
