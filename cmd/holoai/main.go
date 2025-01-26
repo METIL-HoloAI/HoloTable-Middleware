@@ -13,19 +13,20 @@ import (
 )
 
 func main() {
-	config.LoadYaml()
-
-	database.Init()
-
 	// Load API keys
 	err := godotenv.Load("../../.env")
 	if err != nil {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
 
-	// Test
+	config.LoadYaml()
+
+	database.Init()
+
+	// Test print
 	imageGenkey := os.Getenv("IMAGE_API_KEY")
-	fmt.Println("Image API Key:", imageGenkey)
+	fmt.Println("in main: Image API Key:" + imageGenkey)
+	//
 
 	// Check how user wants to listen for input
 	// and start that listener

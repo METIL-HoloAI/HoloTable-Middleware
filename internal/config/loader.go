@@ -131,20 +131,73 @@ func getImage() (structs.APIConfig, error) {
 		return structs.APIConfig{}, err
 	}
 
-	reflectSettings := reflect.ValueOf(&settings).Elem()
+	// Recursive function to process fields
+	var processFields func(reflect.Value)
+	processFields = func(v reflect.Value) {
+		switch v.Kind() {
+		case reflect.Ptr:
+			if !v.IsNil() {
+				processFields(v.Elem()) // Dereference and process
+			}
+		case reflect.Struct:
+			for i := 0; i < v.NumField(); i++ {
+				processFields(v.Field(i))
+			}
+		case reflect.Map:
+			for _, key := range v.MapKeys() {
+				val := v.MapIndex(key)
+				if val.Kind() == reflect.String && strings.Contains(val.String(), "$IMAGEGEN_API_KEY") {
+					// Update map value if it contains $
+					newValue := os.Getenv("IMAGE_API_KEY")
+
+					// Test print
+					fmt.Println("newValue:", newValue)
+					//
+
+					v.SetMapIndex(key, reflect.ValueOf(strings.ReplaceAll(val.String(), "$IMAGEGEN_API_KEY", newValue)))
+
+					// Test print
+					fmt.Printf("Updated map value %s: %s\n", key, v.MapIndex(key))
+					//
+
+				} else {
+					processFields(val) // Process nested values
+				}
+			}
+		case reflect.Slice:
+			for i := 0; i < v.Len(); i++ {
+				processFields(v.Index(i))
+			}
+		case reflect.String:
+			if strings.Contains(v.String(), "$") {
+				// Update string if it contains $
+				newValue := os.Getenv("IMAGE_API_KEY")
+				v.SetString(strings.ReplaceAll(v.String(), "$", newValue))
+			}
+		}
+	}
+
+	// Start processing the fields of the settings struct
+	processFields(reflect.ValueOf(&settings).Elem())
+
+	return settings, nil
+}
+
+	/*reflectSettings := reflect.ValueOf(&settings).Elem()
+	fmt.Printf("test2")
 	for i := 0; i < reflectSettings.NumField(); i++ {
+		fmt.Printf("test3")
 		field := reflectSettings.Field(i)
-		if field.Kind() == reflect.String && strings.HasPrefix(field.String(), "$") {
+		fmt.Printf("test4")
+		if field.Kind() == reflect.String && strings.Contains(field.String(), "$") {
+			fmt.Printf("test5")
 			newValue := os.Getenv("IMAGE_API_KEY")
 			field.SetString("$" + newValue)
 			
 			// Test
 			fmt.Printf("Updated field %s: %s\n", reflectSettings.Type().Field(i).Name, field.String())
 		}
-	}
-
-	return settings, nil
-}
+	}*/
 
 // func getVideo() (structs.APIConfig, error) {
 // 	configPath, err := getConfigPath("/contentgen/videogen.yaml")
