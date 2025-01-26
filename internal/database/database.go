@@ -25,44 +25,73 @@ func Init() {
 	defer db.Close()
 
 	// TODO:
-	// need table for each type of thing (image, video, gifs, 3dmodels)
-	// store file location
 	// store filename
 
-	fileTypes := []string{"image", "video", "gif", "model"}
-	// iterates through the four file types and creates a table for each
-	// each table contains id and filepath
-	for i := 0; i < len(fileTypes); i++ {
-		statement, err := db.Prepare("CREATE TABLE IF NOT EXISTS " + fileTypes[i] + " (id INTEGER PRIMARY KEY, filepath TEXT)")
-		if err != nil {
-			log.Fatalf("Failed to prepare CREATE TABLE statement for '%s': %v", fileTypes[i], err)
-		}
-		_, err = statement.Exec()
-		if err != nil {
-			log.Fatalf("Failed to execute CREATE TABLE statement for '%s': %v", fileTypes[i], err)
-		}
-		statement, err = db.Prepare("INSERT INTO " + fileTypes[i] + " (filepath) VALUES (?)")
-		if err != nil {
-			log.Fatalf("Failed to prepare INSERT statement for '%s': %v", fileTypes[i], err)
-		}
-		_, err = statement.Exec("some filepath")
-		if err != nil {
-			log.Fatalf("Failed to execute INSERT statement for '%s': %v", fileTypes[i], err)
-		}
+	tables := []string{
+		`CREATE TABLE IF NOT EXISTS image (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			filename TEXT,
+			filepath TEXT
+		)`,
+		`CREATE TABLE IF NOT EXISTS video (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			filename TEXT,
+			filepath TEXT
+		)`,
+		`CREATE TABLE IF NOT EXISTS gif (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			filename TEXT,
+			filepath TEXT
+		)`,
+		`CREATE TABLE IF NOT EXISTS model (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			filename TEXT,
+			filepath TEXT
+		)`,
+	}
 
-		rows, err := db.Query("SELECT id, filepath FROM " + fileTypes[i])
+	for _, tableQuery := range tables {
+		_, err := db.Exec(tableQuery)
 		if err != nil {
-			log.Fatalf("Failed to query SELECT statement for '%s': %v", fileTypes[i], err)
-		}
-
-		var id int
-		var filepath string
-
-		for rows.Next() {
-			if err := rows.Scan(&id, &filepath); err != nil {
-				log.Printf("Error scanning row: %v", err)
-				continue
-			}
+			log.Fatal("Error creating tables", err)
 		}
 	}
+}
+
+func Insert(tableName, filename, filepath string) error {
+	query := "INSERT INTO " + tableName + " (filename, filepath) VALUES (?, ?)"
+	_, err := db.Exec(query, filename, filepath)
+	return err
+}
+
+func GetPathByFilename(db *sql.DB, tableName, filename string) (string, error) {
+	query := "SELECT filepath FROM " + tableName + " WHERE filename = ?"
+	var filepath string
+	err := db.QueryRow(query, filename).Scan(&filepath)
+	return filepath, err
+}
+
+func DeleteRecordByFilename(db *sql.DB, tableName, filename string) error {
+	query := "DELETE FROM " + tableName + " WHERE filename = ?"
+	_, err := db.Exec(query, filename)
+	return err
+}
+
+func ListAllFilenames(db *sql.DB, tableName string) ([]string, error) {
+	query := "SELECT filename FROM " + tableName
+	rows, err := db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var filenames []string
+	for rows.Next() {
+		var filename string
+		if err := rows.Scan(&filename); err != nil {
+			return nil, err
+		}
+		filenames = append(filenames, filename)
+	}
+	return filenames, nil
 }
