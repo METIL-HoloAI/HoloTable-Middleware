@@ -7,8 +7,8 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/configloader"
-	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/configloader/structs"
+	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config"
+	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config/structs"
 )
 
 func LoadIntentDetectionResponse(JSONData []byte) {
@@ -22,24 +22,17 @@ func LoadIntentDetectionResponse(JSONData []byte) {
 
 	//load content gen yaml based off JSON data
 	var apiConfig structs.APIConfig
-	var err error
 	switch intentDetectionResponse.ContentType {
 	case "image":
-		apiConfig, err = configloader.GetImage()
+		apiConfig = config.ImageGen
 	case "video":
-		apiConfig, err = configloader.GetVideo()
+		apiConfig = config.VideoGen
 	case "gif":
-		apiConfig, err = configloader.GetGif()
+		apiConfig = config.GifGen
 	case "3d":
-		apiConfig, err = configloader.Get3d()
+		apiConfig = config.ModelGen
 	default:
 		fmt.Println("Intent detection provided invalid content type")
-		return
-	}
-
-	if err != nil {
-		fmt.Println("Error loading content gen settings")
-		fmt.Println(err)
 		return
 	}
 
