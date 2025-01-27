@@ -5,14 +5,10 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"reflect"
 	"runtime"
-	"strings"
 
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config/structs"
 	"gopkg.in/yaml.v3"
-	"github.com/joho/godotenv"
-
 )
 
 var General structs.GeneralSettings
@@ -23,16 +19,7 @@ var GifGen structs.APIConfig
 var ModelGen structs.APIConfig
 
 func LoadYaml() {
-	envLoc, err := getConfigPath("../.env")
-	if err != nil {
-		log.Fatal("Error getting .env file path: ", err)
-	}
-	// Load API keys
-	err = godotenv.Load(envLoc)
-	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
-	}
-
+	var err error
 	General, err = getGeneral()
 	if err != nil {
 		log.Fatal("Error parsing general.yaml: ", err)
@@ -47,6 +34,8 @@ func LoadYaml() {
 	if err != nil {
 		log.Fatal("Error parsing imagegen.yaml: ", err)
 	}
+
+	loadEnv()
 
 	// NOTE: These are commented out for the time being while the yaml files
 	// are written to match the struct they are meant to be. As the yaml files
@@ -123,55 +112,6 @@ func getIntentDetection() (structs.APIConfig, error) {
 		return structs.APIConfig{}, err
 	}
 
-	// Recursive function to process fields
-	var processFields func(reflect.Value)
-	processFields = func(reflectedItem reflect.Value) {
-		switch reflectedItem.Kind() {
-		case reflect.Ptr:
-			if !reflectedItem.IsNil() {
-				processFields(reflectedItem.Elem()) // Dereference and process
-			}
-		case reflect.Struct:
-			for i := 0; i < reflectedItem.NumField(); i++ {
-				processFields(reflectedItem.Field(i))
-			}
-		case reflect.Map:
-			for _, key := range reflectedItem.MapKeys() {
-				val := reflectedItem.MapIndex(key)
-				if val.Kind() == reflect.String && strings.Contains(val.String(), "$CHATGEN_API_KEY") {
-					// Update map value if it contains $
-					newValue := os.Getenv("INTENT_DETECTION_API_KEY")
-
-					// Test print
-					fmt.Println("newValue:", newValue)
-					//
-
-					reflectedItem.SetMapIndex(key, reflect.ValueOf(strings.ReplaceAll(val.String(), "$CHATGEN_API_KEY", newValue)))
-
-					// Test print
-					fmt.Printf("Updated map value %s: %s\n", key, reflectedItem.MapIndex(key))
-					//
-
-				} else {
-					processFields(val) // Process nested values
-				}
-			}
-		case reflect.Slice:
-			for i := 0; i < reflectedItem.Len(); i++ {
-				processFields(reflectedItem.Index(i))
-			}
-		case reflect.String:
-			if strings.Contains(reflectedItem.String(), "$INTENT_DETECTION_API_KEY") {
-				// Update string if it contains $
-				newValue := os.Getenv("INTENT_DETECTION_API_KEY")
-				reflectedItem.SetString(strings.ReplaceAll(reflectedItem.String(), "$INTENT_DETECTION_API_KEY", newValue))
-			}
-		}
-	}
-
-	// Start processing the fields of the settings struct
-	processFields(reflect.ValueOf(&settings).Elem())
-
 	return settings, nil
 }
 
@@ -190,55 +130,6 @@ func getImage() (structs.APIConfig, error) {
 	if err := yaml.Unmarshal(file, &settings); err != nil {
 		return structs.APIConfig{}, err
 	}
-
-	// Recursive function to process fields
-	var processFields func(reflect.Value)
-	processFields = func(reflectedItem reflect.Value) {
-		switch reflectedItem.Kind() {
-		case reflect.Ptr:
-			if !reflectedItem.IsNil() {
-				processFields(reflectedItem.Elem()) // Dereference and process
-			}
-		case reflect.Struct:
-			for i := 0; i < reflectedItem.NumField(); i++ {
-				processFields(reflectedItem.Field(i))
-			}
-		case reflect.Map:
-			for _, key := range reflectedItem.MapKeys() {
-				val := reflectedItem.MapIndex(key)
-				if val.Kind() == reflect.String && strings.Contains(val.String(), "$IMAGEGEN_API_KEY") {
-					// Update map value if it contains $
-					newValue := os.Getenv("IMAGE_API_KEY")
-
-					// Test print
-					fmt.Println("newValue:", newValue)
-					//
-
-					reflectedItem.SetMapIndex(key, reflect.ValueOf(strings.ReplaceAll(val.String(), "$IMAGEGEN_API_KEY", newValue)))
-
-					// Test print
-					fmt.Printf("Updated map value %s: %s\n", key, reflectedItem.MapIndex(key))
-					//
-
-				} else {
-					processFields(val) // Process nested values
-				}
-			}
-		case reflect.Slice:
-			for i := 0; i < reflectedItem.Len(); i++ {
-				processFields(reflectedItem.Index(i))
-			}
-		case reflect.String:
-			if strings.Contains(reflectedItem.String(), "$IMAGEGEN_API_KEY") {
-				// Update string if it contains $
-				newValue := os.Getenv("IMAGE_API_KEY")
-				reflectedItem.SetString(strings.ReplaceAll(reflectedItem.String(), "$IMAGEGEN_API_KEY", newValue))
-			}
-		}
-	}
-
-	// Start processing the fields of the settings struct
-	processFields(reflect.ValueOf(&settings).Elem())
 
 	return settings, nil
 }
