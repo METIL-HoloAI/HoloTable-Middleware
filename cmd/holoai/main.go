@@ -2,23 +2,15 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/database"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/listeners"
-	"github.com/joho/godotenv"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
-	// Load API keys
-	err := godotenv.Load("../../.env")
-	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
-	}
-
 	config.LoadYaml()
 
 	database.Init()

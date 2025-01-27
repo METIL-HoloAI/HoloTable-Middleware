@@ -4,13 +4,15 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
-    "reflect"
 	"path/filepath"
+	"reflect"
 	"runtime"
+	"strings"
 
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config/structs"
 	"gopkg.in/yaml.v3"
+	"github.com/joho/godotenv"
+
 )
 
 var General structs.GeneralSettings
@@ -21,7 +23,16 @@ var GifGen structs.APIConfig
 var ModelGen structs.APIConfig
 
 func LoadYaml() {
-	var err error
+	envLoc, err := getConfigPath("../.env")
+	if err != nil {
+		log.Fatal("Error getting .env file path: ", err)
+	}
+	// Load API keys
+	err = godotenv.Load(envLoc)
+	if err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
+	}
+
 	General, err = getGeneral()
 	if err != nil {
 		log.Fatal("Error parsing general.yaml: ", err)
@@ -29,7 +40,7 @@ func LoadYaml() {
 
 	IntentDetection, err = getIntentDetection()
 	if err != nil {
-		log.Fatal("Error parsing chatgen.yaml: ", err)
+		log.Fatal("Error parsing intentdetection.yaml: ", err)
 	}
 
 	ImageGen, err = getImage()
@@ -97,7 +108,7 @@ func getGeneral() (structs.GeneralSettings, error) {
 }
 
 func getIntentDetection() (structs.APIConfig, error) {
-	configPath, err := getConfigPath("chatgen.yaml")
+	configPath, err := getConfigPath("intentdetection.yaml")
 	if err != nil {
 		return structs.APIConfig{}, err
 	}
@@ -150,10 +161,10 @@ func getIntentDetection() (structs.APIConfig, error) {
 				processFields(reflectedItem.Index(i))
 			}
 		case reflect.String:
-			if strings.Contains(reflectedItem.String(), "$CHATGEN_API_KEY") {
+			if strings.Contains(reflectedItem.String(), "$INTENT_DETECTION_API_KEY") {
 				// Update string if it contains $
 				newValue := os.Getenv("INTENT_DETECTION_API_KEY")
-				reflectedItem.SetString(strings.ReplaceAll(reflectedItem.String(), "$CHATGEN_API_KEY", newValue))
+				reflectedItem.SetString(strings.ReplaceAll(reflectedItem.String(), "$INTENT_DETECTION_API_KEY", newValue))
 			}
 		}
 	}
@@ -231,22 +242,6 @@ func getImage() (structs.APIConfig, error) {
 
 	return settings, nil
 }
-
-	/*reflectSettings := reflect.ValueOf(&settings).Elem()
-	fmt.Printf("test2")
-	for i := 0; i < reflectSettings.NumField(); i++ {
-		fmt.Printf("test3")
-		field := reflectSettings.Field(i)
-		fmt.Printf("test4")
-		if field.Kind() == reflect.String && strings.Contains(field.String(), "$") {
-			fmt.Printf("test5")
-			newValue := os.Getenv("IMAGE_API_KEY")
-			field.SetString("$" + newValue)
-			
-			// Test
-			fmt.Printf("Updated field %s: %s\n", reflectSettings.Type().Field(i).Name, field.String())
-		}
-	}*/
 
 // func getVideo() (structs.APIConfig, error) {
 // 	configPath, err := getConfigPath("/contentgen/videogen.yaml")
