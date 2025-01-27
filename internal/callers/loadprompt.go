@@ -49,10 +49,14 @@ headers:
     }
 })
 Remember, from now on you will only send me json files.%s`, yamlContents)
-
 	// Create the payload for the chat API
+	model, exists := chatSettings.RequiredParameters["model"].Options[0].(string)
+	if !exists || model == "" {
+		return nil, fmt.Errorf("no valid model options available in chatgen.yaml")
+	}
+
 	payload := map[string]interface{}{
-		"model": "gpt-4o", // Use the appropriate model
+		"model": model, // Use the appropriate model
 		"messages": []map[string]string{
 			{"role": "system", "content": initPrompt},
 			{"role": "user", "content": prompt},
