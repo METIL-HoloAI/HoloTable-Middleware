@@ -12,7 +12,7 @@ import (
 )
 
 var General structs.GeneralSettings
-var IntentDetection structs.APIConfig
+var IntentDetection structs.IntentDetection
 var ImageGen structs.APIConfig
 var VideoGen structs.APIConfig
 var GifGen structs.APIConfig
@@ -94,20 +94,20 @@ func getGeneral() (structs.GeneralSettings, error) {
 	return settings, nil
 }
 
-func getIntentDetection() (structs.IntentDetectionSettings, error) {
+func getIntentDetection() (structs.IntentDetection, error) {
 	configPath, err := getConfigPath("intentdetection.yaml")
 	if err != nil {
-		return structs.IntentDetectionSettings{}, err
+		return structs.IntentDetection{}, err
 	}
 
 	file, err := os.ReadFile(configPath)
 	if err != nil {
-		return structs.IntentDetectionSettings{}, err
+		return structs.IntentDetection{}, err
 	}
 
-	var settings structs.IntentDetectionSettings
+	var settings structs.IntentDetection
 	if err := yaml.Unmarshal(file, &settings); err != nil {
-		return structs.IntentDetectionSettings{}, err
+		return structs.IntentDetection{}, err
 	}
 
 	return settings, nil
