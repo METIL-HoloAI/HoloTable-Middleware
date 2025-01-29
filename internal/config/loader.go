@@ -12,7 +12,7 @@ import (
 )
 
 var General structs.GeneralSettings
-var IntentDetection structs.IntentDetectionSettings
+var IntentDetection structs.APIConfig
 var ImageGen structs.APIConfig
 var VideoGen structs.APIConfig
 var GifGen structs.APIConfig

@@ -11,17 +11,10 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-
-	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/configloader"
 )
 
 // LoadPrompt continues the chat with ChatGPT and sends the prompt, then saves and returns the JSON response
 func LoadPrompt(prompt string) ([]byte, error) {
-	// Load chat settings
-	chatSettings, err := configloader.GetChat()
-	if err != nil {
-		return nil, fmt.Errorf("error loading chat settings: %w", err)
-	}
 
 	// Read the contents of the YAML files
 	yamlFiles := []string{"3dgen.yaml", "gifgen.yaml", "imagegen.yaml", "videogen.yaml"}
@@ -35,7 +28,12 @@ func LoadPrompt(prompt string) ([]byte, error) {
 	}
 
 	// Create the initialization prompt
-	initPrompt := fmt.Sprintf(`Await for my next response once you read this and with every next text I send do only send json files with no additional explanation or text. Here are a few yaml files. Remember these and you should await for my next response which will have a prompt, use the prompt to decide the contentType the user wants between a gif, image, 3d or video. Then use the appropriate yaml to create a json file according to the information in the yaml. Here is which yaml is connected to which contentType: gif: gifgen.yaml, image:imagegen.yaml, video:videogen.yaml, 3d:3dgen.yaml. Please ignore the following parameters from the yaml and don't include them in the json file: {endpoint: "https://api.openai.com/v1/images/generations" 
+	initPrompt := fmt.Sprintf(`Await for my next response once you read this and with every next text I send do only send json files
+	 with no additional explanation or text. Here are a few yaml files. Remember these and you should await for my next response
+	  which will have a prompt, use the prompt to decide the contentType the user wants between a gif, image, 3d model or video. 
+	  Then use the appropriate yaml to create a json file according to the information in the yaml. Here is which yaml is connected
+	   to which contentType: gif: gifgen.yaml, image:imagegen.yaml, video:videogen.yaml, 3d:3dgen.yaml. Please ignore the following 
+	   parameters from the yaml and don't include them in the json file: {endpoint: "https://api.openai.com/v1/images/generations" 
 method: "POST"
 headers:
   Authorization: "Bearer $IMAGEGEN_API_KEY"
@@ -49,8 +47,9 @@ headers:
     }
 })
 Remember, from now on you will only send me json files.%s`, yamlContents)
+
 	// Create the payload for the chat API
-	model, exists := chatSettings.RequiredParameters["model"].Options[0].(string)
+	model, exists := IntentDetection.RequiredParameters["model"].Default.(string)
 	if !exists || model == "" {
 		return nil, fmt.Errorf("no valid model options available in chatgen.yaml")
 	}
@@ -70,13 +69,13 @@ Remember, from now on you will only send me json files.%s`, yamlContents)
 	}
 
 	// Create the HTTP request
-	req, err := http.NewRequest(chatSettings.Method, chatSettings.Endpoint, bytes.NewBuffer(payloadBytes))
+	req, err := http.NewRequest(IntentDetection.Method, IntentDetection.Endpoint, bytes.NewBuffer(payloadBytes))
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
 	// Add headers
-	for key, value := range chatSettings.Headers {
+	for key, value := range IntentDetection.Headers {
 		req.Header.Set(key, value)
 	}
 
