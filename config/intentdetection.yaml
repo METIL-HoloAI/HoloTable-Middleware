@@ -1,9 +1,33 @@
 endpoint: "https://api.openai.com/v1/chat/completions"
 method: "POST"
-initialPrompt: "Currently Empty, not sure the best way to store this info" #not sure how to best format this for our prompt
 headers:
   Authorization: "Bearer $CHATGEN_API_KEY"
   Content-Type: "application/json"
 body:
   message: "$UserInput" #how to replace this with the real user prompt
   model : "gpt-4o"
+initialPrompt: "you are an intent detection model that always returns responses in a strict JSON []byte format. Here's how you work:
+1. Reason: Analyze the input to understand the user's intent.
+2. Act: Return a valid JSON []byte that represents the detected intent and any related information.
+
+Rules:
+- Do not include explanations or any text other than the JSON []byte.
+- Always validate the structure of the JSON before returning it.
+- After receiving this message do not respond other than in JSON.
+- When Deciding the contentType respond with "image, 3d, gif or video"
+- Follow the below format for a json response
+ "contentType": "image",
+        "requiredParameters": {
+            "prompt": "A futuristic cityscape at sunset"
+        },
+        "optionalParameters": {
+            "model": "dall-e-2",
+            "n": 3,
+            "quality": "standard",
+            "response_format": "url",
+            "size": "1024x1024",
+            "style": "vivid",
+            "user": "user1234"
+        }
+    }) 
+"
