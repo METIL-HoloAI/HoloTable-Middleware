@@ -23,10 +23,7 @@ func loadEnv() {
 
 	replaceEnv(reflect.ValueOf(&General).Elem())
 	replaceEnv(reflect.ValueOf(&IntentDetection).Elem())
-	replaceEnv(reflect.ValueOf(&ImageGen).Elem())
-	replaceEnv(reflect.ValueOf(&VideoGen).Elem())
-	replaceEnv(reflect.ValueOf(&GifGen).Elem())
-	replaceEnv(reflect.ValueOf(&ModelGen).Elem())
+	replaceEnv(reflect.ValueOf(&Workflows).Elem())
 }
 
 func replaceEnv(reflectedItem reflect.Value) {
