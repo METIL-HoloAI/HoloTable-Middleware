@@ -82,11 +82,6 @@ func LoadPrompt(prompt string) ([]byte, error) {
 	message := choices[0].(map[string]interface{})["message"].(map[string]interface{})
 	content := message["content"].(string)
 
-	// Clean up the content string
-	content = strings.TrimPrefix(content, "```json")
-	content = strings.TrimSuffix(content, "```")
-	content = strings.TrimSpace(content)
-
 	// Convert the cleaned-up content string to a byte slice
 	JSONData := []byte(content)
 
