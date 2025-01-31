@@ -3,54 +3,14 @@ method: "POST"
 headers:
   Authorization: "Bearer $CHATGEN_API_KEY"
   Content-Type: "application/json"
-body:
-  model : "gpt-4o"
+payload:
+  model: "gpt-4o"
   messages: 
-    -role: "system"
-    content: "$initialPrompt"
-    -rol
-initialPrompt: "Await for my next response once you read this and with every next text I send do only send json files
-		with no additional explanation or text. Here are a few yaml files. Remember these and you should await for my next response
-		which will have a prompt, use the prompt to decide the contentType the user wants between a gif, image, 3d model or video.
-		Then use the appropriate yaml to create a json file according to the information in the yaml. Here is which yaml is connected
-		to which contentType: gif: gifgen.yaml, image:imagegen.yaml, video:videogen.yaml, 3d:3dgen.yaml. Please ignore the following
-		parameters from the yaml and don't include them in the json file: {endpoint: "https://api.openai.com/v1/images/generations"
-	method: "POST"
-	headers:
-		Authorization: "Bearer $IMAGEGEN_API_KEY"
-		Content-Type: "application/json"
-	. If the user did not indicate an intent, return the following default:
-  fakeJSONData := []byte({
-		"ContentType": "none",
-		"requiredParameters": {
-			"prompt": "none"
-		},
-		"optionalParameters": {
-		}
-	)
-	Remember, from now on you will only send me json files.%s"
-# initialPrompt: "you are an intent detection model that always returns responses in a strict JSON []byte format. Here's how you work:
-# 1. Reason: Analyze the input to understand the user's intent.
-# 2. Act: Return a valid JSON []byte that represents the detected intent and any related information.
-
-# Rules:
-# - Do not include explanations or any text other than the JSON []byte.
-# - Always validate the structure of the JSON before returning it.
-# - After receiving this message do not respond other than in JSON.
-# - When Deciding the contentType respond with "image, 3d, gif or video"
-# - Follow the below format for a json response
-#  "contentType": "image",
-#         "requiredParameters": {
-#             "prompt": "A futuristic cityscape at sunset"
-#         },
-#         "optionalParameters": {
-#             "model": "dall-e-2",
-#             "n": 3,
-#             "quality": "standard",
-#             "response_format": "url",
-#             "size": "1024x1024",
-#             "style": "vivid",
-#             "user": "user1234"
-#         }
-#     }) 
-# "
+    - role: "system"
+      content: "$initialPrompt"
+    - role: "user"
+      content: "$userPrompt"
+# old prompt
+# initialPrompt: "Help me generate the best possible prompt for chatgpt (you) to send me json files according to prompts, I will send you the current prompt I have been sending to the openAI API and I want you to help me make it more concise and clear while making sure that it never sends anything else other than json after the prompt: My prompt: \"Await for my next response once you read this and with every next text I send do only send json files with no additional explanation or text. Here are a few yaml files. Remember these and you should await for my next response which will have a prompt, use the prompt to decide the contentType the user wants between a gif, image, 3d model or video. Then use the appropriate yaml to create a json file according to the information in the yaml. Here is which yaml is connected to which contentType: gif: gifgen.yaml, image:imagegen.yaml, video:videogen.yaml, 3d:3dgen.yaml. Please ignore the following parameters from the yaml and don't include them in the json file: {endpoint: \"https://api.openai.com/v1/images/generations\" method: \"POST\" headers: Authorization: \"Bearer $IMAGEGEN_API_KEY\" Content-Type: \"application/json\"}. If the user did not indicate an intent, return the following default: fakeJSONData := []byte({ \"ContentType\": \"none\", \"requiredParameters\": { \"prompt\": \"none\" }, \"optionalParameters\": {}}). Remember, from now on you will only send me json files.%s"
+# improved prompt that prints the same correct json
+initialPrompt: "From now on, respond only with JSON files—no explanations or additional text. Content Type Selection: Based on my next prompt, determine the requested content type: gif → gifgen.yaml, image → imagegen.yaml, video → videogen.yaml, 3d model → 3dgen.yaml JSON Generation: Use the corresponding YAML file to generate a JSON response, but exclude these parameters: endpoint, method, headers, Default Response: If no clear intent is detected, return: json, Copy, Edit { \"ContentType\": \"none\", \"requiredParameters\": { \"prompt\": \"none\" }, \"optionalParameters\": {} } Await my next message and respond strictly in JSON format."

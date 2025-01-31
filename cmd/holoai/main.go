@@ -12,16 +12,20 @@ import (
 )
 
 func main() {
-
 	config.LoadYaml()
 
+	// here I'm calling StartTextListener from listeners/text.go
+	// listeners.StartTextListener()
+
 	//TESTING START
-	prompt := "three images of a dog jumping in a chair" // for testing purposes
+	prompt := "Create one image of a dog jumping in a chair" // for testing purposes
 	jsonData, err := callers.LoadPrompt(prompt)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
 	}
+	fmt.Println(string(jsonData))
+
 	callers.LoadIntentDetectionResponse(jsonData)
 	//TESTING END
 

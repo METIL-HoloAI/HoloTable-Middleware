@@ -2,14 +2,6 @@ package callers
 
 // use jsonData, err := callers.LoadPrompt(prompt) to call this function
 
-//TODD:
-//figure out how to store the intent detection prompt best in the yaml file
-//figure out how to store the users prompt and send it regardless of the name of the body paramater (prolly similar to env functionality)
-//figure out best way to send yaml files with content gen
-//make calling work
-//handle response
-//improve intent detection initial prompting
-
 import (
 	"bytes"
 	"encoding/json"
@@ -26,8 +18,7 @@ import (
 // LoadPrompt continues the chat with ChatGPT and sends the prompt, then saves and returns the JSON response
 func LoadPrompt(prompt string) ([]byte, error) {
 
-	//MAYBE USEFULL, DO RESEARCH ON THE BEST WAY TO PASS THESE FILES TO GPT
-	// Read the contents of the YAML files
+	// Read the contents of the YAML files // agreed in group to leave these as is for now
 	yamlFiles := []string{"3dgen.yaml", "gifgen.yaml", "imagegen.yaml", "videogen.yaml"}
 	var yamlContents string
 	for _, file := range yamlFiles {
@@ -39,19 +30,12 @@ func LoadPrompt(prompt string) ([]byte, error) {
 	}
 
 	// Create the initialization prompt
-	initialPrompt := config.IntentDetection.InitialPrompt
-	initPrompt := fmt.Sprintf(initialPrompt, yamlContents)
+	initPrompt := fmt.Sprintf(config.IntentDetection.InitialPrompt, yamlContents)
 
-	// Create the payload for the chat API
-	model := config.IntentDetection.Body["model"]
-
-	// UPDATE THIS PART
-	payload := map[string]interface{}{
-		"model": model, // Use the appropriate model
-		"messages": []map[string]string{
-			{"role": "system", "content": initPrompt},
-			{"role": "user", "content": prompt},
-		},
+	// Build the payload using the new function
+	payload, err := BuildPayload(initPrompt, prompt)
+	if err != nil {
+		return nil, fmt.Errorf("error building payload: %w", err)
 	}
 
 	// Convert payload to JSON
@@ -81,7 +65,6 @@ func LoadPrompt(prompt string) ([]byte, error) {
 	}
 	defer resp.Body.Close()
 
-	//CODE TO HANDLE RESPONSE, MAYBE USEFULL WHO KNOWS
 	// Read and handle the response
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -108,4 +91,28 @@ func LoadPrompt(prompt string) ([]byte, error) {
 	JSONData := []byte(content)
 
 	return JSONData, nil
+}
+
+// MADE FOR more MODULAR PAYLOAD using variables instead of hardcode.
+// BuildPayload constructs the payload for the chat API using the configuration from intentdetection.yaml
+func BuildPayload(initPrompt, userPrompt string) (map[string]interface{}, error) {
+	payloadConfig := config.IntentDetection.Payload
+
+	messages := make([]map[string]string, len(payloadConfig.Messages))
+	for i, msgTemplate := range payloadConfig.Messages {
+		content := msgTemplate.Content
+		content = strings.ReplaceAll(content, "$initialPrompt", initPrompt)
+		content = strings.ReplaceAll(content, "$userPrompt", userPrompt)
+		messages[i] = map[string]string{
+			"role":    msgTemplate.Role,
+			"content": content,
+		}
+	}
+
+	payload := map[string]interface{}{
+		"model":    payloadConfig.Model,
+		"messages": messages,
+	}
+
+	return payload, nil
 }
