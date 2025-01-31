@@ -10,11 +10,6 @@ type IntentDetection struct {
 }
 
 type PayloadConfig struct {
-	Model    string            `yaml:"model"`
-	Messages []MessageTemplate `yaml:"messages"`
-}
-
-type MessageTemplate struct {
-	Role    string `yaml:"role"`
-	Content string `yaml:"content"`
+	Model    string              `yaml:"model"`
+	Messages []map[string]string `yaml:"messages"`
 }

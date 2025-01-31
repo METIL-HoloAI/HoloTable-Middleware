@@ -78,9 +78,18 @@ func LoadPrompt(prompt string) ([]byte, error) {
 	}
 
 	// Extract the content from the assistant's message
-	choices := jsonResponse["choices"].([]interface{})
-	message := choices[0].(map[string]interface{})["message"].(map[string]interface{})
+	choices, ok := jsonResponse["choices"].([]interface{})
+	if !ok || len(choices) == 0 {
+		return nil, fmt.Errorf("invalid or missing choices in response")
+	}
+	message, ok := choices[0].(map[string]interface{})["message"].(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("invalid message format in response")
+	}
 	content := message["content"].(string)
+	if !ok {
+		return nil, fmt.Errorf("invalid content format in response")
+	}
 
 	// Convert the cleaned-up content string to a byte slice
 	JSONData := []byte(content)
@@ -89,25 +98,34 @@ func LoadPrompt(prompt string) ([]byte, error) {
 }
 
 // MADE FOR more MODULAR PAYLOAD using variables instead of hardcode.
-// BuildPayload constructs the payload for the chat API using the configuration from intentdetection.yaml
+// BuildPayload constructs the payload based on dynamically loaded config
 func BuildPayload(initPrompt, userPrompt string) (map[string]interface{}, error) {
 	payloadConfig := config.IntentDetection.Payload
 
-	messages := make([]map[string]string, len(payloadConfig.Messages))
-	for i, msgTemplate := range payloadConfig.Messages {
-		content := msgTemplate.Content
-		content = strings.ReplaceAll(content, "$initialPrompt", initPrompt)
-		content = strings.ReplaceAll(content, "$userPrompt", userPrompt)
-		messages[i] = map[string]string{
-			"role":    msgTemplate.Role,
-			"content": content,
-		}
-	}
+	// Generate messages with the prompt replacements
+	messages := generateMessages(payloadConfig.Messages, initPrompt, userPrompt)
 
+	// Create payload with the model and messages
 	payload := map[string]interface{}{
 		"model":    payloadConfig.Model,
 		"messages": messages,
 	}
 
 	return payload, nil
+}
+
+// Helper function to generate messages with dynamic placeholders
+func generateMessages(messageTemplates []map[string]string, initPrompt, userPrompt string) []map[string]string {
+	messages := make([]map[string]string, len(messageTemplates))
+	for i, msgTemplate := range messageTemplates {
+		message := make(map[string]string)
+		for key, value := range msgTemplate {
+			content := value
+			content = strings.ReplaceAll(content, "$initialPrompt", initPrompt)
+			content = strings.ReplaceAll(content, "$userPrompt", userPrompt)
+			message[key] = content
+		}
+		messages[i] = message
+	}
+	return messages
 }
