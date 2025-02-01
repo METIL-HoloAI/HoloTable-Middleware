@@ -1,7 +1,7 @@
 endpoint: "https://api.openai.com/v1/chat/completions"
 method: "POST"
 headers:
-  Authorization: "Bearer $CHATGEN_API_KEY"
+  Authorization: "Bearer $CHATGPT_API_KEY"
   Content-Type: "application/json"
 payload:
   model: "gpt-4o"

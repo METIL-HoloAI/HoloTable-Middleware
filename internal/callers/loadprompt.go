@@ -15,10 +15,10 @@ import (
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config"
 )
 
-// LoadPrompt continues the chat with ChatGPT and sends the prompt, then saves and returns the JSON response
+// LoadPrompt sends the prompt to chat ai, then saves and returns the JSON response
 func LoadPrompt(prompt string) ([]byte, error) {
 
-	// Read the contents of the YAML files // agreed in group to leave these as is for now
+	// Read the contents of the YAML files and concatenate them in a string
 	yamlFiles := []string{"3dgen.yaml", "gifgen.yaml", "imagegen.yaml", "videogen.yaml"}
 	var yamlContents string
 	for _, file := range yamlFiles {
@@ -29,10 +29,9 @@ func LoadPrompt(prompt string) ([]byte, error) {
 		yamlContents += fmt.Sprintf("\n---\n%s:\n%s", file, content)
 	}
 
-	// Create the initialization prompt
+	// Build the initial prompt with the concatenated YAML contents
 	initPrompt := fmt.Sprintf(config.IntentDetection.InitialPrompt, yamlContents)
 
-	// Build the payload using the new function
 	payload, err := BuildPayload(initPrompt, prompt)
 	if err != nil {
 		return nil, fmt.Errorf("error building payload: %w", err)
@@ -97,30 +96,42 @@ func LoadPrompt(prompt string) ([]byte, error) {
 	return JSONData, nil
 }
 
-// MADE FOR more MODULAR PAYLOAD using variables instead of hardcode.
 // BuildPayload constructs the payload based on dynamically loaded config
 func BuildPayload(initPrompt, userPrompt string) (map[string]interface{}, error) {
 	payloadConfig := config.IntentDetection.Payload
+	payload := make(map[string]interface{})
 
-	// Generate messages with the prompt replacements
-	messages := generateMessages(payloadConfig.Messages, initPrompt, userPrompt)
-
-	// Create payload with the model and messages
-	payload := map[string]interface{}{
-		"model":    payloadConfig.Model,
-		"messages": messages,
+	// Iterate over each key-value pair in the payloadConfig
+	for key, value := range payloadConfig {
+		switch v := value.(type) {
+		case []interface{}:
+			// Handle every array in the payload
+			if len(v) > 0 {
+				if _, ok := v[0].(map[string]interface{}); ok {
+					messages := generateMessages(v, initPrompt, userPrompt)
+					payload[key] = messages
+				} else {
+					payload[key] = v //adds other arrays to the payload
+				}
+			} else {
+				payload[key] = v
+			}
+		default:
+			payload[key] = v //adds other key-value pairs to the payload
+		}
 	}
 
 	return payload, nil
 }
 
 // Helper function to generate messages with dynamic placeholders
-func generateMessages(messageTemplates []map[string]string, initPrompt, userPrompt string) []map[string]string {
-	messages := make([]map[string]string, len(messageTemplates))
+func generateMessages(messageTemplates []interface{}, initPrompt, userPrompt string) []map[string]interface{} {
+	messages := make([]map[string]interface{}, len(messageTemplates))
 	for i, msgTemplate := range messageTemplates {
-		message := make(map[string]string)
-		for key, value := range msgTemplate {
-			content := value
+		msgMap := msgTemplate.(map[string]interface{})
+		message := make(map[string]interface{})
+		for key, value := range msgMap {
+			content := value.(string)
 			content = strings.ReplaceAll(content, "$initialPrompt", initPrompt)
 			content = strings.ReplaceAll(content, "$userPrompt", userPrompt)
 			message[key] = content
