@@ -37,6 +37,8 @@ func LoadPrompt(prompt string) ([]byte, error) {
 		return nil, fmt.Errorf("error building payload: %w", err)
 	}
 
+	prettyPrint(payload)
+
 	// Convert payload to JSON
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
@@ -72,9 +74,13 @@ func LoadPrompt(prompt string) ([]byte, error) {
 
 	// Parse the JSON response
 	var jsonResponse map[string]interface{}
+	fmt.Println("Raw Response Body:\n", string(body))
 	if err := json.Unmarshal(body, &jsonResponse); err != nil {
 		return nil, fmt.Errorf("error unmarshalling response: %w", err)
 	}
+
+	jsonFormatted, _ := json.MarshalIndent(jsonResponse, "", "  ")
+	fmt.Println("Parsed JSON Response:\n", string(jsonFormatted))
 
 	// Extract the content from the assistant's message
 	choices, ok := jsonResponse["choices"].([]interface{})
@@ -96,47 +102,48 @@ func LoadPrompt(prompt string) ([]byte, error) {
 	return JSONData, nil
 }
 
-// BuildPayload constructs the payload based on dynamically loaded config
+// BuildPayload now correctly follows your function signature
 func BuildPayload(initPrompt, userPrompt string) (map[string]interface{}, error) {
 	payloadConfig := config.IntentDetection.Payload
-	payload := make(map[string]interface{})
-
-	// Iterate over each key-value pair in the payloadConfig
-	for key, value := range payloadConfig {
-		switch v := value.(type) {
-		case []interface{}:
-			// Handle every array in the payload
-			if len(v) > 0 {
-				if _, ok := v[0].(map[string]interface{}); ok {
-					messages := generateMessages(v, initPrompt, userPrompt)
-					payload[key] = messages
-				} else {
-					payload[key] = v //adds other arrays to the payload
-				}
-			} else {
-				payload[key] = v
-			}
-		default:
-			payload[key] = v //adds other key-value pairs to the payload
-		}
-	}
-
+	payload := deepReplace(payloadConfig, initPrompt, userPrompt).(map[string]interface{})
 	return payload, nil
 }
 
-// Helper function to generate messages with dynamic placeholders
-func generateMessages(messageTemplates []interface{}, initPrompt, userPrompt string) []map[string]interface{} {
-	messages := make([]map[string]interface{}, len(messageTemplates))
-	for i, msgTemplate := range messageTemplates {
-		msgMap := msgTemplate.(map[string]interface{})
-		message := make(map[string]interface{})
-		for key, value := range msgMap {
-			content := value.(string)
-			content = strings.ReplaceAll(content, "$initialPrompt", initPrompt)
-			content = strings.ReplaceAll(content, "$userPrompt", userPrompt)
-			message[key] = content
+// Recursively replace placeholders in ANY structure
+func deepReplace(data interface{}, initPrompt, userPrompt string) interface{} {
+	switch v := data.(type) {
+	case string:
+		return replacePlaceholders(v, initPrompt, userPrompt)
+	case map[string]interface{}:
+		newMap := make(map[string]interface{})
+		for key, value := range v {
+			newMap[key] = deepReplace(value, initPrompt, userPrompt)
 		}
-		messages[i] = message
+		return newMap
+	case []interface{}:
+		newList := make([]interface{}, len(v))
+		for i, item := range v {
+			newList[i] = deepReplace(item, initPrompt, userPrompt)
+		}
+		return newList
+	default:
+		return v
 	}
-	return messages
+}
+
+// Helper function to replace placeholders in a string
+func replacePlaceholders(text, initPrompt, userPrompt string) string {
+	text = strings.ReplaceAll(text, "$initialPrompt", initPrompt)
+	text = strings.ReplaceAll(text, "$userPrompt", userPrompt)
+	return text
+}
+
+// Helper function to pretty-print JSON output
+func prettyPrint(data interface{}) {
+	jsonBytes, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		fmt.Println("Error formatting JSON:", err)
+		return
+	}
+	fmt.Println("Built Payload:\n", string(jsonBytes))
 }
