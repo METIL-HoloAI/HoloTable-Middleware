@@ -27,7 +27,10 @@ func main() {
 	defer db.Close()
 
 	database.Init(db)
-	go websocket.EstablishConnection()
+
+	if config.General.OpenWebsocket {
+		go websocket.EstablishConnection()
+	}
 
 	// Check how user wants to listen for input
 	// and start that listener
