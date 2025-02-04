@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 
-	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/callers"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/database"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/listeners"
@@ -13,21 +12,6 @@ import (
 
 func main() {
 	config.LoadYaml()
-
-	// here I'm calling StartTextListener from listeners/text.go
-	// listeners.StartTextListener()
-
-	//TESTING START
-	prompt := "Create one image of a dog jumping in a chair" // for testing purposes
-	jsonData, err := callers.LoadPrompt(prompt)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return
-	}
-	fmt.Println(string(jsonData))
-
-	callers.LoadIntentDetectionResponse(jsonData)
-	//TESTING END
 
 	database.Init()
 

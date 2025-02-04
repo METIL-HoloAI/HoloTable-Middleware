@@ -6,4 +6,5 @@ type IntentDetection struct {
 	Headers       map[string]string      `yaml:"headers"`
 	Payload       map[string]interface{} `yaml:"payload"`
 	InitialPrompt string                 `yaml:"initialPrompt"`
+	ResponsePath  string                 `yaml:"responsePath"`
 }

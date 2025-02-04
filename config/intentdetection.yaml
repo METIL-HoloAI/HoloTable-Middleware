@@ -1,13 +1,14 @@
-endpoint: "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$IntententDetectionAPIKey"
+endpoint: "https://api.openai.com/v1/chat/completions"
 method: "POST"
 headers:
+  Authorization: "Bearer $INTENT_DETECTION_API_KEY"
   Content-Type: "application/json"
 payload:
-  contents:
+  model: "gpt-4o"
+  messages: 
+    - role: "system"
+      content: "%initialPrompt"
     - role: "user"
-      parts:
-        - text: "$initialPrompt"
-    - role: "user"
-      parts:
-        - text: "$userPrompt"
+      content: "%userPrompt"
 initialPrompt: "From now on, respond strictly with raw JSON—no explanations, no formatting, and no extra characters. Determine Content Type: Based on my next prompt, classify the requested content type:(gif) using gifgen.yaml, (image) using imagegen.yaml, (video) using videogen.yaml, or (3d) using 3dgen.yaml\n\nGenerate JSON: Use the relevant YAML file to generate a JSON response while excluding:\n\nendpoint\nmethod\nheaders\n\nFallback Response: If no valid content type is detected, return:\n{\n  \"ContentType\": \"none\",\n  \"requiredParameters\": {\n    \"prompt\": \"none\"\n  },\n  \"optionalParameters\": {}\n}\n\nAwait my next input and respond strictly with raw JSON—no formatting, no markdown, no additional text."
+responsePath: "choices.0.message.content"
