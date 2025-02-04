@@ -30,7 +30,7 @@ func loadEnv() {
 }
 
 func replaceEnv(reflectedItem reflect.Value) {
-	regex, err := regexp.Compile(`\$[A-Z_]+`)
+	regex, err := regexp.Compile(`\&[A-Z_]+`)
 	if err != nil {
 		log.Fatal("Failed to compile regex, ", err)
 	}
@@ -50,8 +50,10 @@ func replaceEnv(reflectedItem reflect.Value) {
 			if val.Kind() == reflect.String {
 				matches := regex.FindAllString(val.String(), -1)
 				for _, match := range matches {
-					newVal := os.Getenv(strings.Split(match, "$")[1])
-					reflectedItem.SetMapIndex(key, reflect.ValueOf(strings.ReplaceAll(val.String(), match, newVal)))
+					newVal := os.Getenv(strings.Split(match, "&")[1])
+					if newVal != "" {
+						reflectedItem.SetMapIndex(key, reflect.ValueOf(strings.ReplaceAll(val.String(), match, newVal)))
+					}
 				}
 			} else {
 				replaceEnv(val) // Process nested values
@@ -64,8 +66,10 @@ func replaceEnv(reflectedItem reflect.Value) {
 	case reflect.String:
 		matches := regex.FindAllString(reflectedItem.String(), -1)
 		for _, match := range matches {
-			newVal := os.Getenv(strings.Split(match, "$")[1])
-			reflectedItem.SetString(strings.ReplaceAll(reflectedItem.String(), match, newVal))
+			newVal := os.Getenv(strings.Split(match, "&")[1])
+			if newVal != "" {
+				reflectedItem.SetString(strings.ReplaceAll(reflectedItem.String(), match, newVal))
+			}
 		}
 	}
 }
