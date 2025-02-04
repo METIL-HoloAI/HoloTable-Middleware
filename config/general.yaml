@@ -1,2 +1,3 @@
 listener: text
 dataDir: "./datastorage/"
+openWebsocket: true
