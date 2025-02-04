@@ -1,7 +1,10 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
+	"log"
+	"os"
 
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/database"
@@ -13,7 +16,17 @@ import (
 func main() {
 	config.LoadYaml()
 
-	database.Init()
+	if err := os.MkdirAll(config.General.DataDir, os.ModePerm); err != nil {
+		log.Fatal("Failed to create data directory:", err)
+	}
+
+	db, err := sql.Open("sqlite3", config.General.DataDir+"database.db?_mode=shared&_journal_mode=WAL")
+	if err != nil {
+		log.Fatal("Failed to open database:", err)
+	}
+	defer db.Close()
+
+	database.Init(db)
 
 	// Check how user wants to listen for input
 	// and start that listener
