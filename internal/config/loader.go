@@ -35,6 +35,8 @@ func LoadYaml() {
 		log.Fatal("Error parsing imagegen.yaml: ", err)
 	}
 
+	loadEnv()
+
 	// NOTE: These are commented out for the time being while the yaml files
 	// are written to match the struct they are meant to be. As the yaml files
 	// are written, uncomment the call, variable corresponding function to correctly load them

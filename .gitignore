@@ -26,3 +26,6 @@ go.work.sum
 
 # Data storage directory
 datastorage/
+
+# Test db
+test.db

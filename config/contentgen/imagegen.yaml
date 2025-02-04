@@ -1,4 +1,6 @@
 #Paramaters for OpenAI's Image Generation API
+#The APIConfig struct assumes that each required and optional paramater has a description
+# a (possibly nonexistent) List of options and a (possibly nonexistent) default val.
 #For more details see https://platform.openai.com/docs/api-reference/images/create
 
 endpoint: "https://api.openai.com/v1/images/generations"
