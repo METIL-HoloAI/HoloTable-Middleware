@@ -12,7 +12,7 @@ import (
 )
 
 var General structs.GeneralSettings
-var IntentDetection structs.IntentDetectionSettings
+var IntentDetection structs.APIConfig
 var ImageGen structs.APIConfig
 var VideoGen structs.APIConfig
 var GifGen structs.APIConfig
@@ -34,6 +34,8 @@ func LoadYaml() {
 	if err != nil {
 		log.Fatal("Error parsing imagegen.yaml: ", err)
 	}
+
+	loadEnv()
 
 	// NOTE: These are commented out for the time being while the yaml files
 	// are written to match the struct they are meant to be. As the yaml files
@@ -94,20 +96,20 @@ func getGeneral() (structs.GeneralSettings, error) {
 	return settings, nil
 }
 
-func getIntentDetection() (structs.IntentDetectionSettings, error) {
+func getIntentDetection() (structs.APIConfig, error) {
 	configPath, err := getConfigPath("intentdetection.yaml")
 	if err != nil {
-		return structs.IntentDetectionSettings{}, err
+		return structs.APIConfig{}, err
 	}
 
 	file, err := os.ReadFile(configPath)
 	if err != nil {
-		return structs.IntentDetectionSettings{}, err
+		return structs.APIConfig{}, err
 	}
 
-	var settings structs.IntentDetectionSettings
+	var settings structs.APIConfig
 	if err := yaml.Unmarshal(file, &settings); err != nil {
-		return structs.IntentDetectionSettings{}, err
+		return structs.APIConfig{}, err
 	}
 
 	return settings, nil
