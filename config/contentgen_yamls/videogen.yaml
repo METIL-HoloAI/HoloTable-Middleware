@@ -4,28 +4,8 @@
 #For more details see https://platform.openai.com/docs/api-reference/images/create
 
 #added a workflow section to the yaml, this will be a part of each contentgen yaml. (this particual yaml only has one step)
-
-imagegen_api:
-  workflow:
-    steps:
-      - name: "submit_job"
-        method: "POST"
-        url: "https://api.openai.com/v1/images/generations"
-        body: { "prompt": "{user_input}" }
-        response_key: "job_id"
-
-      - name: "poll_status"
-        method: "GET"
-        url: "https://api.openai.com/status/{job_id}"
-        response_key: "status"
-        poll:
-          until: "status == 'complete'"
-          interval: 5  # seconds
-
-      - name: "fetch_result"
-        method: "GET"
-        url: "https://api.openai.com/result/{job_id}"
-        response_key: "image_url"
+#THIS IS NOT VIDEO GEN YAML THIS IS PASTED FROM IMAGEGEN FOR TESTING
+video:
   endpoint: "https://api.openai.com/v1/images/generations"
   method: "POST"
   headers:
@@ -60,6 +40,4 @@ imagegen_api:
       default: "vivid"
       description: "The style of the generated images. Only supported for dall-e-3."
       options: ["vivid", "natural"]
-    user:
-      description: "A unique identifier representing your end-user."
-      options: [] 
+   

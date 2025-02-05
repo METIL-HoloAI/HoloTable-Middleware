@@ -1,0 +1,48 @@
+#Paramaters for OpenAI's Image Generation API
+#The APIConfig struct assumes that each required and optional paramater has a description
+# a (possibly nonexistent) List of options and a (possibly nonexistent) default val.
+#For more details see https://platform.openai.com/docs/api-reference/images/create
+
+3d:
+  endpoint: "https://api.meshy.ai/openapi/v2/text-to-3d"
+  method: "POST"
+  headers:
+    Authorization: "Bearer $3D_MODEL_API_KEY"
+    Content-Type: "application/json"
+  requiredParameters:
+    prompt:
+      description: "A text description of the desired 3D model."
+      options: [] 
+  optionalParameters:
+    art_style:
+      default: "realistic"
+      description: "The desired art style of the object."
+      options: ["realistic", "sculpture"]
+    seed:
+      default: null
+      description: "Seed for random number generation to ensure reproducibility."
+      options: []
+    ai_model:
+      default: "meshy-4"
+      description: "ID of the model to use."
+      options: ["meshy-4"]
+    topology:
+      default: "triangle"
+      description: "Specify the topology of the generated model."
+      options: ["quad", "triangle"]
+    target_polycount:
+      default: 30000
+      description: "Target number of polygons in the generated model."
+      options: []
+    should_remesh:
+      default: true
+      description: "Flag to enable the remesh phase."
+      options: [true, false]
+    symmetry_mode:
+      default: "auto"
+      description: "Controls symmetry behavior during the model generation process."
+      options: ["off", "auto", "on"]
+    enable_pbr:
+      default: false
+      description: "Generate PBR Maps (metallic, roughness, normal) in addition to the base color."
+      options: [true, false]

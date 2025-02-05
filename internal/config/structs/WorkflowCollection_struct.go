@@ -2,45 +2,19 @@ package structs
 
 // Represents a single API call step
 type Step struct {
-	Name        string            `yaml:"name"`
-	Method      string            `yaml:"method"`
-	URL         string            `yaml:"url"`
-	Body        map[string]string `yaml:"body,omitempty"`
-	ResponseKey string            `yaml:"response_key,omitempty"`
-	Poll        *PollConfig       `yaml:"poll,omitempty"`
+	Name                 string                 `yaml:"name"`                            // Step identifier
+	Method               string                 `yaml:"method"`                          // HTTP method (GET, POST, etc.)
+	URL                  string                 `yaml:"url"`                             // API endpoint (with placeholders)
+	Headers              map[string]string      `yaml:"headers,omitempty"`               // Optional headers for the request
+	Body                 map[string]interface{} `yaml:"body,omitempty"`                  // Request payload (now fully dynamic)
+	ResponsePlaceholders map[string]interface{} `yaml:"response_placeholders,omitempty"` // Mapping placeholders -> response field names
+	Poll                 map[string]interface{} `yaml:"poll,omitempty"`                  // Fully dynamic polling config
 }
 
-// Represents polling configuration for async API calls
-type PollConfig struct {
-	Until    string `yaml:"until"`
-	Interval int    `yaml:"interval"`
-}
-
-// Represents the overall workflow
+// Represents a full API workflow (multiple steps)
 type Workflow struct {
 	Steps []Step `yaml:"steps"`
 }
 
-// Represents API Configuration
-type APIConfig struct {
-	Endpoint           string                      `yaml:"endpoint"`
-	Method             string                      `yaml:"method"`
-	Headers            map[string]string           `yaml:"headers"`
-	RequiredParameters map[string]ParameterDetails `yaml:"requiredParameters"`
-	OptionalParameters map[string]ParameterDetails `yaml:"optionalParameters"`
-}
-
-type ParameterDetails struct {
-	Description string        `yaml:"description"`
-	Default     interface{}   `yaml:"default,omitempty"`
-	Options     []interface{} `yaml:"options,omitempty"`
-}
-
-// Top-level struct that holds both workflow and API configuration
-type APIYaml struct {
-	Workflow  Workflow  `yaml:"workflow"`
-	APIConfig APIConfig `yaml:",inline"` // Inline for easy access
-}
-
-// Maps content type -> APIYaml (Workflow + Config)
-type WorkflowCollection map[string]APIYaml
+// Maps content type (e.g., "imagegen", "3dgen") to its workflow
+type WorkflowCollection map[string]Workflow

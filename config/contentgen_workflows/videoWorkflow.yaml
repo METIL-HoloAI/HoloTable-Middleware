@@ -1,0 +1,52 @@
+#this is the 3d workflow pasted over for testing
+video:
+  workflow:
+    steps:
+      - name: "submit_preview_task"
+        method: "POST"
+        url: "https://api.meshy.ai/openapi/v2/text-to-3d"
+        headers:
+          Authorization: "Bearer $3D_MODEL_API_KEY"
+          Content-Type: "application/json"
+        body:
+          mode: "preview"
+          prompt: "{user_input}"
+        response_key: "result"
+
+      - name: "poll_preview_status"
+        method: "GET"
+        url: "https://api.meshy.ai/openapi/v2/text-to-3d/{submit_preview_task.result}"
+        headers:
+          Authorization: "Bearer $3D_MODEL_API_KEY"
+        response_key: "status"
+        poll:
+          until: "status == 'SUCCEEDED'"
+          interval: 5  # seconds
+
+      - name: "submit_refine_task"
+        method: "POST"
+        url: "https://api.meshy.ai/openapi/v2/text-to-3d"
+        headers:
+          Authorization: "Bearer $3D_MODEL_API_KEY"
+          Content-Type: "application/json"
+        body:
+          mode: "refine"
+          preview_task_id: "{submit_preview_task.result}"
+        response_key: "result"
+
+      - name: "poll_refine_status"
+        method: "GET"
+        url: "https://api.meshy.ai/openapi/v2/text-to-3d/{submit_refine_task.result}"
+        headers:
+          Authorization: "Bearer $3D_MODEL_API_KEY"
+        response_key: "status"
+        poll:
+          until: "status == 'SUCCEEDED'"
+          interval: 5  # seconds
+
+      - name: "fetch_final_model"
+        method: "GET"
+        url: "https://api.meshy.ai/openapi/v2/text-to-3d/{submit_refine_task.result}"
+        headers:
+          Authorization: "Bearer $3D_MODEL_API_KEY"
+        response_key: "model_urls.glb"

@@ -39,7 +39,7 @@ func main() {
 	}
 
 	fakeJSONData := []byte(`{
-		"contentType": "image",
+		"contentType": "3d",
 		"requiredParameters": {
 			"prompt": "A futuristic cityscape at sunset"
 		},
@@ -49,8 +49,7 @@ func main() {
 			"quality": "standard",
 			"response_format": "url",
 			"size": "1024x1024",
-			"style": "vivid",
-			"user": "user1234"
+			"style": "vivid"
 		}
 	}`)
 

@@ -32,7 +32,7 @@ func LoadYaml() {
 		log.Fatalf("Error loading workflows: %v", err)
 	}
 
-	loadEnv()
+	//loadEnv()
 }
 
 // This is a workaround to make sure filepaths are always pulled relative
@@ -101,8 +101,8 @@ func loadWorkflowsFromDir() (structs.WorkflowCollection, error) {
 		return nil, fmt.Errorf("error getting workflow config path: %v", err)
 	}
 
-	// Ensure the directory exists
-	files, err := filepath.Glob(filepath.Join(workflowDir, "*.yaml")) // Find all YAML files
+	// Find all YAML files in the directory
+	files, err := filepath.Glob(filepath.Join(workflowDir, "*.yaml"))
 	if err != nil {
 		return nil, fmt.Errorf("error finding YAML files in workflow directory: %v", err)
 	}
@@ -116,7 +116,7 @@ func loadWorkflowsFromDir() (structs.WorkflowCollection, error) {
 		}
 
 		// Step 1: Load YAML into a map (top-level key is retained)
-		var raw map[string]structs.APIYaml
+		var raw map[string]structs.Workflow // Directly unmarshalling into the new struct
 		err = yaml.Unmarshal(yamlData, &raw)
 		if err != nil {
 			log.Printf("Error parsing YAML file %s: %v", file, err)
@@ -124,8 +124,8 @@ func loadWorkflowsFromDir() (structs.WorkflowCollection, error) {
 		}
 
 		// Step 2: Store workflows using the top-level key
-		for key, config := range raw {
-			workflows[key] = config // Use the YAML key directly
+		for key, workflow := range raw {
+			workflows[key] = workflow // Use the YAML key directly
 		}
 	}
 
