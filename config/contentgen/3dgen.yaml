@@ -1,5 +1,4 @@
-# Parameters for Meshy 3D API
-# For more details see https://meshy.com/docs/api-reference
+# TEST FILE
 
 endpoint: "https://api.meshy.com/v1/generate"
 method: "POST"
