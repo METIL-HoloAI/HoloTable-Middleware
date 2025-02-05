@@ -1,17 +1,16 @@
 image:
-  workflow:
-    steps:
-      - name: "generate_image"
-        method: "POST"
-        url: "https://api.openai.com/v1/images/generations"
-        headers:
-          Authorization: "Bearer $IMAGEGEN_API_KEY"
-          Content-Type: "application/json"
-        body:
-          prompt: "{user_input}"
-          model: "{model}"
-          n: "{n}"
-          size: "{size}"
-          response_format: "{response_format}"
-          user: "{user}"
-        response_key: "data"
+  steps:
+    - name: "generate_image"
+      method: "POST"
+      url: "https://api.openai.com/v1/images/generations"
+      headers:
+        Authorization: "Bearer $IMAGE_API_KEY"
+        Content-Type: "application/json"
+      body:
+        prompt: "{user_input}"
+        model: "{model}"
+        n: "{n}"
+        size: "{size}"
+        response_format: "{response_format}"
+        user: "{user}"
+      response_key: "data"

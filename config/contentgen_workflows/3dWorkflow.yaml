@@ -4,7 +4,7 @@
       method: "POST"
       url: "https://api.meshy.ai/openapi/v2/text-to-3d"
       headers:
-        Authorization: "Bearer $3D_MODEL_API_KEY"
+        Authorization: "Bearer $THREED_MODEL_API_KEY"
         Content-Type: "application/json"
       body:
         mode: "preview"
@@ -16,7 +16,7 @@
       method: "GET"
       url: "https://api.meshy.ai/openapi/v2/text-to-3d/{preview_task_id}"
       headers:
-        Authorization: "Bearer $3D_MODEL_API_KEY"
+        Authorization: "Bearer $THREED_MODEL_API_KEY"
       response_placeholders:
         status: status
       poll:
@@ -27,7 +27,7 @@
       method: "POST"
       url: "https://api.meshy.ai/openapi/v2/text-to-3d"
       headers:
-        Authorization: "Bearer $3D_MODEL_API_KEY"
+        Authorization: "Bearer $THREED_MODEL_API_KEY"
         Content-Type: "application/json"
       body:
         mode: "refine"
@@ -40,7 +40,7 @@
       method: "GET"
       url: "https://api.meshy.ai/openapi/v2/text-to-3d/{refine_task_id}"
       headers:
-        Authorization: "Bearer $3D_MODEL_API_KEY"
+        Authorization: "Bearer $THREED_MODEL_API_KEY"
       response_placeholders:
         status: status
       poll:
@@ -51,6 +51,6 @@
       method: "GET"
       url: "https://api.meshy.ai/openapi/v2/text-to-3d/{refine_task_id}"
       headers:
-        Authorization: "Bearer $3D_MODEL_API_KEY"
+        Authorization: "Bearer $THREED_MODEL_API_KEY"
       response_placeholders:
         model_url: model_urls.glb

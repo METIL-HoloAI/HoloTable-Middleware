@@ -13,6 +13,10 @@ import (
 
 var General structs.GeneralSettings
 var IntentDetection structs.APIConfig
+var ImageGen structs.APIConfig
+var VideoGen structs.APIConfig
+var GifGen structs.APIConfig
+var ModelGen structs.APIConfig
 var Workflows structs.WorkflowCollection
 
 func LoadYaml() {
@@ -26,7 +30,27 @@ func LoadYaml() {
 	if err != nil {
 		log.Fatal("Error parsing intentdetection.yaml: ", err)
 	}
+	//contentgen yamls
+	ImageGen, err = getImage()
+	if err != nil {
+		log.Fatal("Error parsing imagegen.yaml: ", err)
+	}
 
+	VideoGen, err = getVideo()
+	if err != nil {
+		log.Fatal("Error parsing videogen.yaml: ", err)
+	}
+
+	GifGen, err = getGif()
+	if err != nil {
+		log.Fatal("Error parsing gifgen.yaml: ", err)
+	}
+
+	ModelGen, err = get3d()
+	if err != nil {
+		log.Fatal("Error parsing 3dgen.yaml: ", err)
+	}
+	//workflows
 	Workflows, err = loadWorkflowsFromDir()
 	if err != nil {
 		log.Fatalf("Error loading workflows: %v", err)
@@ -76,6 +100,82 @@ func getGeneral() (structs.GeneralSettings, error) {
 
 func getIntentDetection() (structs.APIConfig, error) {
 	configPath, err := getConfigPath("intentdetection.yaml")
+	if err != nil {
+		return structs.APIConfig{}, err
+	}
+
+	file, err := os.ReadFile(configPath)
+	if err != nil {
+		return structs.APIConfig{}, err
+	}
+
+	var settings structs.APIConfig
+	if err := yaml.Unmarshal(file, &settings); err != nil {
+		return structs.APIConfig{}, err
+	}
+
+	return settings, nil
+}
+
+func getImage() (structs.APIConfig, error) {
+	configPath, err := getConfigPath("/contentgen_yamls/imagegen.yaml")
+	if err != nil {
+		return structs.APIConfig{}, err
+	}
+
+	file, err := os.ReadFile(configPath)
+	if err != nil {
+		return structs.APIConfig{}, err
+	}
+
+	var settings structs.APIConfig
+	if err := yaml.Unmarshal(file, &settings); err != nil {
+		return structs.APIConfig{}, err
+	}
+
+	return settings, nil
+}
+
+func getVideo() (structs.APIConfig, error) {
+	configPath, err := getConfigPath("/contentgen_yamls/videogen.yaml")
+	if err != nil {
+		return structs.APIConfig{}, err
+	}
+
+	file, err := os.ReadFile(configPath)
+	if err != nil {
+		return structs.APIConfig{}, err
+	}
+
+	var settings structs.APIConfig
+	if err := yaml.Unmarshal(file, &settings); err != nil {
+		return structs.APIConfig{}, err
+	}
+
+	return settings, nil
+}
+
+func getGif() (structs.APIConfig, error) {
+	configPath, err := getConfigPath("/contentgen_yamls/gifgen.yaml")
+	if err != nil {
+		return structs.APIConfig{}, err
+	}
+
+	file, err := os.ReadFile(configPath)
+	if err != nil {
+		return structs.APIConfig{}, err
+	}
+
+	var settings structs.APIConfig
+	if err := yaml.Unmarshal(file, &settings); err != nil {
+		return structs.APIConfig{}, err
+	}
+
+	return settings, nil
+}
+
+func get3d() (structs.APIConfig, error) {
+	configPath, err := getConfigPath("/contentgen_yamls/3dgen.yaml")
 	if err != nil {
 		return structs.APIConfig{}, err
 	}

@@ -5,39 +5,40 @@
 
 #added a workflow section to the yaml, this will be a part of each contentgen yaml. (this particual yaml only has one step)
 
-image:
-  endpoint: "https://api.openai.com/v1/images/generations"
-  method: "POST"
-  headers:
-    Authorization: "Bearer $IMAGE_API_KEY"
-    Content-Type: "application/json"
-  requiredParameters:
-    prompt:
-      description: "A text description of the desired image(s)."
-      options: [] 
-  optionalParameters:
-    model:
-      default: "dall-e-2"
-      description: "The model to use for image generation."
-      options: ["dall-e-2", "dall-e-3"]
-    n:
-      default: 1
-      description: "The number of images to generate. Must be between 1 and 10. Dall-e 3 Only supports 1 image per call"
-      options: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    quality:
-      default: "standard"
-      description: "The quality of the generated image. hd Only supported for dall-e-3."
-      options: ["standard", "hd"]
-    response_format:
-      default: "url"
-      description: "The format in which the generated images are returned."
-      options: ["url", "b64_json"]
-    size:
-      default: "1024x1024"
-      description: "The size of the generated images."
-      options: ["256x256", "512x512", "1024x1024", "1024x1024", "1792x1024", "1024x1792"]
-    style:
-      default: "vivid"
-      description: "The style of the generated images. Only supported for dall-e-3."
-      options: ["vivid", "natural"]
-   
+endpoint: "https://api.openai.com/v1/images/generations"
+method: "POST"
+headers:
+  Authorization: "Bearer $IMAGEGEN_API_KEY"
+  Content-Type: "application/json"
+requiredParameters:
+  prompt:
+    description: "A text description of the desired image(s)."
+    options: [] 
+optionalParameters:
+  model:
+    default: "dall-e-2"
+    description: "The model to use for image generation."
+    options: ["dall-e-2", "dall-e-3"]
+  n:
+    default: 1
+    description: "The number of images to generate. Must be between 1 and 10. Dall-e 3 Only supports 1 image per call"
+    options: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+  quality:
+    default: "standard"
+    description: "The quality of the generated image. hd Only supported for dall-e-3."
+    options: ["standard", "hd"]
+  response_format:
+    default: "url"
+    description: "The format in which the generated images are returned."
+    options: ["url", "b64_json"]
+  size:
+    default: "1024x1024"
+    description: "The size of the generated images."
+    options: ["256x256", "512x512", "1024x1024", "1024x1024", "1792x1024", "1024x1792"]
+  style:
+    default: "vivid"
+    description: "The style of the generated images. Only supported for dall-e-3."
+    options: ["vivid", "natural"]
+  user:
+    description: "A unique identifier representing your end-user."
+    options: [] 
