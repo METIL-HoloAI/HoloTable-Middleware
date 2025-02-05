@@ -40,7 +40,7 @@ func LoadPrompt(prompt string) ([]byte, error) {
 	}
 
 	//DEBUG
-	prettyPrint(payload)
+	//prettyPrint(payload)
 	//DEBUG
 
 	// Convert payload to JSON
@@ -80,7 +80,7 @@ func LoadPrompt(prompt string) ([]byte, error) {
 	var jsonResponse map[string]interface{}
 
 	//DEBUG
-	fmt.Println("Raw Response Body:\n", string(body))
+	//fmt.Println("Raw Response Body:\n", string(body))
 	//DEBUG
 
 	if err := json.Unmarshal(body, &jsonResponse); err != nil {

@@ -4,7 +4,7 @@
 endpoint: "https://api.meshy.com/v1/generate"
 method: "POST"
 headers:
-  Authorization: "Bearer $MESHY_API_KEY"
+  Authorization: "Bearer $3D_MODEL_API_KEY"
   Content-Type: "application/json"
 requiredParameters:
   prompt:
