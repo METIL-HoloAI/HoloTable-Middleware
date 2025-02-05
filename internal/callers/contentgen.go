@@ -13,7 +13,7 @@ import (
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config/structs"
 )
 
-// Loads intent detection response & selects the appropriate workflow
+// Loads the intent detection response & selects the appropriate workflow
 func LoadIntentDetectionResponse(JSONData []byte) {
 	// Read JSON data from intent detection
 	var intentDetectionResponse structs.IntentDetectionResponse
@@ -35,45 +35,59 @@ func LoadIntentDetectionResponse(JSONData []byte) {
 
 // Handles workflow execution dynamically
 func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, workflow structs.Workflow) {
-	// Global storage for all response values (ensures placeholders are accessible)
+	// Storage for previous step results (ensures placeholders are accessible)
 	dataStore := make(map[string]interface{})
 
 	// Loop through workflow steps
-	for _, step := range workflow.Steps {
-		fmt.Printf("\nExecuting Step: %s\n", step.Name)
+	for i, step := range workflow.Steps {
+		fmt.Printf("\n🔹 Executing Step %d: %s\n", i+1, step.Name)
 
-		// Replace placeholders dynamically before making the API call
-		apiURL := deepReplace(step.URL, dataStore).(string)
-		fmt.Printf("Updated API URL: %s\n", apiURL)
+		// Determine API URL (replace placeholders if it's not the first step)
+		var apiURL string
+		if i == 0 {
+			apiURL = step.URL
+		} else {
+			apiURL = deepReplace(step.URL, dataStore).(string)
+		}
+		fmt.Printf("🔄 Updated API URL: %s\n", apiURL)
 
-		// Create API request configuration dynamically
+		// Create API request configuration
 		apiConfig := structs.APIConfig{
 			Endpoint: apiURL,
 			Method:   step.Method,
 			Headers:  step.Headers,
 		}
 
-		// Build API payload dynamically with recursive placeholder replacement
-		payload := deepReplace(step.Body, dataStore).(map[string]interface{})
-		fmt.Printf("Updated Payload: %+v\n", payload)
+		// Build the payload
+		var payload map[string]interface{}
+		if i == 0 {
+			payload = buildPayload(intentDetectionResponse) // First step: Use intent detection parameters
+		} else {
+			payload = deepReplace(step.Body, dataStore).(map[string]interface{}) // Replace placeholders for later steps
+		}
+		fmt.Printf("📦 Final Payload for API Call: %+v\n", payload)
 
-		// Make API call
+		// Make the API call
 		responseData, err := makeAPICall(apiConfig, payload)
 		if err != nil {
-			fmt.Printf("Error in step '%s': %v\n", step.Name, err)
+			fmt.Printf("❌ Error in step '%s': %v\n", step.Name, err)
 			return
 		}
 
-		// Print full API response for debugging
-		fmt.Printf("API Response for '%s': %+v\n", step.Name, responseData)
+		fmt.Printf("✅ API Response for '%s': %+v\n", step.Name, responseData)
 
-		// Store response values for future steps using response_placeholders mapping
+		// **Extract & Store Response Data for Future Steps**
 		for placeholder, responseKey := range step.ResponsePlaceholders {
-			if val, exists := responseData[responseKey]; exists {
-				dataStore[placeholder] = val
-				fmt.Printf("Stored '%s' = %v for future use\n", placeholder, val)
+			// Ensure responseKey is a string before using it as a map key
+			if responseKeyStr, ok := responseKey.(string); ok {
+				if val, exists := responseData[responseKeyStr]; exists {
+					dataStore[placeholder] = val
+					fmt.Printf("🔑 Stored '%s' = %v for future use\n", placeholder, val)
+				} else {
+					fmt.Printf("⚠️ Warning: Expected response key '%s' not found in API response for step '%s'\n", responseKeyStr, step.Name)
+				}
 			} else {
-				fmt.Printf("Warning: Expected response key '%s' not found in step '%s'\n", responseKey, step.Name)
+				fmt.Printf("❌ Error: Response key for placeholder '%s' is not a string in step '%s'\n", placeholder, step.Name)
 			}
 		}
 
@@ -87,7 +101,19 @@ func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, wor
 		}
 	}
 
-	fmt.Println("Workflow execution completed successfully.")
+	fmt.Println("🎉 Workflow execution completed successfully.")
+}
+
+func buildPayload(intentDetectionResponse structs.IntentDetectionResponse) map[string]interface{} {
+	// Combine required and optional parameters into a single payload
+	payload := make(map[string]interface{})
+	for key, value := range intentDetectionResponse.RequiredParameters {
+		payload[key] = value
+	}
+	for key, value := range intentDetectionResponse.OptionalParameters {
+		payload[key] = value
+	}
+	return payload
 }
 
 // Makes the API request & returns the response
@@ -138,57 +164,11 @@ func makeAPICall(apiConfig structs.APIConfig, payload map[string]interface{}) (m
 	return responseData, nil
 }
 
-// Handles polling for async workflows
-func pollForCompletion(step structs.Step, dataStore map[string]interface{}) error {
-	client := &http.Client{}
-
-	for {
-		url := deepReplace(step.URL, dataStore).(string)
-		fmt.Printf("Polling URL: %s\n", url)
-
-		req, err := http.NewRequest("GET", url, nil)
-		if err != nil {
-			return err
-		}
-
-		resp, err := client.Do(req)
-		if err != nil {
-			return err
-		}
-		defer resp.Body.Close()
-
-		// Extract response data
-		var responseData map[string]interface{}
-		json.NewDecoder(resp.Body).Decode(&responseData)
-
-		// Print polling response for debugging
-		fmt.Printf("Polling Response: %+v\n", responseData)
-
-		// Store response values for later use
-		for placeholder, responseKey := range step.ResponsePlaceholders {
-			if val, exists := responseData[responseKey]; exists {
-				dataStore[placeholder] = val
-				fmt.Printf("Updating DataStore: '%s' = %v\n", placeholder, val)
-			}
-		}
-
-		// Check if polling condition is met
-		if responseData[step.Poll.Condition] == step.Poll.TargetValue {
-			fmt.Printf("Polling complete for '%s'!\n", step.Name)
-			return nil
-		}
-
-		// Wait before polling again
-		fmt.Printf("Polling '%s'... waiting %d seconds\n", step.Name, step.Poll.Interval)
-		time.Sleep(time.Duration(step.Poll.Interval) * time.Second)
-	}
-}
-
-// Recursively replaces placeholders within maps, lists, and strings
+// Recursively replaces placeholders **only for response placeholders**
 func deepReplace(data interface{}, dataStore map[string]interface{}) interface{} {
 	switch v := data.(type) {
 	case string:
-		// Replace all known placeholders in the string
+		// Replace response placeholders in the string
 		for key, value := range dataStore {
 			placeholder := "{" + key + "}"
 			v = strings.ReplaceAll(v, placeholder, fmt.Sprintf("%v", value))
@@ -213,5 +193,71 @@ func deepReplace(data interface{}, dataStore map[string]interface{}) interface{}
 
 	default:
 		return v
+	}
+}
+
+// Handles polling for async workflows
+func pollForCompletion(step structs.Step, dataStore map[string]interface{}) error {
+	client := &http.Client{}
+
+	// Extract polling configuration dynamically
+	conditionKey, ok := step.Poll["condition"].(string)
+	if !ok {
+		return fmt.Errorf("❌ Error: Polling condition key is missing or not a string in step '%s'", step.Name)
+	}
+
+	targetValue, ok := step.Poll["target_value"]
+	if !ok {
+		return fmt.Errorf("❌ Error: Polling target value is missing in step '%s'", step.Name)
+	}
+
+	interval, ok := step.Poll["interval"].(float64) // JSON numbers are parsed as float64
+	if !ok {
+		return fmt.Errorf("❌ Error: Polling interval is missing or not a number in step '%s'", step.Name)
+	}
+
+	// Start polling loop
+	for {
+		// Replace placeholders in the polling URL
+		pollURL := deepReplace(step.URL, dataStore).(string)
+		fmt.Printf("🔄 Polling URL: %s\n", pollURL)
+
+		// Make a GET request to check the status
+		req, err := http.NewRequest("GET", pollURL, nil)
+		if err != nil {
+			return fmt.Errorf("❌ Error creating polling request: %v", err)
+		}
+
+		resp, err := client.Do(req)
+		if err != nil {
+			return fmt.Errorf("❌ Error making polling request: %v", err)
+		}
+		defer resp.Body.Close()
+
+		// Extract response data
+		var responseData map[string]interface{}
+		if err := json.NewDecoder(resp.Body).Decode(&responseData); err != nil {
+			return fmt.Errorf("❌ Error decoding polling response: %v", err)
+		}
+
+		// Debugging: Print polling response
+		fmt.Printf("📊 Polling Response: %+v\n", responseData)
+
+		// Extract condition value from response
+		currentValue, exists := responseData[conditionKey]
+		if !exists {
+			fmt.Printf("⚠️ Warning: Expected polling key '%s' not found in response\n", conditionKey)
+			continue
+		}
+
+		// Check if the condition is met
+		if currentValue == targetValue {
+			fmt.Printf("✅ Polling complete for '%s'!\n", step.Name)
+			return nil
+		}
+
+		// Wait before polling again
+		fmt.Printf("⏳ Polling '%s'... waiting %.0f seconds\n", step.Name, interval)
+		time.Sleep(time.Duration(interval) * time.Second)
 	}
 }

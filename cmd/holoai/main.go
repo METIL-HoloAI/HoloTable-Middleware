@@ -41,15 +41,17 @@ func main() {
 	fakeJSONData := []byte(`{
 		"contentType": "3d",
 		"requiredParameters": {
-			"prompt": "A futuristic cityscape at sunset"
+			"prompt": "a monster mask"
 		},
 		"optionalParameters": {
-			"model": "dall-e-2",
-			"n": 3,
-			"quality": "standard",
-			"response_format": "url",
-			"size": "1024x1024",
-			"style": "vivid"
+			"art_style": "realistic",
+			"seed": null,
+			"ai_model": "meshy-4",
+			"topology": "triangle",
+			"target_polycount": 30000,
+			"should_remesh": true,
+			"symmetry_mode": "auto",
+			"enable_pbr": false
 		}
 	}`)
 

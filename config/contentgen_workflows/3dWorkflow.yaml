@@ -1,4 +1,4 @@
-3d_model_generation:
+3d:
   steps:
     - name: "submit_preview_task"
       method: "POST"

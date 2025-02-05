@@ -32,7 +32,7 @@ func LoadYaml() {
 		log.Fatalf("Error loading workflows: %v", err)
 	}
 
-	//loadEnv()
+	loadEnv()
 }
 
 // This is a workaround to make sure filepaths are always pulled relative
