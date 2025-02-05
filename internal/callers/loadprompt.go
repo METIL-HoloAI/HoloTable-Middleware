@@ -19,7 +19,6 @@ import (
 func LoadPrompt(prompt string) ([]byte, error) {
 
 	// Read the contents of the YAML files and concatenate them in a string
-	//I want opnions on if I should update this to match Mitchells approach of reading in the entire directory
 	yamlFiles := []string{"3dgen.yaml", "gifgen.yaml", "imagegen.yaml", "videogen.yaml"}
 	var yamlContents string
 	for _, file := range yamlFiles {
@@ -101,7 +100,7 @@ func LoadPrompt(prompt string) ([]byte, error) {
 	return []byte(extractedText), nil
 }
 
-// ////
+// Build the payload for the intent detection API call
 func BuildPayload(initPrompt, userPrompt string) (map[string]interface{}, error) {
 	payloadConfig := config.IntentDetection.Payload
 	payload := searchPayload(payloadConfig, initPrompt, userPrompt).(map[string]interface{})
