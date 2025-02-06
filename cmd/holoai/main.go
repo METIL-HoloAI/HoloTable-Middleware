@@ -41,6 +41,7 @@ func main() {
 	fakeJSONData := []byte(`{
 		"contentType": "3d",
 		"requiredParameters": {
+			"mode": "preview",
 			"prompt": "a monster mask"
 		},
 		"optionalParameters": {

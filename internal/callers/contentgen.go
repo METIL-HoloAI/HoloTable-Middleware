@@ -93,6 +93,7 @@ func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, wor
 
 		// Handle polling if required
 		if step.Poll != nil {
+			fmt.Printf("🔍 DEBUG: Stored Task ID for Polling: %v\n", dataStore["preview_task_id"])
 			err = pollForCompletion(step, dataStore)
 			if err != nil {
 				fmt.Printf("polling error in step '%s': %v\n", step.Name, err)
@@ -150,9 +151,9 @@ func makeAPICall(apiConfig structs.APIConfig, payload map[string]interface{}) (m
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	// Handle non-200 status codes
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("non-200 status: %d, body: %s", resp.StatusCode, body)
+	// Handle non-200 and non-202 status codes
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
+		return nil, fmt.Errorf("non-200/202 status: %d, body: %s", resp.StatusCode, body)
 	}
 
 	// Parse JSON response
@@ -161,6 +162,13 @@ func makeAPICall(apiConfig structs.APIConfig, payload map[string]interface{}) (m
 		return nil, fmt.Errorf("failed to unmarshal API response: %w", err)
 	}
 
+	// ✅ Handle 202 Accepted: Return response for polling
+	if resp.StatusCode == http.StatusAccepted {
+		fmt.Printf("🔄 Received 202 Accepted: Task is processing... Storing response.\n")
+		return responseData, nil // Let the caller handle polling
+	}
+
+	// ✅ Handle 200 OK: Normal successful response
 	return responseData, nil
 }
 
@@ -200,32 +208,44 @@ func deepReplace(data interface{}, dataStore map[string]interface{}) interface{}
 func pollForCompletion(step structs.Step, dataStore map[string]interface{}) error {
 	client := &http.Client{}
 
-	// Extract polling configuration dynamically
-	conditionKey, ok := step.Poll["condition"].(string)
+	// Extract polling condition
+	targetValue, ok := step.Poll["until"].(string)
 	if !ok {
-		return fmt.Errorf("❌ Error: Polling condition key is missing or not a string in step '%s'", step.Name)
+		return fmt.Errorf("❌ Error: Polling target value is missing or not a string in step '%s'", step.Name)
 	}
 
-	targetValue, ok := step.Poll["target_value"]
+	// Extract and handle polling interval
+	intervalRaw, ok := step.Poll["interval"]
 	if !ok {
-		return fmt.Errorf("❌ Error: Polling target value is missing in step '%s'", step.Name)
+		return fmt.Errorf("❌ Error: Polling interval is missing in step '%s'", step.Name)
 	}
 
-	interval, ok := step.Poll["interval"].(float64) // JSON numbers are parsed as float64
-	if !ok {
-		return fmt.Errorf("❌ Error: Polling interval is missing or not a number in step '%s'", step.Name)
+	var interval float64
+	switch v := intervalRaw.(type) {
+	case float64:
+		interval = v
+	case int:
+		interval = float64(v) // Convert int to float64
+	default:
+		return fmt.Errorf("❌ Error: Polling interval is not a valid number (got %T) in step '%s'", v, step.Name)
 	}
 
-	// Start polling loop
+	fmt.Printf("🔄 Starting Polling for Step: %s | Target Status: %s | Interval: %.0f seconds\n", step.Name, targetValue, interval)
+
 	for {
 		// Replace placeholders in the polling URL
 		pollURL := deepReplace(step.URL, dataStore).(string)
 		fmt.Printf("🔄 Polling URL: %s\n", pollURL)
 
-		// Make a GET request to check the status
+		// Create request with headers
 		req, err := http.NewRequest("GET", pollURL, nil)
 		if err != nil {
 			return fmt.Errorf("❌ Error creating polling request: %v", err)
+		}
+
+		// ✅ Ensure API key is included
+		for key, value := range step.Headers {
+			req.Header.Set(key, value)
 		}
 
 		resp, err := client.Do(req)
@@ -234,30 +254,40 @@ func pollForCompletion(step structs.Step, dataStore map[string]interface{}) erro
 		}
 		defer resp.Body.Close()
 
-		// Extract response data
 		var responseData map[string]interface{}
 		if err := json.NewDecoder(resp.Body).Decode(&responseData); err != nil {
 			return fmt.Errorf("❌ Error decoding polling response: %v", err)
 		}
 
-		// Debugging: Print polling response
+		// 🔍 Debugging: Print polling response
 		fmt.Printf("📊 Polling Response: %+v\n", responseData)
 
-		// Extract condition value from response
-		currentValue, exists := responseData[conditionKey]
+		// **✅ Fix #1: Stop Polling if API Returns an Error**
+		if msg, exists := responseData["message"]; exists {
+			fmt.Printf("❌ API Error: %v\n", msg)
+			return fmt.Errorf("❌ Polling failed: API error '%v'", msg)
+		}
+
+		// Extract the status from the response
+		currentStatus, exists := responseData["status"]
 		if !exists {
-			fmt.Printf("⚠️ Warning: Expected polling key '%s' not found in response\n", conditionKey)
+			fmt.Printf("⚠️ Warning: Expected polling key 'status' not found in response\n")
+			// ✅ Fix #3: Ensure `time.Sleep()` happens even when status is missing
+			fmt.Printf("⏳ Retrying in %.0f seconds...\n", interval)
+			time.Sleep(time.Duration(interval) * time.Second)
 			continue
 		}
 
-		// Check if the condition is met
-		if currentValue == targetValue {
-			fmt.Printf("✅ Polling complete for '%s'!\n", step.Name)
+		fmt.Printf("🔍 Current Status: %v | Target: %s\n", currentStatus, targetValue)
+
+		// ✅ Stop polling when the target status is reached
+		if currentStatus == targetValue {
+			fmt.Printf("✅ Polling complete! Step '%s' reached status '%s'\n", step.Name, targetValue)
 			return nil
 		}
 
-		// Wait before polling again
-		fmt.Printf("⏳ Polling '%s'... waiting %.0f seconds\n", step.Name, interval)
+		// ⏳ Wait before polling again
+		fmt.Printf("⏳ Status: %v | Retrying in %.0f seconds...\n", currentStatus, interval)
 		time.Sleep(time.Duration(interval) * time.Second)
 	}
 }
