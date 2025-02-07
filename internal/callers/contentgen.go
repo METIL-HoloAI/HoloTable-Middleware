@@ -52,7 +52,7 @@ func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, wor
 		fmt.Printf("🔄 Updated API URL: %s\n", apiURL)
 
 		// Create API request configuration
-		apiConfig := structs.APIConfig{
+		workflowConfig := structs.APIConfig{
 			Endpoint: apiURL,
 			Method:   step.Method,
 			Headers:  step.Headers,
@@ -68,13 +68,17 @@ func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, wor
 		fmt.Printf("📦 Final Payload for API Call: %+v\n", payload)
 
 		// Make the API call
-		responseData, err := makeAPICall(apiConfig, payload)
+		responseData, err := makeAPICall(workflowConfig, payload)
 		if err != nil {
 			fmt.Printf("❌ Error in step '%s': %v\n", step.Name, err)
 			return
 		}
 
 		fmt.Printf("✅ API Response for '%s': %+v\n", step.Name, responseData)
+
+		//if(this is the final step){
+		//	Call database function (send response data which is a map[string]interface{}, variable type (.glb in workflow), and the file path bs from the meshy docs that i need to add to workflow)
+		//}
 
 		// **Extract & Store Response Data for Future Steps**
 		for placeholder, responseKey := range step.ResponsePlaceholders {

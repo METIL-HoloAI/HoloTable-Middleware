@@ -54,3 +54,4 @@
         Authorization: "Bearer $THREED_MODEL_API_KEY"
       response_placeholders:
         model_url: model_urls.glb
+        #responsePath: "choices.0.message.content" jacob code example of how to get chat gpts api response
