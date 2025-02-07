@@ -1,5 +1,6 @@
 package structs
 
+// Represents API Configuration
 type APIConfig struct {
 	Endpoint           string                      `yaml:"endpoint"`
 	Method             string                      `yaml:"method"`
