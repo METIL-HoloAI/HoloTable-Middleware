@@ -33,7 +33,6 @@ func StartTextListener() {
 			config.LoadYaml()
 			fmt.Println("Reloaded yaml...")
 		} else { // Call intent detection
-			fmt.Println("This is your input prompt:", input)
 			jsonData, err := callers.LoadPrompt(input)
 			if err != nil {
 				fmt.Println("Error:", err)
