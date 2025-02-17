@@ -7,16 +7,13 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-// Create an upgrader with a simple origin check.
 var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
-		// For production, replace this with a proper origin check.
-		return true
-	},
+	// In production, be sure to check origins properly.
+	CheckOrigin: func(r *http.Request) bool { return true },
 }
 
 func wsHandler(w http.ResponseWriter, r *http.Request) {
-	// Upgrade the HTTP connection to a WebSocket connection
+	// Upgrade HTTP connection to a WebSocket connection.
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println("Upgrade error:", err)
@@ -24,24 +21,28 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 
-	// Echo loop: this reads the message sent (from terminal where wscat is connected to go server) and writes it back (in terminal where main.go is running)
+	log.Println("Client connected")
+
+	// Continuously read messages from the client
 	for {
 		messageType, message, err := conn.ReadMessage()
 		if err != nil {
 			log.Println("Read error:", err)
 			break
 		}
-		log.Printf("Received: %s", message)
-		err = conn.WriteMessage(messageType, message)
-		if err != nil {
-			log.Println("Write error:", err)
-			break
+
+		// Process only binary messages (the audio data)
+		if messageType == websocket.BinaryMessage {
+			log.Printf("Received %d bytes of audio data", len(message))
+			// Here you might decode or forward the audio data for further processing
+		} else {
+			log.Println("Non-binary message received; ignoring.")
 		}
 	}
 }
 
 func EstablishConnection() {
-	http.HandleFunc("/ws", wsHandler)
-	log.Println("Server started on :8080")
+	http.HandleFunc("/ws/audio", wsHandler)
+	log.Println("Server listening on :8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
