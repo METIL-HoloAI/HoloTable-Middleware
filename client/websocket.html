@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Audio Capture & WebSocket</title>
+  </head>
+  <body>
+    <h1>Capturing Audio and Sending via WebSocket</h1>
+    <script>
+      // Create a WebSocket connection to your Go server
+      const ws = new WebSocket("ws://localhost:8080/ws/audio");
+      ws.binaryType = "arraybuffer"; // Ensure binary data is handled properly
+
+      // Access the microphone
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+          const audioContext = new AudioContext();
+          const source = audioContext.createMediaStreamSource(stream);
+
+          // Use a ScriptProcessorNode to capture audio chunks
+          // Buffer size of 4096, 1 input channel, 1 output channel
+          const processor = audioContext.createScriptProcessor(4096, 1, 1);
+
+          source.connect(processor);
+          processor.connect(audioContext.destination); // Required even if you don't use the output
+
+          processor.onaudioprocess = event => {
+            const inputBuffer = event.inputBuffer.getChannelData(0); // Mono channel
+            // Convert Float32Array to 16-bit PCM (Int16Array)
+            const buffer = new ArrayBuffer(inputBuffer.length * 2);
+            const outputData = new Int16Array(buffer);
+            for (let i = 0; i < inputBuffer.length; i++) {
+              // Clamp and convert the float to 16-bit integer
+              let s = Math.max(-1, Math.min(1, inputBuffer[i]));
+              outputData[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+            }
+
+            // If WebSocket is open, send the data
+            if (ws.readyState === WebSocket.OPEN) {
+              ws.send(buffer);
+            }
+          };
+
+          ws.onopen = () => console.log("WebSocket connection opened.");
+          ws.onclose = () => console.log("WebSocket connection closed.");
+          ws.onerror = err => console.error("WebSocket error:", err);
+        })
+        .catch(err => console.error("Error capturing audio:", err));
+    </script>
+  </body>
+</html>
