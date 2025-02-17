@@ -8,8 +8,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
-	"path/filepath"
 
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config"
 )
@@ -17,16 +15,29 @@ import (
 // LoadPrompt sends the prompt to chat ai, then saves and returns the JSON response
 func LoadPrompt(prompt string) ([]byte, error) {
 
-	// Read the contents of the YAML files and concatenate them in a string
-	yamlFiles := []string{"3dgen.yaml", "gifgen.yaml", "imagegen.yaml", "videogen.yaml"}
-	var yamlContents string
-	for _, file := range yamlFiles {
-		content, err := os.ReadFile(filepath.Join("config/contentgen", file))
-		if err != nil {
-			return nil, fmt.Errorf("error reading YAML file %s: %w", file, err)
-		}
-		yamlContents += fmt.Sprintf("\n---\n%s:\n%s", file, content)
+	videoString, err := json.Marshal(config.VideoGen)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling VideoGen config: %w", err)
 	}
+
+	gifString, err := json.Marshal(config.GifGen)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling GifGen config: %w", err)
+	}
+
+	modelString, err := json.Marshal(config.ModelGen)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling ModelGen config: %w", err)
+	}
+
+	imageString, err := json.Marshal(config.ImageGen)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling ImageGen config: %w", err)
+	}
+
+	yamlContents := bytes.Join([][]byte{videoString, gifString, modelString, imageString}, []byte{})
+
+	fmt.Println("yamlContents: ", string(yamlContents))
 
 	// Build the initial prompt with the concatenated YAML contents
 	initPrompt := fmt.Sprintf(config.IntentDetection.InitialPrompt, yamlContents)
