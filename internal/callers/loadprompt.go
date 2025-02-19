@@ -35,9 +35,12 @@ func LoadPrompt(prompt string) ([]byte, error) {
 		return nil, fmt.Errorf("error marshalling ImageGen config: %w", err)
 	}
 
-	yamlContents := bytes.Join([][]byte{videoString, gifString, modelString, imageString}, []byte{})
-
-	fmt.Println("yamlContents: ", string(yamlContents))
+	yamlContents := bytes.Join([][]byte{
+		[]byte("video: " + string(videoString) + "\n"),
+		[]byte("gif: " + string(gifString) + "\n"),
+		[]byte("model: " + string(modelString) + "\n"),
+		[]byte("image: " + string(imageString) + "\n"),
+	}, []byte{})
 
 	// Build the initial prompt with the concatenated YAML contents
 	initPrompt := fmt.Sprintf(config.IntentDetection.InitialPrompt, yamlContents)
