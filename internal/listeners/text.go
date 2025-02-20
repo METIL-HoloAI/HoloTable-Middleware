@@ -33,19 +33,9 @@ func StartTextListener() {
 			config.LoadYaml()
 			fmt.Println("Reloaded yaml...")
 		} else { // Call intent detection
-			go callIntentDetection(input)
+			go callers.StartIntentDetection(input)
 		}
 
 		fmt.Println()
 	}
-}
-
-func callIntentDetection(input string) {
-	jsonData, err := callers.LoadPrompt(input)
-	if err != nil {
-		fmt.Println("Error running intent detection:", err)
-		return
-	}
-	// Pass JSON data from intent detection to contentget.go for the call
-	callers.LoadIntentDetectionResponse(jsonData)
 }

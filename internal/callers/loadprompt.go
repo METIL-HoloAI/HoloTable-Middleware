@@ -12,6 +12,16 @@ import (
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config"
 )
 
+func StartIntentDetection(input string) {
+	jsonData, err := LoadPrompt(input)
+	if err != nil {
+		fmt.Println("Error running intent detection:", err)
+		return
+	}
+	// Pass JSON data from intent detection to contentget.go for the call
+	LoadIntentDetectionResponse(jsonData)
+}
+
 // LoadPrompt sends the prompt to chat ai, then saves and returns the JSON response
 func LoadPrompt(prompt string) ([]byte, error) {
 
