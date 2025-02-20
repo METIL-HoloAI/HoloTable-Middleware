@@ -33,9 +33,5 @@ func TranscribeAudio(audio []byte, clientWebsocket *websocket.Conn) bool {
 		}
 	}
 
-	if strings.Contains(response, config.SpeechToText.Keyword) {
-		return true
-	}
-
-	return false
+	return strings.Contains(response, config.SpeechToText.Keyword)
 }
