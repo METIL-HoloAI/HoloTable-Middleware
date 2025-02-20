@@ -2,13 +2,12 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch Go Program",
+            "name": "Launch HoloTable Middleware",
             "type": "go",
             "request": "launch",
             "mode": "debug",
             "program": "${workspaceFolder}/cmd/holoai",
-            "cwd": "${workspaceFolder}"  
+            "console": "integratedTerminal"
         }
     ]
 }
-

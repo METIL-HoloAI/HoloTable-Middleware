@@ -212,13 +212,11 @@ func deepReplace(data interface{}, dataStore map[string]interface{}) interface{}
 func pollForCompletion(step structs.Step, dataStore map[string]interface{}) error {
 	client := &http.Client{}
 
-	// Extract polling condition
 	targetValue, ok := step.Poll["until"].(string)
 	if !ok {
 		return fmt.Errorf("❌ Error: Polling target value is missing or not a string in step '%s'", step.Name)
 	}
 
-	// Extract and handle polling interval
 	intervalRaw, ok := step.Poll["interval"]
 	if !ok {
 		return fmt.Errorf("❌ Error: Polling interval is missing in step '%s'", step.Name)
@@ -229,69 +227,69 @@ func pollForCompletion(step structs.Step, dataStore map[string]interface{}) erro
 	case float64:
 		interval = v
 	case int:
-		interval = float64(v) // Convert int to float64
+		interval = float64(v)
 	default:
 		return fmt.Errorf("❌ Error: Polling interval is not a valid number (got %T) in step '%s'", v, step.Name)
 	}
 
 	fmt.Printf("🔄 Starting Polling for Step: %s | Target Status: %s | Interval: %.0f seconds\n", step.Name, targetValue, interval)
 
+	// Create a timeout timer of 2.5 minutes
+	timeout := time.After(150 * time.Second)
+
 	for {
-		// Replace placeholders in the polling URL
-		pollURL := deepReplace(step.URL, dataStore).(string)
-		fmt.Printf("🔄 Polling URL: %s\n", pollURL)
+		select {
+		case <-timeout:
+			return fmt.Errorf("⏳ Timeout: Polling for step '%s' exceeded 2.5 minutes", step.Name)
+		default:
+			// Replace placeholders in the polling URL
+			pollURL := deepReplace(step.URL, dataStore).(string)
+			fmt.Printf("🔄 Polling URL: %s\n", pollURL)
 
-		// Create request with headers
-		req, err := http.NewRequest("GET", pollURL, nil)
-		if err != nil {
-			return fmt.Errorf("❌ Error creating polling request: %v", err)
-		}
+			req, err := http.NewRequest("GET", pollURL, nil)
+			if err != nil {
+				return fmt.Errorf("❌ Error creating polling request: %v", err)
+			}
 
-		// ✅ Ensure API key is included
-		for key, value := range step.Headers {
-			req.Header.Set(key, value)
-		}
+			for key, value := range step.Headers {
+				req.Header.Set(key, value)
+			}
 
-		resp, err := client.Do(req)
-		if err != nil {
-			return fmt.Errorf("❌ Error making polling request: %v", err)
-		}
-		defer resp.Body.Close()
+			resp, err := client.Do(req)
+			if err != nil {
+				return fmt.Errorf("❌ Error making polling request: %v", err)
+			}
+			defer resp.Body.Close()
 
-		var responseData map[string]interface{}
-		if err := json.NewDecoder(resp.Body).Decode(&responseData); err != nil {
-			return fmt.Errorf("❌ Error decoding polling response: %v", err)
-		}
+			var responseData map[string]interface{}
+			if err := json.NewDecoder(resp.Body).Decode(&responseData); err != nil {
+				return fmt.Errorf("❌ Error decoding polling response: %v", err)
+			}
 
-		// 🔍 Debugging: Print polling response
-		fmt.Printf("📊 Polling Response: %+v\n", responseData)
+			fmt.Printf("📊 Polling Response: %+v\n", responseData)
 
-		// **✅ Fix #1: Stop Polling if API Returns an Error**
-		if msg, exists := responseData["message"]; exists {
-			fmt.Printf("❌ API Error: %v\n", msg)
-			return fmt.Errorf("❌ Polling failed: API error '%v'", msg)
-		}
+			if msg, exists := responseData["message"]; exists {
+				fmt.Printf("❌ API Error: %v\n", msg)
+				return fmt.Errorf("❌ Polling failed: API error '%v'", msg)
+			}
 
-		// Extract the status from the response
-		currentStatus, exists := responseData["status"]
-		if !exists {
-			fmt.Printf("⚠️ Warning: Expected polling key 'status' not found in response\n")
-			// ✅ Fix #3: Ensure `time.Sleep()` happens even when status is missing
-			fmt.Printf("⏳ Retrying in %.0f seconds...\n", interval)
+			currentStatus, exists := responseData["status"]
+			if !exists {
+				fmt.Printf("⚠️ Warning: Expected polling key 'status' not found in response\n")
+				fmt.Printf("⏳ Retrying in %.0f seconds...\n", interval)
+				time.Sleep(time.Duration(interval) * time.Second)
+				continue
+			}
+
+			fmt.Printf("🔍 Current Status: %v | Target: %s\n", currentStatus, targetValue)
+
+			if currentStatus == targetValue {
+				fmt.Printf("✅ Polling complete! Step '%s' reached status '%s'\n", step.Name, targetValue)
+				return nil
+			}
+
+			fmt.Printf("⏳ Status: %v | Retrying in %.0f seconds...\n", currentStatus, interval)
 			time.Sleep(time.Duration(interval) * time.Second)
-			continue
 		}
-
-		fmt.Printf("🔍 Current Status: %v | Target: %s\n", currentStatus, targetValue)
-
-		// ✅ Stop polling when the target status is reached
-		if currentStatus == targetValue {
-			fmt.Printf("✅ Polling complete! Step '%s' reached status '%s'\n", step.Name, targetValue)
-			return nil
-		}
-
-		// ⏳ Wait before polling again
-		fmt.Printf("⏳ Status: %v | Retrying in %.0f seconds...\n", currentStatus, interval)
-		time.Sleep(time.Duration(interval) * time.Second)
 	}
 }
