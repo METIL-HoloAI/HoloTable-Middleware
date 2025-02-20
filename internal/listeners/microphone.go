@@ -8,7 +8,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func TranscribeAudio(audio []byte, clientWebsocket *websocket.Conn) {
+func TranscribeAudio(audio []byte, clientWebsocket *websocket.Conn) bool {
 	vosk, _, err := websocket.DefaultDialer.Dial(config.SpeechToText.WebsocketURL, nil)
 	if err != nil {
 		log.Fatal("Failed to open vosk websocket connection, ", err)
@@ -34,8 +34,8 @@ func TranscribeAudio(audio []byte, clientWebsocket *websocket.Conn) {
 	}
 
 	if strings.Contains(response, config.SpeechToText.Keyword) {
-		// TODO: send something back to user websocket to tell them a keyword has been found
-		// TODO: Record next sentence from user
-		log.Print("Found keyword")
+		return true
 	}
+
+	return false
 }
