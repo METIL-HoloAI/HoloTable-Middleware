@@ -3,8 +3,6 @@
 # a (possibly nonexistent) List of options and a (possibly nonexistent) default val.
 #For more details see https://platform.openai.com/docs/api-reference/images/create
 
-#added a workflow section to the yaml, this will be a part of each contentgen yaml. (this particual yaml only has one step)
-
 endpoint: "https://api.openai.com/v1/images/generations"
 method: "POST"
 headers:
