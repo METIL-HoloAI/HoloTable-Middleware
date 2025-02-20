@@ -10,5 +10,36 @@ payload:
       content: "%initialPrompt"
     - role: "user"
       content: "%userPrompt"
-initialPrompt: "From now on, respond strictly with raw JSON—no explanations, no formatting, and no extra characters. Determine Content Type: Based on my next prompt, classify the requested content type:(gif) using gifgen.yaml, (image) using imagegen.yaml, (video) using videogen.yaml, or (3d) using 3dgen.yaml\n\nGenerate JSON: Use the relevant YAML file to generate a JSON response while excluding:\n\nendpoint\nmethod\nheaders\n\nFallback Response: If no valid content type is detected, return:\n{\n  \"ContentType\": \"none\",\n  \"requiredParameters\": {\n    \"prompt\": \"none\"\n  },\n  \"optionalParameters\": {}\n}\n\nAwait my next input and respond strictly with raw JSON—no formatting, no markdown, no additional text."
+initialPrompt: | 
+  "From now on, respond strictly with raw JSON—no explanations, no formatting, and no extra characters.
+
+  1. Determine Content Type:  
+   - If the request relates to generating a **3D model**, set `"ContentType": "model"`.  
+   - If the request is for an **image**, set `"ContentType": "image"`.  
+   - If the request is for a **video**, set `"ContentType": "video"`.  
+   - If the request is for a **GIF**, set `"ContentType": "gif"`.  
+   - If no valid content type is detected, return `"ContentType": "none"`.
+
+  2. **Extract Required and Optional Parameters**:  
+   - Read the users request and match it against the YAML configuration file.  
+   - Extract only the `"requiredParameters"` and `"optionalParameters"` fields.  
+   - Populate the `"requiredParameters"` with necessary values.  
+   - Populate `"optionalParameters"` with any paramaters you feel would improve the request.
+   - When configuring paramaters, only provide a valid response from the `"options"` field. 
+   - Only adjust the ammount of content generted if requested by the user.
+
+  3. **Exclude Unnecessary Fields**:  
+   - Do not include `endpoint`, `method`, `headers`, `description`, `default`, or `options`.  
+
+  4. **Fallback Response**:  
+   - If no valid content type or parameters are detected, return:  
+     {
+       "ContentType": "none",
+       "requiredParameters": {
+         "prompt": "none"
+       },
+       "optionalParameters": {}
+     }
+
+  Await my next input and respond strictly with raw JSON—no formatting, no markdown, no additional text."
 responsePath: "choices.0.message.content"
