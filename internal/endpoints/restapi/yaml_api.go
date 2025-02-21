@@ -16,7 +16,7 @@ import (
 func YamlApi() {
 	router := mux.NewRouter()
 	router.HandleFunc("/config/{name}", getYamlHandler).Methods("GET")
-	//router.HandleFunc("/config/{name}", putYamlHandler).Methods("PUT")
+	// router.HandleFunc("/config/{name}", putYamlHandler).Methods("PUT")
 
 	// start serv
 	log.Fatal(http.ListenAndServe(":8000", router))
@@ -25,7 +25,7 @@ func YamlApi() {
 func getYamlHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	yamlName := vars["name"]
-	yamlPath := yamlName + ".yaml"
+	yamlPath := "../../../config/" + yamlName + ".yaml"
 
 	data, err := os.ReadFile(yamlPath)
 	if err != nil {
