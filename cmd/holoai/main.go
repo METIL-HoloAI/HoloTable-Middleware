@@ -9,6 +9,7 @@ import (
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/database"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/listeners"
+	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/unityserver"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -27,6 +28,13 @@ func main() {
 
 	database.Init(db)
 
+	// Start WebSocket server
+	go unityserver.StartWebSocketServer()
+	<-unityserver.ClientReady
+
+	// Current Simulator for content needed to be passed into my function for Unity
+	unityserver.GenerateAndSendContent()
+
 	// Check how user wants to listen for input
 	// and start that listener
 	if config.General.Listener == "mic" {
@@ -36,5 +44,4 @@ func main() {
 	} else {
 		fmt.Println("Invalid listener option in general.yaml")
 	}
-
 }
