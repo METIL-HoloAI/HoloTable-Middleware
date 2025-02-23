@@ -57,8 +57,12 @@ func putYamlHandler(w http.ResponseWriter, r *http.Request) {
 
     err = os.WriteFile(yamlPath, body, 0)
     if err != nil {
-        http.Error(w, "Failed to write file", http.StatusInternalServerError)
-        return
+		yamlPath = "../../config/contentgen/" + yamlName + ".yaml"
+		err2 := os.WriteFile(yamlPath, body, 0)
+		if err2 != nil {
+			http.Error(w, "Failed to write file", http.StatusInternalServerError)
+			return
+		}
     }
 
     w.WriteHeader(http.StatusOK)
