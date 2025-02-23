@@ -34,8 +34,10 @@ func getYamlHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/yaml")
-	w.Write(data)
+	dataString := string(data)
+
+	w.Header().Set("Content-Type", "text/plain")
+	w.Write([]byte(dataString))
 }
 
 func putYamlHandler(w http.ResponseWriter, r *http.Request) {
