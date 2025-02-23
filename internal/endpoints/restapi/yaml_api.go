@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"io"
 
 	"github.com/gorilla/mux"
 )
@@ -16,7 +17,7 @@ import (
 func YamlApi() {
 	router := mux.NewRouter()
 	router.HandleFunc("/config/{name}", getYamlHandler).Methods("GET")
-	// router.HandleFunc("/config/{name}", putYamlHandler).Methods("PUT")
+	router.HandleFunc("/config/{name}", putYamlHandler).Methods("PUT")
 
 	// start serv
 	log.Fatal(http.ListenAndServe(":8000", router))
@@ -37,6 +38,23 @@ func getYamlHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
-// func putYamlHandler(w http.ResponseWriter, r *http.Request) {
+func putYamlHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	yamlName := vars["name"]
+	yamlPath := "../../../config/" + yamlName + ".yaml"
 
-// }
+    body, err := io.ReadAll(r.Body)
+    if err != nil {
+        http.Error(w, "Invalid request body", http.StatusBadRequest)
+        return
+    }
+
+    err = os.WriteFile(yamlPath, body, 0)
+    if err != nil {
+        http.Error(w, "Failed to write file", http.StatusInternalServerError)
+        return
+    }
+
+    w.WriteHeader(http.StatusOK)
+    w.Write([]byte("YAML updated"))
+}
