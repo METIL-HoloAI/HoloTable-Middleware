@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"os"
 	"io"
-	"fmt"
 	"github.com/gorilla/mux"
 )
 
@@ -27,12 +26,16 @@ func getYamlHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	yamlName := vars["name"]
 	yamlPath := "../../config/" + yamlName + ".yaml"
-	fmt.Println(yamlPath)
 
 	data, err := os.ReadFile(yamlPath)
 	if err != nil {
-		http.Error(w, "Failed to read file", http.StatusInternalServerError)
-		return
+		yamlPath = "../../config/contentgen/" + yamlName + ".yaml"
+		data2, err := os.ReadFile(yamlPath)
+		if err != nil {
+			http.Error(w, "Failed to read file", http.StatusInternalServerError)
+			return
+		}
+		data = data2
 	}
 
 	dataString := string(data)
