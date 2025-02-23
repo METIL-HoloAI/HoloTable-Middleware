@@ -30,7 +30,7 @@ func main() {
 
 	// Start WebSocket server
 	go unityserver.StartWebSocketServer()
-	<-unityserver.ClientReady
+	<-unityserver.clientReady
 
 	// Current Simulator for content needed to be passed into my function for Unity
 	unityserver.GenerateAndSendContent()

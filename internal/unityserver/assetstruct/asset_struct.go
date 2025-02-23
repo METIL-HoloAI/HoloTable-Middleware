@@ -1,4 +1,4 @@
-package struct
+package assetstruct
 
 type AssetMessage struct {
 	Type      string `json:"type"`
