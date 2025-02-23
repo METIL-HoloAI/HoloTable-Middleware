@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 	"io"
-
+	"fmt"
 	"github.com/gorilla/mux"
 )
 
@@ -26,7 +26,8 @@ func YamlApi() {
 func getYamlHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	yamlName := vars["name"]
-	yamlPath := "../../../config/" + yamlName + ".yaml"
+	yamlPath := "../../config/" + yamlName + ".yaml"
+	fmt.Println(yamlPath)
 
 	data, err := os.ReadFile(yamlPath)
 	if err != nil {
@@ -43,7 +44,7 @@ func getYamlHandler(w http.ResponseWriter, r *http.Request) {
 func putYamlHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	yamlName := vars["name"]
-	yamlPath := "../../../config/" + yamlName + ".yaml"
+	yamlPath := "../../config/" + yamlName + ".yaml"
 
     body, err := io.ReadAll(r.Body)
     if err != nil {
