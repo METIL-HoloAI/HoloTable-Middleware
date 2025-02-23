@@ -7,8 +7,8 @@ import (
 	"log"
 	"path/filepath"
 
+	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/unityserver/assetstruct"
 	"github.com/gorilla/websocket"
-	"github.com/wasasita/HoloTable-Middleware/internal/unityserver/assetstruct"
 )
 
 const (
@@ -49,7 +49,11 @@ func ExportAsset(fileName, extension string, fileData []byte) {
 
 func SendToUnity(response []byte) {
 	log.Println("Sending message to Unity")
-	if err := conn.WriteMessage(websocket.TextMessage, response); err != nil {
+	if Conn == nil {
+		log.Println("Connection is not initialized")
+		return
+	}
+	if err := Conn.WriteMessage(websocket.TextMessage, response); err != nil {
 		log.Println("Write Error:", err)
 	}
 }

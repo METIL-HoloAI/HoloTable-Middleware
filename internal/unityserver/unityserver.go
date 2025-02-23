@@ -11,17 +11,14 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool { return true },
 }
 
-var clientReady = make(chan bool)
-var conn *websocket.Conn
+var ClientReady = make(chan bool)
+var Conn *websocket.Conn
 
 func StartWebSocketServer() {
 	go startWebSocketServer()
 
 	// HANDSHAKE MECHANISM
-	<-clientReady // This will block until the Unity client sends a "READY" message
-
-	// Current Simulator for content needed to be passed into my function for Unity
-	GenerateAndSendContent()
+	<-ClientReady // This will block until the Unity client sends a "READY" message
 }
 
 func startWebSocketServer() {
@@ -32,7 +29,7 @@ func startWebSocketServer() {
 
 func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	var err error
-	conn, err = upgrader.Upgrade(w, r, nil)
+	Conn, err = upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println("WebSocket Upgrade Error:", err)
 		return
@@ -40,7 +37,7 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	log.Println("WebSocket client connected")
 
 	// Wait for a handshake message from the Unity client
-	_, msg, err := conn.ReadMessage()
+	_, msg, err := Conn.ReadMessage()
 	if err != nil {
 		log.Println("Read Error:", err)
 		return
@@ -48,6 +45,6 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 
 	if string(msg) == "READY" {
 		log.Println("Unity client is ready")
-		clientReady <- true
+		ClientReady <- true
 	}
 }
