@@ -1,6 +1,7 @@
 package listeners
 
 import (
+	"encoding/json"
 	"log"
 	"strings"
 
@@ -8,10 +9,21 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func TranscribeAudio(audio []byte, clientWebsocket *websocket.Conn) bool {
+// Models vosk server response
+type Message struct {
+	Result []struct {
+		Conf  float64
+		End   float64
+		Start float64
+		Word  string
+	}
+	Text string
+}
+
+func TranscribeAudio(audio []byte) bool {
 	vosk, _, err := websocket.DefaultDialer.Dial(config.SpeechToText.WebsocketURL, nil)
 	if err != nil {
-		log.Fatal("Failed to open vosk websocket connection, ", err)
+		log.Fatal("Failed to open Vosk WebSocket connection: ", err)
 	}
 	defer vosk.Close()
 
@@ -20,18 +32,30 @@ func TranscribeAudio(audio []byte, clientWebsocket *websocket.Conn) bool {
 		log.Fatal("Failed to send audio to vosk, ", err)
 	}
 
-	var response string
-	for {
-		_, responsebytes, err := vosk.ReadMessage()
-		if err != nil {
-			log.Fatal("Failed to read message from vosk, ", err)
-		}
-
-		if responsebytes != nil {
-			response = string(responsebytes)
-			break
-		}
+	_, _, err = vosk.ReadMessage()
+	if err != nil {
+		log.Fatal("Failed to recieve response from vosk for audio, ", err)
 	}
 
-	return strings.Contains(response, config.SpeechToText.Keyword)
+	err = vosk.WriteMessage(websocket.TextMessage, []byte("{\"eof\" : 1}"))
+	if err != nil {
+		log.Fatal("Failed to send vosk EOF, ", err)
+	}
+
+	_, jsonMessage, err := vosk.ReadMessage()
+	if err != nil {
+		log.Fatal("Failed to recieve final message from vosk, ", err)
+	}
+
+	vosk.Close()
+
+	var message Message
+	err = json.Unmarshal(jsonMessage, &message)
+	if err != nil {
+		log.Fatal("Failed to unmarshal json from vosk, ", err)
+	}
+
+	log.Print(message)
+
+	return strings.Contains(message.Text, config.SpeechToText.Keyword)
 }
