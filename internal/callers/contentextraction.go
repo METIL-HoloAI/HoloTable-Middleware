@@ -3,89 +3,71 @@ package callers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config"
 )
 
-// ContentExtraction extracts content from the response based on the data type.
-// It returns the extracted value along with an error if something goes wrong.
-func ContentExtraction(response string, dataType string) (string, error) {
-	var responseFormat, responsePath string
+// ContentExtraction extracts content from the JSON response based on the data type.
+func ContentExtraction(response string, dataType string) (string, string, string, string, error) {
+	var responseFormat, responsePath, fileIDPath, fileType string
 
 	// Select configuration parameters based on the provided data type.
+	lastStep := len(config.Workflows[dataType].Steps) - 1
 	switch dataType {
-	case "image":
-		if val, ok := config.Workflows["image"].Steps[0].Response["response_format"].(string); ok {
-			responseFormat = val
-		} else {
-			return "", errors.New("response_format is nil or not a string for data type: image")
-		}
-		if val, ok := config.Workflows["image"].Steps[0].Response["response_path"].(string); ok {
-			responsePath = val
-		} else {
-			return "", errors.New("response_path is nil or not a string for data type: image")
-		}
-	case "video":
-		if val, ok := config.Workflows["video"].Steps[0].Response["response_format"].(string); ok {
-			responseFormat = val
-		} else {
-			return "", errors.New("response_format is nil or not a string for data type: video")
-		}
-		if val, ok := config.Workflows["video"].Steps[0].Response["response_path"].(string); ok {
-			responsePath = val
-		} else {
-			return "", errors.New("response_path is nil or not a string for data type: video")
-		}
-	case "gif":
-		if val, ok := config.Workflows["gif"].Steps[0].Response["response_format"].(string); ok {
-			responseFormat = val
-		} else {
-			return "", errors.New("response_format is nil or not a string for data type: gif")
-		}
-		if val, ok := config.Workflows["gif"].Steps[0].Response["response_path"].(string); ok {
-			responsePath = val
-		} else {
-			return "", errors.New("response_path is nil or not a string for data type: gif")
-		}
-	case "3d":
-		// Access the last step for the 3D workflow.
-		lastStep := len(config.Workflows["3d"].Steps) - 1
-		if val, ok := config.Workflows["3d"].Steps[lastStep].Response["response_format"].(string); ok {
-			responseFormat = val
-		} else {
-			return "", errors.New("response_format is nil or not a string for data type: 3d")
-		}
-		if val, ok := config.Workflows["3d"].Steps[lastStep].Response["response_path"].(string); ok {
-			responsePath = val
-		} else {
-			return "", errors.New("response_path is nil or not a string for data type: 3d")
-		}
+	case "image", "video", "gif", "3d":
+		responseFormat, responsePath, fileIDPath, fileType = getConfigParams(dataType, lastStep)
 	default:
-		return "", errors.New("unknown data type: " + dataType)
+		return "", "", "", "", errors.New("unknown data type: " + dataType)
 	}
 
-	// If the expected response format is "url", perform JSON extraction.
-	if responseFormat == "url" {
-		return extractURL(response, responsePath)
+	// Extract the data (URL or raw data string).
+	dataExtracted, err := extractValue(response, responsePath)
+	if err != nil {
+		return "", responseFormat, "", "", err
 	}
-	// For other response formats, simply return the full response.
-	return response, nil
+
+	// Extract file ID if a file_id_path is provided.
+	var fileID string
+	if fileIDPath != "" {
+		fileID, err = extractValue(response, fileIDPath)
+		if err != nil {
+			return "", responseFormat, "", "", err
+		}
+	}
+
+	return dataExtracted, responseFormat, fileID, fileType, nil
 }
 
-// extractURL extracts the URL from the JSON response using the provided responsePath.
-// The responsePath is treated as a JSON path, e.g.: "data.model_urls.glb"
-func extractURL(response, responsePath string) (string, error) {
+// getConfigParams retrieves configuration parameters for the given data type and step index.
+func getConfigParams(dataType string, stepIndex int) (string, string, string, string) {
+	workflow := config.Workflows[dataType].Steps[stepIndex].Response
+	return getStringFromMap(workflow, "response_format"),
+		getStringFromMap(workflow, "response_path"),
+		getStringFromMap(workflow, "file_id_path"),
+		getStringFromMap(workflow, "file_extention")
+}
+
+// getStringFromMap safely retrieves a string value from a map.
+func getStringFromMap(m map[string]interface{}, key string) string {
+	if val, ok := m[key].(string); ok {
+		return val
+	}
+	return ""
+}
+
+// extractValue traverses the JSON response using the provided JSON path (dot-separated)
+// and returns the final value as a string. If the final value is not a string, it converts it.
+func extractValue(response, responsePath string) (string, error) {
 	var jsonData interface{}
 	if err := json.Unmarshal([]byte(response), &jsonData); err != nil {
 		return "", err
 	}
 
-	// If the path starts with "response.", remove it.
+	// Remove the "response." prefix if present.
 	responsePath = strings.TrimPrefix(responsePath, "response.")
-
-	// Split the JSON path into parts.
 	parts := strings.Split(responsePath, ".")
 	current := jsonData
 	var err error
@@ -96,19 +78,19 @@ func extractURL(response, responsePath string) (string, error) {
 		}
 	}
 
-	// Ensure the final value is a string.
-	str, ok := current.(string)
-	if !ok {
-		return "", errors.New("final value is not a string")
+	// If the final value is not a string, convert it to one.
+	if str, ok := current.(string); ok {
+		return str, nil
 	}
-	return str, nil
+	return fmt.Sprintf("%v", current), nil
 }
 
 // navigateJSON navigates through the JSON data based on a path segment.
-// It supports keys and (if no explicit index is provided) automatically takes the first element when encountering an array.
+// It supports simple keys and, if no explicit array index is provided,
+// automatically selects the first element when encountering an array.
 func navigateJSON(current interface{}, part string) (interface{}, error) {
-	// If the part does not explicitly start with an array index and current is an array,
-	// automatically take the first element.
+	// If current is an array and the path segment does not start with an explicit index,
+	// automatically select the first element.
 	if len(part) > 0 && part[0] != '[' {
 		if arr, ok := current.([]interface{}); ok {
 			if len(arr) == 0 {
@@ -120,7 +102,7 @@ func navigateJSON(current interface{}, part string) (interface{}, error) {
 
 	// If the segment contains an explicit array index, process it.
 	if idx := strings.Index(part, "["); idx != -1 {
-		// Process the key portion before the '[', if any.
+		// Process the key portion before the '[' (if any).
 		key := part[:idx]
 		if key != "" {
 			m, ok := current.(map[string]interface{})
@@ -134,7 +116,7 @@ func navigateJSON(current interface{}, part string) (interface{}, error) {
 			}
 		}
 
-		// Process each array index in the part.
+		// Process all array indices in the part.
 		for {
 			start := strings.Index(part, "[")
 			if start == -1 {
@@ -162,7 +144,7 @@ func navigateJSON(current interface{}, part string) (interface{}, error) {
 		return current, nil
 	}
 
-	// Otherwise, part is a simple key. Expect current to be an object.
+	// Otherwise, treat part as a simple key.
 	m, ok := current.(map[string]interface{})
 	if !ok {
 		return nil, errors.New("expected JSON object for key: " + part)

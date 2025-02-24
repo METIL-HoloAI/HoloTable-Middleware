@@ -54,3 +54,5 @@
       response:
         response_path: "model_urls.glb"
         response_format: "url"
+        file_id_path: "created"
+        file_extention: "glb"

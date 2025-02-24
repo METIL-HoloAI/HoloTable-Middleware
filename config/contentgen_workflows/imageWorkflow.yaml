@@ -18,3 +18,5 @@ image:
       response:
         response_path: "data.url"
         response_format: "url"
+        file_id_path: "created"
+        file_extention: "png"
