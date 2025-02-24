@@ -6,7 +6,7 @@
 endpoint: "https://api.openai.com/v1/images/generations"
 method: "POST"
 headers:
-  Authorization: "Bearer $IMAGEGEN_API_KEY"
+  Authorization: "Bearer $IMAGE_API_KEY"
   Content-Type: "application/json"
 requiredParameters:
   prompt:
@@ -37,6 +37,4 @@ optionalParameters:
     default: "vivid"
     description: "The style of the generated images. Only supported for dall-e-3."
     options: ["vivid", "natural"]
-  user:
-    description: "A unique identifier representing your end-user."
-    options: [] 
+
