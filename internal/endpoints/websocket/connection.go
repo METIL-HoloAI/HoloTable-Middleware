@@ -38,7 +38,10 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 			keywordDetected := listeners.TranscribeAudio(message)
 
 			if keywordDetected {
-				conn.WriteMessage(websocket.TextMessage, []byte("Keyword Detected"))
+				err = conn.WriteMessage(websocket.TextMessage, []byte("Keyword Detected"))
+				if err != nil {
+					log.Fatal("Failed to send keyword detected message to client, ", err)
+				}
 				// TODO: mark next message to be sent to stt service
 			}
 			// Here you might decode or forward the audio data for further processing
