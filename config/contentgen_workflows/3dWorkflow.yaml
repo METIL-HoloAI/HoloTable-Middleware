@@ -4,11 +4,10 @@
       method: "POST"
       url: "https://api.meshy.ai/openapi/v2/text-to-3d"
       headers:
-        Authorization: "Bearer $THREED_MODEL_API_KEY"
+        Authorization: "Bearer &THREED_MODEL_API_KEY"
         Content-Type: "application/json"
       body:
-        mode: "preview"
-        prompt: "{user_input}"
+        intent_detection_step: true
       response_placeholders:
         preview_task_id: result  # This is the only response we get from the API
 
@@ -16,7 +15,7 @@
       method: "GET"
       url: "https://api.meshy.ai/openapi/v2/text-to-3d/{preview_task_id}"
       headers:
-        Authorization: "Bearer $THREED_MODEL_API_KEY"
+        Authorization: "Bearer &THREED_MODEL_API_KEY"
       response_placeholders:
         status: status
       poll:
@@ -27,7 +26,7 @@
       method: "POST"
       url: "https://api.meshy.ai/openapi/v2/text-to-3d"
       headers:
-        Authorization: "Bearer $THREED_MODEL_API_KEY"
+        Authorization: "Bearer &THREED_MODEL_API_KEY"
         Content-Type: "application/json"
       body:
         mode: "refine"
@@ -40,7 +39,7 @@
       method: "GET"
       url: "https://api.meshy.ai/openapi/v2/text-to-3d/{refine_task_id}"
       headers:
-        Authorization: "Bearer $THREED_MODEL_API_KEY"
+        Authorization: "Bearer &THREED_MODEL_API_KEY"
       response_placeholders:
         status: status
       poll:
@@ -51,7 +50,7 @@
       method: "GET"
       url: "https://api.meshy.ai/openapi/v2/text-to-3d/{refine_task_id}"
       headers:
-        Authorization: "Bearer $THREED_MODEL_API_KEY"
+        Authorization: "Bearer &THREED_MODEL_API_KEY"
       response_placeholders:
         model_url: model_urls.glb
         #responsePath: "choices.0.message.content" jacob code example of how to get chat gpts api response

@@ -4,7 +4,7 @@ gif:
       method: "POST"
       url: "https://cloud.leonardo.ai/api/rest/v1/generations"
       headers:
-        Authorization: "Bearer $LEONARDO_API_KEY"
+        Authorization: "Bearer &LEONARDO_API_KEY"
         Content-Type: "application/json"
       body:
         height: 768
@@ -20,7 +20,7 @@ gif:
       method: "GET"
       url: "https://cloud.leonardo.ai/api/rest/v1/generations/{generation_id}"
       headers:
-        Authorization: "Bearer $LEONARDO_API_KEY"
+        Authorization: "Bearer &LEONARDO_API_KEY"
       response_placeholders:
         status: status
         image_id: generations_by_pk.generated_images.0.id
@@ -32,7 +32,7 @@ gif:
       method: "POST"
       url: "https://cloud.leonardo.ai/api/rest/v1/generations-motion-svd"
       headers:
-        Authorization: "Bearer $LEONARDO_API_KEY"
+        Authorization: "Bearer &LEONARDO_API_KEY"
         Content-Type: "application/json"
       body:
         imageId: "{image_id}"
@@ -44,7 +44,7 @@ gif:
       method: "GET"
       url: "https://cloud.leonardo.ai/api/rest/v1/generations/{motion_generation_id}"
       headers:
-        Authorization: "Bearer $LEONARDO_API_KEY"
+        Authorization: "Bearer &LEONARDO_API_KEY"
       response_placeholders:
         status: status
         video_url: generations_by_pk.generated_video.url
@@ -56,6 +56,6 @@ gif:
       method: "GET"
       url: "{video_url}"
       headers:
-        Authorization: "Bearer $LEONARDO_API_KEY"
+        Authorization: "Bearer &LEONARDO_API_KEY"
       response_placeholders:
         video_file: video_url  # The final motion video file

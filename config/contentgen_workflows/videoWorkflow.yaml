@@ -1,57 +1,43 @@
-#this is the 3d workflow pasted over for testing
-video:
+text_to_video:
   steps:
-    - name: "submit_preview_task"
+    - name: "authenticate_and_get_token"
       method: "POST"
-      url: "https://api.meshy.ai/openapi/v2/text-to-3d"
+      url: "https://api.klingai.com/auth/token"
       headers:
-        Authorization: "Bearer $VIDEO_API_KEY"
         Content-Type: "application/json"
       body:
-        mode: "preview"
-        prompt: "{user_input}"
+        access_key: "$ACCESS_KEY"
+        secret_key: "$SECRET_KEY"
       response_placeholders:
-        preview_task_id: result  # This is the only response we get from the API
+        api_token: token  # Extract the API token from the response
 
-    - name: "poll_preview_status"
-      method: "GET"
-      url: "https://api.meshy.ai/openapi/v2/text-to-3d/{preview_task_id}"
-      headers:
-        Authorization: "Bearer $VIDEO_API_KEY"
-      response_placeholders:
-        status: status
-      poll:
-        until: "SUCCEEDED"
-        interval: 5
-
-    - name: "submit_refine_task"
+    - name: "submit_video_generation_task"
       method: "POST"
-      url: "https://api.meshy.ai/openapi/v2/text-to-3d"
+      url: "https://api.klingai.com/v1/video/generate"
       headers:
-        Authorization: "Bearer $VIDEO_API_KEY"
+        Authorization: "Bearer {api_token}"
         Content-Type: "application/json"
       body:
-        mode: "refine"
-        preview_task_id: "{preview_task_id}"
+        intent_detection_step: true
       response_placeholders:
-        refine_task_id: result  # This is the new task ID we need
+        task_id: task_id        # Extract the task ID from the response
 
-
-    - name: "poll_refine_status"
+    - name: "poll_video_generation_status"
       method: "GET"
-      url: "https://api.meshy.ai/openapi/v2/text-to-3d/{refine_task_id}"
+      url: "https://api.klingai.com/v1/video/status/{task_id}"
       headers:
-        Authorization: "Bearer $VIDEO_API_KEY"
+        Authorization: "Bearer {api_token}"
       response_placeholders:
         status: status
+        video_url: result.url   # Extract the URL of the generated video
       poll:
         until: "SUCCEEDED"
-        interval: 5
+        interval: 10            # Poll every 10 seconds until the task succeeds
 
-    - name: "fetch_final_model"
+    - name: "fetch_generated_video"
       method: "GET"
-      url: "https://api.meshy.ai/openapi/v2/text-to-3d/{refine_task_id}"
+      url: "{video_url}"
       headers:
-        Authorization: "Bearer $VIDEO_API_KEY"
+        Authorization: "Bearer {api_token}"
       response_placeholders:
-        model_url: model_urls.glb
+        video_file: video_content  # The binary content of the video file

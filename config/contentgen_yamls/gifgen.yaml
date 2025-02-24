@@ -9,7 +9,7 @@
 endpoint: "https://api.openai.com/v1/images/generations"
 method: "POST"
 headers:
-  Authorization: "Bearer $IMAGE_API_KEY"
+  Authorization: "Bearer &IMAGE_API_KEY"
   Content-Type: "application/json"
 requiredParameters:
   prompt:
