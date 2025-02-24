@@ -19,7 +19,7 @@
 
           // Use a ScriptProcessorNode to capture audio chunks
           // Buffer size of 4096, 1 input channel, 1 output channel
-          const processor = audioContext.createScriptProcessor(4096, 1, 1);
+          const processor = audioContext.createScriptProcessor(16384, 1, 1);
 
           source.connect(processor);
           processor.connect(audioContext.destination); // Required even if you don't use the output
