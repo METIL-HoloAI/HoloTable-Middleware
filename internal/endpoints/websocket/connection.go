@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/listeners"
 	"github.com/gorilla/websocket"
 )
 
@@ -34,6 +35,12 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 		// Process only binary messages (the audio data)
 		if messageType == websocket.BinaryMessage {
 			log.Printf("Received %d bytes of audio data", len(message))
+			keywordDetected := listeners.TranscribeAudio(message)
+
+			if keywordDetected {
+				conn.WriteMessage(websocket.TextMessage, []byte("Keyword Detected"))
+				// TODO: mark next message to be sent to stt service
+			}
 			// Here you might decode or forward the audio data for further processing
 		} else {
 			log.Println("Non-binary message received; ignoring.")
