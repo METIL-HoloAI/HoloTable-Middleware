@@ -81,7 +81,7 @@ func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, wor
 		//}
 
 		// **Extract & Store Response Data for Future Steps**
-		for placeholder, responseKey := range step.ResponsePlaceholders {
+		for placeholder, responseKey := range step.Response {
 			// Ensure responseKey is a string before using it as a map key
 			if responseKeyStr, ok := responseKey.(string); ok {
 				if val, exists := responseData[responseKeyStr]; exists {

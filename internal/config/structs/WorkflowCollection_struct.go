@@ -2,13 +2,13 @@ package structs
 
 // Represents a single API call step
 type Step struct {
-	Name                 string                 `yaml:"name"`                            // Step identifier
-	Method               string                 `yaml:"method"`                          // HTTP method (GET, POST, etc.)
-	URL                  string                 `yaml:"url"`                             // API endpoint (with placeholders)
-	Headers              map[string]string      `yaml:"headers,omitempty"`               // Optional headers for the request
-	Body                 map[string]interface{} `yaml:"body,omitempty"`                  // Request payload (now fully dynamic)
-	ResponsePlaceholders map[string]interface{} `yaml:"response_placeholders,omitempty"` // Mapping placeholders -> response field names
-	Poll                 map[string]interface{} `yaml:"poll,omitempty"`                  // Fully dynamic polling config
+	Name     string                 `yaml:"name"`               // Step identifier
+	Method   string                 `yaml:"method"`             // HTTP method (GET, POST, etc.)
+	URL      string                 `yaml:"url"`                // API endpoint (with placeholders)
+	Headers  map[string]string      `yaml:"headers,omitempty"`  // Optional headers for the request
+	Body     map[string]interface{} `yaml:"body,omitempty"`     // Request payload (now fully dynamic)
+	Response map[string]interface{} `yaml:"response,omitempty"` // Mapping placeholders -> response field names
+	Poll     map[string]interface{} `yaml:"poll,omitempty"`     // Fully dynamic polling config
 }
 
 // Represents a full API workflow (multiple steps)

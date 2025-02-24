@@ -15,4 +15,6 @@ image:
         size: "{size}"
         response_format: "{response_format}"
         user: "{user}"
-      response_key: "data"
+      response:
+        response_path: "data.url"
+        response_format: "url"

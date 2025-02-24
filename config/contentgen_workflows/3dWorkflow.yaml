@@ -35,7 +35,6 @@
       response_placeholders:
         refine_task_id: result  # This is the new task ID we need
 
-
     - name: "poll_refine_status"
       method: "GET"
       url: "https://api.meshy.ai/openapi/v2/text-to-3d/{refine_task_id}"
@@ -52,6 +51,6 @@
       url: "https://api.meshy.ai/openapi/v2/text-to-3d/{refine_task_id}"
       headers:
         Authorization: "Bearer $THREED_MODEL_API_KEY"
-      response_placeholders:
-        model_url: model_urls.glb
-        #responsePath: "choices.0.message.content" jacob code example of how to get chat gpts api response
+      response:
+        response_path: "model_urls.glb"
+        response_format: "url"
