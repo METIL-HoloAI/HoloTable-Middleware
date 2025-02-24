@@ -9,6 +9,7 @@ import (
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/database"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/endpoints/websocket"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/listeners"
+	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/utils"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -29,9 +30,7 @@ func main() {
 
 	if config.General.OpenWebsocket {
 		go websocket.EstablishConnection()
-		// keep running until interupt is hit
-		for {
-		}
+		utils.WaitForInterrupt()
 	} else {
 		listeners.StartTextListener()
 	}
