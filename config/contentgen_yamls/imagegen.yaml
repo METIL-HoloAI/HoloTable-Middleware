@@ -37,6 +37,3 @@ optionalParameters:
     default: "vivid"
     description: "The style of the generated images. Only supported for dall-e-3."
     options: ["vivid", "natural"]
-  user:
-    description: "A unique identifier representing your end-user."
-    options: [] 
