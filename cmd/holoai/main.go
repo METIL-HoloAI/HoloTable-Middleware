@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"os"
 
@@ -30,17 +29,10 @@ func main() {
 
 	if config.General.OpenWebsocket {
 		go websocket.EstablishConnection()
-	}
-
-	// Check how user wants to listen for input
-	// and start that listener
-	if config.General.Listener == "mic" {
-		fmt.Println("Microphone Listener")
-		// microphone listener logic here
-	} else if config.General.Listener == "text" {
-		listeners.StartTextListener()
+		// keep running until interupt is hit
+		for {
+		}
 	} else {
-		fmt.Println("Invalid listener option in general.yaml")
+		listeners.StartTextListener()
 	}
-
 }
