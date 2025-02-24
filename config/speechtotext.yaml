@@ -1,2 +1,2 @@
-WebsocketURL: localhost:2700
+WebsocketURL: ws://localhost:2700
 Keyword: "quantum computer"
