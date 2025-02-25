@@ -5,18 +5,20 @@ import (
 	"net/http"
 	"os"
 	"io"
+	"strings"
 	"github.com/gorilla/mux"
+	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/database"
 )
 
 // https://pkg.go.dev/github.com/gorilla/mux
 // https://medium.com/better-programming/building-a-simple-rest-api-in-go-with-gorilla-mux-892ceb128c6f
 // send text
-// create routes thru database
 
 func YamlApi() {
 	router := mux.NewRouter()
 	router.HandleFunc("/config/{name}", getYamlHandler).Methods("GET")
 	router.HandleFunc("/config/{name}", putYamlHandler).Methods("PUT")
+	router.HandleFunc("/database/list", useListAllFilenames).Methods("PUT")
 
 	// start serv
 	log.Fatal(http.ListenAndServe(":8000", router))
@@ -67,4 +69,25 @@ func putYamlHandler(w http.ResponseWriter, r *http.Request) {
 
     w.WriteHeader(http.StatusOK)
     w.Write([]byte("YAML updated"))
+}
+
+// create routes thru database
+// Allow users to call and use ListAllFilenames thru an API 
+func useListAllFilenames(w http.ResponseWriter, r *http.Request) {
+	tables := [4]string{"image", "video", "gif", "model"}
+	var allFilenames []string
+
+	for i := 0; i < 4; i++ {
+		cache, err := database.ListAllFilenames(tables[i])
+		if err != nil {
+			http.Error(w, "Failed to load database table" + tables[i], http.StatusBadRequest)
+			return
+		}
+		allFilenames = append(allFilenames, cache...)
+	}
+	// converts string array to byte slice
+	responseBytes := []byte(strings.Join(allFilenames, "\n"))
+
+	w.Header().Set("Content-Type", "text/plain")
+	w.Write(responseBytes)
 }
