@@ -1,6 +1,6 @@
 liveTranscription:
-  WebsocketURL: ws://localhost:2700
-  Keyword: "quantum computer"
+  websocketURL: ws://localhost:2700
+  keyword: "quantum computer"
 speechToTextAPI:
   # this is currently  for whisper
   endpoint: "https://api.openai.com/v1/audio/transcriptions"
