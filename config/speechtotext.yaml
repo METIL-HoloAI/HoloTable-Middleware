@@ -1,3 +1,4 @@
+# ask sponsor next meeting if we should even make stt modular or just stick to vosk for the whole thing, not just keyword recognition
 liveTranscription:
   websocketURL: ws://localhost:2700
   keyword: "quantum computer"
