@@ -21,7 +21,7 @@ type Message struct {
 }
 
 func TranscribeAudio(audio []byte) bool {
-	vosk, _, err := websocket.DefaultDialer.Dial(config.SpeechToText.WebsocketURL, nil)
+	vosk, _, err := websocket.DefaultDialer.Dial(config.SpeechToText.LiveTranscription.WebsocketURL, nil)
 	if err != nil {
 		log.Fatal("Failed to open Vosk WebSocket connection: ", err)
 	}
@@ -57,5 +57,5 @@ func TranscribeAudio(audio []byte) bool {
 
 	log.Print(message)
 
-	return strings.Contains(message.Text, config.SpeechToText.Keyword)
+	return strings.Contains(message.Text, config.SpeechToText.LiveTranscription.Keyword)
 }
