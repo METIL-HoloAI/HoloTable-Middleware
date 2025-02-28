@@ -2,13 +2,14 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"os"
 
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/database"
+	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/endpoints/websocket"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/listeners"
+	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/utils"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -27,14 +28,10 @@ func main() {
 
 	database.Init(db)
 
-	// Check how user wants to listen for input
-	// and start that listener
-	if config.General.Listener == "mic" {
-		fmt.Println("Microphone Listener")
-	} else if config.General.Listener == "text" {
-		listeners.StartTextListener()
+	if config.General.OpenWebsocket {
+		go websocket.EstablishConnection()
+		utils.WaitForInterrupt()
 	} else {
-		fmt.Println("Invalid listener option in general.yaml")
+		listeners.StartTextListener()
 	}
-
 }
