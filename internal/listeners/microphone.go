@@ -20,14 +20,24 @@ type Message struct {
 	Text string
 }
 
-func TranscribeAudio(audio []byte) bool {
-	vosk, _, err := websocket.DefaultDialer.Dial(config.SpeechToText.LiveTranscription.WebsocketURL, nil)
+var vosk *websocket.Conn
+
+func InitializeVosk() {
+	// Error has to be declared out here to avoid an error
+	// of vosk not being used
+	var err error
+	vosk, _, err = websocket.DefaultDialer.Dial(config.SpeechToText.LiveTranscription.WebsocketURL, nil)
 	if err != nil {
 		log.Fatal("Failed to open Vosk WebSocket connection: ", err)
 	}
-	defer vosk.Close()
+}
 
-	err = vosk.WriteMessage(websocket.BinaryMessage, audio)
+func CloseVosk() {
+	vosk.Close()
+}
+
+func TranscribeAudio(audio []byte) bool {
+	err := vosk.WriteMessage(websocket.BinaryMessage, audio)
 	if err != nil {
 		log.Fatal("Failed to send audio to vosk, ", err)
 	}
@@ -46,8 +56,6 @@ func TranscribeAudio(audio []byte) bool {
 	if err != nil {
 		log.Fatal("Failed to recieve final message from vosk, ", err)
 	}
-
-	vosk.Close()
 
 	var message Message
 	err = json.Unmarshal(jsonMessage, &message)

@@ -24,6 +24,9 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("Client connected")
 
+	// Start the vosk client
+	listeners.InitializeVosk()
+
 	// Continuously read messages from the client
 	for {
 		messageType, message, err := conn.ReadMessage()
@@ -49,6 +52,9 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 			log.Println("Non-binary message received; ignoring.")
 		}
 	}
+
+	// Close the vosk connection
+	listeners.CloseVosk()
 }
 
 func EstablishConnection() {
