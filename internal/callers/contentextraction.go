@@ -23,28 +23,19 @@ func ContentExtraction(response string, dataType string) (string, string, string
 		return "", "", "", "", errors.New("unknown data type: " + dataType)
 	}
 
-	var dataExtracted, fileID string
-	var err error
+	// Extract the data (URL or raw data string).
+	dataExtracted, err := extractValue(response, responsePath)
+	if err != nil {
+		return "", responseFormat, "", "", err
+	}
 
-	if responseFormat == "content" {
-		// If the response format is "content", use the response directly.
-		dataExtracted = response
-	} else if responseFormat == "url" {
-		// If the response format is "url", extract the data (URL or raw data string).
-		dataExtracted, err = extractValue(response, responsePath)
+	// Extract file ID if a file_id_path is provided.
+	var fileID string
+	if fileIDPath != "" {
+		fileID, err = extractValue(response, fileIDPath)
 		if err != nil {
 			return "", responseFormat, "", "", err
 		}
-
-		// Extract file ID if a file_id_path is provided.
-		if fileIDPath != "" {
-			fileID, err = extractValue(response, fileIDPath)
-			if err != nil {
-				return "", responseFormat, "", "", err
-			}
-		}
-	} else {
-		return "", "", "", "", errors.New("unsupported response format: " + responseFormat)
 	}
 
 	return dataExtracted, responseFormat, fileID, fileType, nil

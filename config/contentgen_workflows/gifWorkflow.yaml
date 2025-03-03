@@ -55,3 +55,8 @@ gif:
         Authorization: "Bearer $GIF_API_KEY"
       response_placeholders:
         model_url: model_urls.glb
+      response:
+        response_path: "data.url"
+        response_format: "url"
+        file_id_path: "created"
+        file_extention: "png"

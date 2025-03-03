@@ -48,7 +48,7 @@ func main() {
 		"created": 1680345939,
 		"data": [
 			{
-				"url": "https://images.pexels.com/photos/45201/kitty-cat-kitten-pet-45201.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+				"url": "https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExZHppYmMzaDRnazY1Zm80bXhxMXlzaTRmOTI5MnE5ZDNhZ2VyeXVobiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/v1JhVEt4gW3WoVdiaB/giphy.gif",
 				"id": "cat_12345"
 			}
 		]
@@ -56,7 +56,7 @@ func main() {
 
 	// Extract the content from the JSON.
 	// This function returns the extracted URL (or data), the response format, and the file ID.
-	extractedURL, extractedFormat, fileID, fileExtention, err := callers.ContentExtraction(sampleJSON, "image")
+	extractedURL, extractedFormat, fileID, fileExtention, err := callers.ContentExtraction(sampleJSON, "gif")
 	if err != nil {
 		log.Fatalf("Extraction failed: %v", err)
 	}
@@ -70,7 +70,7 @@ func main() {
 
 	// The storage function will detect if the content is a URL and download it if necessary.
 	// It returns the content (as bytes) and the local file path.
-	_, filePath, err := callers.ContentStorage("image", extractedFormat, fileID, fileExtention, []byte(extractedURL))
+	_, filePath, err := callers.ContentStorage("gif", extractedFormat, fileID, fileExtention, []byte(extractedURL))
 	if err != nil {
 		log.Fatalf("Storage failed: %v", err)
 	}
