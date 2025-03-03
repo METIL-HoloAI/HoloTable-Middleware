@@ -12,7 +12,7 @@ import (
 )
 
 var General structs.GeneralSettings
-var IntentDetection structs.APIConfig
+var IntentDetection structs.IntentDetection
 var ImageGen structs.APIConfig
 var VideoGen structs.APIConfig
 var GifGen structs.APIConfig
@@ -50,11 +50,11 @@ func LoadYaml() {
 	// if err != nil {
 	// 	log.Fatal("Error parsing gifgen.yaml: ", err)
 	// }
-	//
-	// ModelGen, err = get3d()
-	// if err != nil {
-	// 	log.Fatal("Error parsing 3dgen.yaml: ", err)
-	// }
+
+	ModelGen, err = get3d()
+	if err != nil {
+		log.Fatal("Error parsing 3dgen.yaml: ", err)
+	}
 }
 
 // This is a workaround to make sure filepaths are always pulled relative
@@ -96,20 +96,20 @@ func getGeneral() (structs.GeneralSettings, error) {
 	return settings, nil
 }
 
-func getIntentDetection() (structs.APIConfig, error) {
+func getIntentDetection() (structs.IntentDetection, error) {
 	configPath, err := getConfigPath("intentdetection.yaml")
 	if err != nil {
-		return structs.APIConfig{}, err
+		return structs.IntentDetection{}, err
 	}
 
 	file, err := os.ReadFile(configPath)
 	if err != nil {
-		return structs.APIConfig{}, err
+		return structs.IntentDetection{}, err
 	}
 
-	var settings structs.APIConfig
+	var settings structs.IntentDetection
 	if err := yaml.Unmarshal(file, &settings); err != nil {
-		return structs.APIConfig{}, err
+		return structs.IntentDetection{}, err
 	}
 
 	return settings, nil
@@ -134,59 +134,58 @@ func getImage() (structs.APIConfig, error) {
 	return settings, nil
 }
 
-// func getVideo() (structs.APIConfig, error) {
-// 	configPath, err := getConfigPath("/contentgen/videogen.yaml")
-// 	if err != nil {
-// 		return structs.APIConfig{}, err
-// 	}
+//	func getVideo() (structs.APIConfig, error) {
+//		configPath, err := getConfigPath("/contentgen/videogen.yaml")
+//		if err != nil {
+//			return structs.APIConfig{}, err
+//		}
 //
-// 	file, err := os.ReadFile(configPath)
-// 	if err != nil {
-// 		return structs.APIConfig{}, err
-// 	}
+//		file, err := os.ReadFile(configPath)
+//		if err != nil {
+//			return structs.APIConfig{}, err
+//		}
 //
-// 	var settings structs.APIConfig
-// 	if err := yaml.Unmarshal(file, &settings); err != nil {
-// 		return structs.APIConfig{}, err
-// 	}
+//		var settings structs.APIConfig
+//		if err := yaml.Unmarshal(file, &settings); err != nil {
+//			return structs.APIConfig{}, err
+//		}
 //
-// 	return settings, nil
-// }
+//		return settings, nil
+//	}
 //
-// func getGif() (structs.APIConfig, error) {
-// 	configPath, err := getConfigPath("/contentgen/gifgen.yaml")
-// 	if err != nil {
-// 		return structs.APIConfig{}, err
-// 	}
+//	func getGif() (structs.APIConfig, error) {
+//		configPath, err := getConfigPath("/contentgen/gifgen.yaml")
+//		if err != nil {
+//			return structs.APIConfig{}, err
+//		}
 //
-// 	file, err := os.ReadFile(configPath)
-// 	if err != nil {
-// 		return structs.APIConfig{}, err
-// 	}
+//		file, err := os.ReadFile(configPath)
+//		if err != nil {
+//			return structs.APIConfig{}, err
+//		}
 //
-// 	var settings structs.APIConfig
-// 	if err := yaml.Unmarshal(file, &settings); err != nil {
-// 		return structs.APIConfig{}, err
-// 	}
+//		var settings structs.APIConfig
+//		if err := yaml.Unmarshal(file, &settings); err != nil {
+//			return structs.APIConfig{}, err
+//		}
 //
-// 	return settings, nil
-// }
-//
-// func get3d() (structs.APIConfig, error) {
-// 	configPath, err := getConfigPath("/contentgen/3dgen.yaml")
-// 	if err != nil {
-// 		return structs.APIConfig{}, err
-// 	}
-//
-// 	file, err := os.ReadFile(configPath)
-// 	if err != nil {
-// 		return structs.APIConfig{}, err
-// 	}
-//
-// 	var settings structs.APIConfig
-// 	if err := yaml.Unmarshal(file, &settings); err != nil {
-// 		return structs.APIConfig{}, err
-// 	}
-//
-// 	return settings, nil
-// }
+//		return settings, nil
+//	}
+func get3d() (structs.APIConfig, error) {
+	configPath, err := getConfigPath("/contentgen/3dgen.yaml")
+	if err != nil {
+		return structs.APIConfig{}, err
+	}
+
+	file, err := os.ReadFile(configPath)
+	if err != nil {
+		return structs.APIConfig{}, err
+	}
+
+	var settings structs.APIConfig
+	if err := yaml.Unmarshal(file, &settings); err != nil {
+		return structs.APIConfig{}, err
+	}
+
+	return settings, nil
+}

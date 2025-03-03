@@ -1,8 +1,10 @@
 package structs
 
-type IntentDetectionSettings struct {
-	ApiUrl     string
-	SeedPrompt string
-	Headers    string
-	Auth       string
+type IntentDetection struct {
+	Endpoint      string                 `yaml:"endpoint"`
+	Method        string                 `yaml:"method"`
+	Headers       map[string]string      `yaml:"headers"`
+	Payload       map[string]interface{} `yaml:"payload"`
+	InitialPrompt string                 `yaml:"initialPrompt"`
+	ResponsePath  string                 `yaml:"responsePath"`
 }
