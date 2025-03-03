@@ -29,3 +29,6 @@ datastorage/
 
 # Test db
 test.db
+
+# Test frontend
+websocket.html
