@@ -1,0 +1,2 @@
+listener: text
+dataDir: "./datastorage/"
