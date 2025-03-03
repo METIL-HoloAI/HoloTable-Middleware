@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/callers"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/database"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/listeners"
@@ -38,24 +37,24 @@ func main() {
 		fmt.Println("Invalid listener option in general.yaml")
 	}
 
-	fakeJSONData := []byte(`{
-		"contentType": "3d",
-		"requiredParameters": {
-			"mode": "preview",
-			"prompt": "a monster mask"
-		},
-		"optionalParameters": {
-			"art_style": "realistic",
-			"seed": null,
-			"ai_model": "meshy-4",
-			"topology": "triangle",
-			"target_polycount": 30000,
-			"should_remesh": true,
-			"symmetry_mode": "auto",
-			"enable_pbr": false
-		}
-	}`)
+	// fakeJSONData := []byte(`{
+	// 	"contentType": "3d",
+	// 	"requiredParameters": {
+	// 		"mode": "preview",
+	// 		"prompt": "a monster mask"
+	// 	},
+	// 	"optionalParameters": {
+	// 		"art_style": "realistic",
+	// 		"seed": null,
+	// 		"ai_model": "meshy-4",
+	// 		"topology": "triangle",
+	// 		"target_polycount": 30000,
+	// 		"should_remesh": true,
+	// 		"symmetry_mode": "auto",
+	// 		"enable_pbr": false
+	// 	}
+	// }`)
 
-	callers.LoadIntentDetectionResponse(fakeJSONData)
+	// callers.LoadIntentDetectionResponse(fakeJSONData)
 
 }

@@ -1,7 +1,7 @@
 endpoint: "https://api.openai.com/v1/chat/completions"
 method: "POST"
 headers:
-  Authorization: "Bearer $INTENT_DETECTION_API_KEY"
+  Authorization: "Bearer &INTENT_DETECTION_API_KEY"
   Content-Type: "application/json"
 payload:
   model: "gpt-4o"
@@ -14,6 +14,7 @@ initialPrompt: |
   "From now on, respond strictly with raw JSON—no explanations, no formatting, and no extra characters.
 
   1. Determine Content Type:  
+   - Your job is to read in the YAML files provided, determine the type of content the user wants to generate then, based off of the relevent yaml file populate the required and optional parameter fields.
    - If the request relates to generating a **3D model**, set `"ContentType": "model"`.  
    - If the request is for an **image**, set `"ContentType": "image"`.  
    - If the request is for a **video**, set `"ContentType": "video"`.  
@@ -21,17 +22,25 @@ initialPrompt: |
    - If no valid content type is detected, return `"ContentType": "none"`.
 
   2. **Extract Required and Optional Parameters**:  
-   - Read the users request and match it against the YAML configuration file.  
-   - Extract only the `"requiredParameters"` and `"optionalParameters"` fields.  
+   - Read the users request and match it against the YAML configuration file.    
+   - Ensure all required parameter fields are configured (use defaults if necessary).
+   - Improve the users prompt for higher quality generations.
    - Populate the `"requiredParameters"` with necessary values.  
    - Populate `"optionalParameters"` with any paramaters you feel would improve the request.
-   - When configuring paramaters, only provide a valid response from the `"options"` field. 
+   - When configuring paramaters, only provide a valid response from the `"options"` field, otherwise do not configure. 
    - Only adjust the ammount of content generted if requested by the user.
+   - If a required parameter has a default value in the YAML file, use that default.  
+   - Never omit a required parameter, even if the user does not explicitly mention it.
 
   3. **Exclude Unnecessary Fields**:  
-   - Do not include `endpoint`, `method`, `headers`, `description`, `default`, or `options`.  
+   - Do not include `endpoint`, `method`, `headers`, `description`, `default`, or `options`.
 
-  4. **Fallback Response**:  
+  4. **Output Requirements**:  
+   - Respond with a valid **JSON object**, not a string.  
+   - Do NOT escape quotation marks or return a stringified JSON object.  
+   - Output must always include a `"ContentType"`, `"requiredParameters"`, and `"optionalParameters"`.  
+
+  5. **Fallback Response**:  
    - If no valid content type or parameters are detected, return:  
      {
        "ContentType": "none",

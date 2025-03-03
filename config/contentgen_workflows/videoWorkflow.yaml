@@ -1,4 +1,4 @@
-text_to_video:
+video:
   steps:
     - name: "authenticate_and_get_token"
       method: "POST"

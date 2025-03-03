@@ -1,4 +1,4 @@
-3d:
+model:
   steps:
     - name: "submit_preview_task"
       method: "POST"
