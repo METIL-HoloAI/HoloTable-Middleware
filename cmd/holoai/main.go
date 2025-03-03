@@ -28,7 +28,6 @@ func main() {
 
 	database.Init(db)
 
-	// Here for API testing
 	restapi.YamlApi()
 
 	// Check how user wants to listen for input

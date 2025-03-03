@@ -49,26 +49,38 @@ func getYamlHandler(w http.ResponseWriter, r *http.Request) {
 func putYamlHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	yamlName := vars["name"]
-	yamlPath := "../../config/" + yamlName + ".yaml"
+	yamlPaths := []string{
+		"../../config/" + yamlName + ".yaml",
+		"../../config/contentgen/" + yamlName + ".yaml",
+	}
 
-    body, err := io.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
     if err != nil {
         http.Error(w, "Invalid request body", http.StatusBadRequest)
         return
     }
 
-    err = os.WriteFile(yamlPath, body, 0)
-    if err != nil {
-		yamlPath = "../../config/contentgen/" + yamlName + ".yaml"
-		err2 := os.WriteFile(yamlPath, body, 0)
-		if err2 != nil {
-			http.Error(w, "Failed to write file", http.StatusInternalServerError)
-			return
+	var existingPath string
+	for _, path := range yamlPaths {
+		if _, err := os.Stat(path); err == nil {
+			existingPath = path
+			break
 		}
-    }
+	}
 
-    w.WriteHeader(http.StatusOK)
-    w.Write([]byte("YAML updated"))
+    if existingPath == "" {
+		http.Error(w, "File does not exist", http.StatusNotFound)
+		return
+	}
+
+	err = os.WriteFile(existingPath, body, 0644)
+	if err != nil {
+		http.Error(w, "Failed to update file", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("YAML updated"))
 }
 
 // create routes thru database
