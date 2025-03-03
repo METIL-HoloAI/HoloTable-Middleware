@@ -1,8 +1,10 @@
 package unityserver
 
 import (
+	"bufio"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/websocket"
 )
@@ -19,6 +21,9 @@ func StartWebSocketServer() {
 
 	// HANDSHAKE MECHANISM
 	<-ClientReady // This will block until the Unity client sends a "READY" message
+
+	// Listen for "close" message from the terminal
+	go listenForClose()
 }
 
 func startWebSocketServer() {
@@ -36,15 +41,33 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Println("WebSocket client connected")
 
-	// Wait for a handshake message from the Unity client
-	_, msg, err := Conn.ReadMessage()
-	if err != nil {
-		log.Println("Read Error:", err)
-		return
-	}
+	// Wait for messages from the Unity client
+	for {
+		_, msg, err := Conn.ReadMessage()
+		if err != nil {
+			log.Println("Read Error:", err)
+			return
+		}
 
-	if string(msg) == "READY" {
-		log.Println("Unity client is ready")
-		ClientReady <- true
+		if string(msg) == "READY" {
+			log.Println("Unity client is ready")
+			ClientReady <- true
+		} else {
+			log.Printf("Received message: %s", msg)
+		}
+	}
+}
+
+func listenForClose() {
+	reader := bufio.NewReader(os.Stdin)
+	for {
+		input, _ := reader.ReadString('\n')
+		if input == "close\n" {
+			log.Println("Received close message from terminal, closing connection")
+			if Conn != nil {
+				Conn.Close()
+			}
+			os.Exit(0)
+		}
 	}
 }

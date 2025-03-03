@@ -3,7 +3,6 @@ package unityserver
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"path/filepath"
 
@@ -12,30 +11,29 @@ import (
 )
 
 const (
-	ASSETS_DIR = "./src/3dModelsTest" // Asset directory
+	ASSETS_DIR = "./internal/unityserver/3dModelsTest" // Asset directory
 )
 
 func GenerateAndSendContent() {
 	// test 1
-	// fileName := "blueMan"
-	// extension := "glb"
-
-	// test 2
 	fileName := "catLion"
 	extension := "jpeg"
-	fileData, err := ioutil.ReadFile(filepath.Join(ASSETS_DIR, fmt.Sprintf("%s.%s", fileName, extension)))
-	if err != nil {
-		log.Fatalf("Failed to read file: %v", err)
-	}
-	ExportAsset(fileName, extension, fileData)
+	filePath := filepath.Join(ASSETS_DIR, fmt.Sprintf("%s.%s", fileName, extension))
+	ExportAsset(fileName, extension, filePath)
+
+	// test 2
+	fileName = "blueMan"
+	extension = "glb"
+	filePath = filepath.Join(ASSETS_DIR, fmt.Sprintf("%s.%s", fileName, extension))
+	ExportAsset(fileName, extension, filePath)
 }
 
-func ExportAsset(fileName, extension string, fileData []byte) {
+func ExportAsset(fileName, extension, filePath string) {
 	assetMsg := assetstruct.AssetMessage{
 		Type:      "asset",
 		Name:      fileName,
 		Extension: extension,
-		FileData:  fileData,
+		FilePath:  filePath,
 	}
 
 	response, err := json.Marshal(assetMsg)
