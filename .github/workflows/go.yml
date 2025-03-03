@@ -1,0 +1,50 @@
+# This workflow will build a golang project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
+
+name: Go
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  go-checks:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.23.4'
+    
+    # Clean Go modules cache to avoid stale dependencies
+    - name: Clean Go cache
+      run: go clean -cache -modcache -i -r
+
+    # Tidy up go.mod and go.sum to remove any residual references
+    - name: Tidy Go modules
+      run: go mod tidy
+   
+    - name: Build
+      run: go build -v ./...
+
+    - name: golangci-lint
+      uses: golangci/golangci-lint-action@v6
+      with:
+        version: latest
+
+    - name: Check formatting with gofmt
+      run: |
+        files=$(gofmt -l .)
+        if [ -n "$files" ]; then
+          echo "The following files are not formatted correctly:"
+          echo "$files"
+          echo "Please run go fmt ./..."
+          exit 1
+        fi
+
+    - name: Run tests
+      run: go test ./...

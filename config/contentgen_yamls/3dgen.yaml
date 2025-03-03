@@ -1,0 +1,30 @@
+#Paramaters for OpenAI's Image Generation API
+#The APIConfig struct assumes that each required and optional paramater has a description
+# a (possibly nonexistent) List of options and a (possibly nonexistent) default val.
+#For more details see https://platform.openai.com/docs/api-reference/images/create
+
+endpoint: "https://api.meshy.ai/openapi/v2/text-to-3d"
+method: "POST"
+headers:
+  Authorization: "Bearer &THREED_MODEL_API_KEY"
+  Content-Type: "application/json"
+requiredParameters:
+  mode:
+    default: "preview"
+    options: ["preview"]
+  prompt:
+    description: "A textual description of the desired 3D model."
+    options: []
+optionalParameters:
+  art_style:
+    description: "Defines the artistic style of the generated model."
+    options: ["realistic", "sculpture"]
+  topology:
+    default: "triangle"
+    description: "Specifies the topology of the generated model."
+    options: ["quad", "triangle"]
+  symmetry_mode:
+    default: "auto"
+    description: "Controls symmetry behavior during model generation."
+    options: ["off", "auto", "on"]
+
