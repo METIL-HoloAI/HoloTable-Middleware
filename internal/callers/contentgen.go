@@ -33,7 +33,6 @@ func LoadIntentDetectionResponse(JSONData []byte) {
 	HandleWorkflow(intentDetectionResponse, workflow)
 }
 
-// Handles workflow execution dynamically
 func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, workflow structs.Workflow) {
 	// Storage for previous step results (ensures placeholders are accessible)
 	dataStore := make(map[string]interface{})
@@ -42,7 +41,7 @@ func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, wor
 	for i, step := range workflow.Steps {
 		fmt.Printf("\n🔹 Executing Step %d: %s\n", i+1, step.Name)
 
-		// Determine API URL (replace placeholders if it's not the first step)
+		// if its the first step store url as is, if not check for and replace placeholders in the URL
 		var apiURL string
 		if i == 0 {
 			apiURL = step.URL
@@ -51,23 +50,23 @@ func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, wor
 		}
 		fmt.Printf("🔄 Updated API URL: %s\n", apiURL)
 
-		// Create API request configuration
+		// put together API request configuration for sending to makeAPICall()
 		workflowConfig := structs.APIConfig{
 			Endpoint: apiURL,
 			Method:   step.Method,
 			Headers:  step.Headers,
 		}
 
-		// Build the payload
+		// Build the payload if its an intent detection step this payload is given by their code else create based on workflow while replacing placeholders
 		var payload map[string]interface{}
-		if i == 0 {
+		if _, exists := step.Body["intent_detection_step"]; exists {
 			payload = buildPayload(intentDetectionResponse) // First step: Use intent detection parameters
 		} else {
 			payload = deepReplace(step.Body, dataStore).(map[string]interface{}) // Replace placeholders for later steps
 		}
 		fmt.Printf("📦 Final Payload for API Call: %+v\n", payload)
 
-		// Make the API call
+		// Make the API call passing what we jsut created above
 		responseData, err := makeAPICall(workflowConfig, payload)
 		if err != nil {
 			fmt.Printf("❌ Error in step '%s': %v\n", step.Name, err)
@@ -76,6 +75,7 @@ func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, wor
 
 		fmt.Printf("✅ API Response for '%s': %+v\n", step.Name, responseData)
 
+		//TODO
 		//if(this is the final step){
 		//	Call database function (send response data which is a map[string]interface{}, variable type (.glb in workflow), and the file path bs from the meshy docs that i need to add to workflow)
 		//}
@@ -235,7 +235,7 @@ func pollForCompletion(step structs.Step, dataStore map[string]interface{}) erro
 	fmt.Printf("🔄 Starting Polling for Step: %s | Target Status: %s | Interval: %.0f seconds\n", step.Name, targetValue, interval)
 
 	// Create a timeout timer of 2.5 minutes
-	timeout := time.After(150 * time.Second)
+	timeout := time.After(500 * time.Second)
 
 	for {
 		select {

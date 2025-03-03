@@ -6,42 +6,25 @@
 endpoint: "https://api.meshy.ai/openapi/v2/text-to-3d"
 method: "POST"
 headers:
-  Authorization: "Bearer $THREED_MODEL_API_KEY"
+  Authorization: "Bearer &THREED_MODEL_API_KEY"
   Content-Type: "application/json"
 requiredParameters:
+  mode:
+    default: "preview"
+    options: ["preview"]
   prompt:
-    description: "A text description of the desired 3D model."
-    options: [] 
+    description: "A textual description of the desired 3D model."
+    options: []
 optionalParameters:
   art_style:
-    default: "realistic"
-    description: "The desired art style of the object."
+    description: "Defines the artistic style of the generated model."
     options: ["realistic", "sculpture"]
-  seed:
-    default: null
-    description: "Seed for random number generation to ensure reproducibility."
-    options: []
-  ai_model:
-    default: "meshy-4"
-    description: "ID of the model to use."
-    options: ["meshy-4"]
   topology:
     default: "triangle"
-    description: "Specify the topology of the generated model."
+    description: "Specifies the topology of the generated model."
     options: ["quad", "triangle"]
-  target_polycount:
-    default: 30000
-    description: "Target number of polygons in the generated model."
-    options: []
-  should_remesh:
-    default: true
-    description: "Flag to enable the remesh phase."
-    options: [true, false]
   symmetry_mode:
     default: "auto"
-    description: "Controls symmetry behavior during the model generation process."
+    description: "Controls symmetry behavior during model generation."
     options: ["off", "auto", "on"]
-  enable_pbr:
-    default: false
-    description: "Generate PBR Maps (metallic, roughness, normal) in addition to the base color."
-    options: [true, false]
+

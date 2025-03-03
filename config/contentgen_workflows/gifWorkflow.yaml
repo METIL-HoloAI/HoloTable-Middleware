@@ -1,62 +1,61 @@
-#this is the 3d Workflow pasted over for testing 
 gif:
   steps:
-    - name: "submit_preview_task"
+    - name: "submit_image_generation"
       method: "POST"
-      url: "https://api.meshy.ai/openapi/v2/text-to-3d"
+      url: "https://cloud.leonardo.ai/api/rest/v1/generations"
       headers:
-        Authorization: "Bearer $GIF_API_KEY"
+        Authorization: "Bearer &LEONARDO_API_KEY"
         Content-Type: "application/json"
       body:
-        mode: "preview"
-        prompt: "{user_input}"
+        height: 768
+        width: 1024
+        modelId: "1e60896f-3c26-4296-8ecc-53e2afecc132"
+        prompt: "{user_input}"  # First user prompt (for image generation)
+        num_images: 1
+        alchemy: true
       response_placeholders:
-        preview_task_id: result  # This is the only response we get from the API
+        generation_id: sdGenerationJob.generationId
 
-    - name: "poll_preview_status"
+    - name: "poll_image_generation_status"
       method: "GET"
-      url: "https://api.meshy.ai/openapi/v2/text-to-3d/{preview_task_id}"
+      url: "https://cloud.leonardo.ai/api/rest/v1/generations/{generation_id}"
       headers:
-        Authorization: "Bearer $GIF_API_KEY"
+        Authorization: "Bearer &LEONARDO_API_KEY"
       response_placeholders:
         status: status
+        image_id: generations_by_pk.generated_images.0.id
       poll:
         until: "SUCCEEDED"
-        interval: 5
+        interval: 10
 
-    - name: "submit_refine_task"
+    - name: "submit_motion_generation"
       method: "POST"
-      url: "https://api.meshy.ai/openapi/v2/text-to-3d"
+      url: "https://cloud.leonardo.ai/api/rest/v1/generations-motion-svd"
       headers:
-        Authorization: "Bearer $GIF_API_KEY"
+        Authorization: "Bearer &LEONARDO_API_KEY"
         Content-Type: "application/json"
       body:
-        mode: "refine"
-        preview_task_id: "{preview_task_id}"
+        imageId: "{image_id}"
+        motionStrength: 5  # Can be adjusted based on user preference
       response_placeholders:
-        refine_task_id: result  # This is the new task ID we need
+        motion_generation_id: motionSvdGenerationJob.generationId
 
-
-    - name: "poll_refine_status"
+    - name: "poll_motion_generation_status"
       method: "GET"
-      url: "https://api.meshy.ai/openapi/v2/text-to-3d/{refine_task_id}"
+      url: "https://cloud.leonardo.ai/api/rest/v1/generations/{motion_generation_id}"
       headers:
-        Authorization: "Bearer $GIF_API_KEY"
+        Authorization: "Bearer &LEONARDO_API_KEY"
       response_placeholders:
         status: status
+        video_url: generations_by_pk.generated_video.url
       poll:
         until: "SUCCEEDED"
-        interval: 5
+        interval: 10
 
-    - name: "fetch_final_model"
+    - name: "fetch_final_video"
       method: "GET"
-      url: "https://api.meshy.ai/openapi/v2/text-to-3d/{refine_task_id}"
+      url: "{video_url}"
       headers:
-        Authorization: "Bearer $GIF_API_KEY"
+        Authorization: "Bearer &LEONARDO_API_KEY"
       response_placeholders:
-        model_url: model_urls.glb
-      response:
-        response_path: "data.url"
-        response_format: "url"
-        file_id_path: "created"
-        file_extention: "png"
+        video_file: video_url  # The final motion video file

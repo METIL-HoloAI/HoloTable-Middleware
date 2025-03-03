@@ -6,17 +6,8 @@ image:
       method: "POST"
       url: "https://api.openai.com/v1/images/generations"
       headers:
-        Authorization: "Bearer $IMAGE_API_KEY"
+        Authorization: "Bearer &IMAGE_API_KEY"
         Content-Type: "application/json"
       body:
-        prompt: "{user_input}"
-        model: "{model}"
-        n: "{n}"
-        size: "{size}"
-        response_format: "{response_format}"
-        user: "{user}"
-      response:
-        response_path: "data.url"
-        response_format: "url"
-        file_id_path: "created"
-        file_extention: "png"
+        intent_detection_step: true
+      response_key: "data"

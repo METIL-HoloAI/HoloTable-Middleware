@@ -14,9 +14,7 @@ import (
 
 // public function for initializing the database
 func TestDatabaseInit(t *testing.T) {
-	config.LoadYaml()
-
-	if err := os.MkdirAll(config.General.DataDir, os.ModePerm); err != nil {
+	if err := os.MkdirAll("./testdb/", os.ModePerm); err != nil {
 		t.Fatal("Failed to create data directory:", err)
 	}
 

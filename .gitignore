@@ -7,6 +7,8 @@
 *.dll
 *.so
 *.dylib
+*.bin
+*.bin~
 
 # Test binary, built with `go test -c`
 *.test
@@ -26,3 +28,9 @@ go.work.sum
 
 # Data storage directory
 datastorage/
+
+# Test db
+test.db
+
+#configuration file edited to fix VS debugger issue
+launch.json
