@@ -24,20 +24,16 @@ func InitLogger() {
 	} else {
 		logrus.SetFormatter(&logrus.TextFormatter{
 			DisableTimestamp: true,
+			CallerPrettyfier: func(f *runtime.Frame) (string, string) {
+				// Customize how file and function name appear
+				filename := fmt.Sprintf("%s:%d", f.File, f.Line)
+				return "", filename
+			},
+			ForceColors: true,
 		})
 	}
 
 	logrus.SetReportCaller(true)
-
-	// Set log format to include caller info
-	logrus.SetFormatter(&logrus.TextFormatter{
-		DisableTimestamp: true,
-		CallerPrettyfier: func(f *runtime.Frame) (string, string) {
-			// Customize how file and function name appear
-			filename := fmt.Sprintf("%s:%d", f.File, f.Line)
-			return f.Function, filename
-		},
-	})
 
 	// Set output to stdout (you can also log to a file)
 	logrus.SetOutput(os.Stdout)

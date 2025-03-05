@@ -1,6 +1,7 @@
 package callers
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -80,4 +81,13 @@ func parseIndex(s string) (int, error) {
 	var i int
 	_, err := fmt.Sscanf(s, "%d", &i)
 	return i, err
+}
+
+// PrettyPrintJSON converts an object to an indented JSON string
+func PrettyPrintJSON(obj interface{}) (string, error) {
+	prettyJSON, err := json.MarshalIndent(obj, "", "  ") // Indentation with 2 spaces
+	if err != nil {
+		return "", err
+	}
+	return string(prettyJSON), nil
 }
