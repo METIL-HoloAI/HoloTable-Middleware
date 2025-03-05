@@ -26,25 +26,25 @@ func StartIntentDetection(input string) {
 // LoadPrompt sends the prompt to chat ai, then saves and returns the JSON response
 func LoadPrompt(prompt string) ([]byte, error) {
 	// Assume config.VideoGen, config.GifGen, etc., are populated
-	videoString, err := PrettyPrintJSON(config.VideoGen)
+	videoString, err := MarshalandPretty(config.VideoGen)
 	if err != nil {
 		logrus.WithError(err).Error("\nError marshalling VideoGen config")
 		return nil, fmt.Errorf("Error marshalling VideoGen config: %w", err)
 	}
 
-	gifString, err := PrettyPrintJSON(config.GifGen)
+	gifString, err := MarshalandPretty(config.GifGen)
 	if err != nil {
 		logrus.WithError(err).Error("\nError marshalling GifGen config")
 		return nil, fmt.Errorf("Error marshalling GifGen config: %w", err)
 	}
 
-	modelString, err := PrettyPrintJSON(config.ModelGen)
+	modelString, err := MarshalandPretty(config.ModelGen)
 	if err != nil {
 		logrus.WithError(err).Error("\nError marshalling ModelGen config")
 		return nil, fmt.Errorf("Error marshalling ModelGen config: %w", err)
 	}
 
-	imageString, err := PrettyPrintJSON(config.ImageGen)
+	imageString, err := MarshalandPretty(config.ImageGen)
 	if err != nil {
 		logrus.WithError(err).Error("\nError marshalling ImageGen config")
 		return nil, fmt.Errorf("Error marshalling ImageGen config: %w", err)

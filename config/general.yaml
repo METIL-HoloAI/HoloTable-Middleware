@@ -3,7 +3,6 @@ dataDir: "./datastorage/"
 #log lvl order, from lowest to highest
 #Trace → Debug → Info → Warn → Error → Fatal → Panic
 log_level: "trace"
-#options are text and json, json is not implemented yet
-log_format: "text"
+
 
 
