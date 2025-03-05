@@ -23,7 +23,7 @@ func ContentStorage(fileType, format, fileID, fileExtention string, content []by
 	// Map file types to database table names.
 	tableMap := map[string]string{
 		"image": "image",
-		"3d":    "model",
+		"model": "model",
 		"gif":   "gif",
 		"video": "video",
 	}

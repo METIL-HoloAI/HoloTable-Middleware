@@ -17,7 +17,7 @@ func ContentExtraction(response string, dataType string) (string, string, string
 	// Select configuration parameters based on the provided data type.
 	lastStep := len(config.Workflows[dataType].Steps) - 1
 	switch dataType {
-	case "image", "video", "gif", "3d":
+	case "image", "video", "gif", "model":
 		responseFormat, responsePath, fileIDPath, fileType = getConfigParams(dataType, lastStep)
 	default:
 		return "", "", "", "", errors.New("unknown data type: " + dataType)
