@@ -20,13 +20,31 @@ func loadEnv() {
 	if err != nil {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
-
 	replaceEnv(reflect.ValueOf(&General).Elem())
 	replaceEnv(reflect.ValueOf(&IntentDetection).Elem())
+
 	replaceEnv(reflect.ValueOf(&ImageGen).Elem())
 	replaceEnv(reflect.ValueOf(&VideoGen).Elem())
 	replaceEnv(reflect.ValueOf(&GifGen).Elem())
 	replaceEnv(reflect.ValueOf(&ModelGen).Elem())
+
+	// MANUALLY TRAVERSE EACH WORKFLOW & STEP TO REPLACE ENV VARIABLES
+	for workflowKey, workflow := range Workflows {
+		for i := range workflow.Steps { // Iterate by reference to persist changes
+			log.Printf("🔍 DEBUG: Processing workflow '%s', Step %d\n", workflowKey, i)
+
+			// Replace env variables inside Headers map
+			for headerKey, headerValue := range workflow.Steps[i].Headers {
+				workflow.Steps[i].Headers[headerKey] = os.ExpandEnv(headerValue) // ✅ Direct replacement
+			}
+
+			// Apply `replaceEnv()` for deeper replacements
+			replaceEnv(reflect.ValueOf(&workflow.Steps[i]).Elem())
+
+			// apply changes back into `Workflows`
+			Workflows[workflowKey] = workflow
+		}
+	}
 }
 
 func replaceEnv(reflectedItem reflect.Value) {
