@@ -8,8 +8,8 @@ import (
 
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/database"
-	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/listeners"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/endpoints/restapi"
+	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/listeners"
 	_ "github.com/mattn/go-sqlite3"
 )
 
