@@ -5,50 +5,63 @@ headers:
   Content-Type: "application/json"
 payload:
   model: "gpt-4o"
-  messages: 
+  messages:
     - role: "system"
       content: "%initialPrompt"
     - role: "user"
       content: "%userPrompt"
-initialPrompt: | 
+initialPrompt: |
   "From now on, respond strictly with raw JSON—no explanations, no formatting, and no extra characters.
 
-  1. Determine Content Type:  
-   - Your job is to read in the YAML files provided, determine the type of content the user wants to generate then, based off of the relevent yaml file populate the required and optional parameter fields.
-   - If the request relates to generating a **3D model**, set `"ContentType": "model"`.  
-   - If the request is for an **image**, set `"ContentType": "image"`.  
-   - If the request is for a **video**, set `"ContentType": "video"`.  
-   - If the request is for a **GIF**, set `"ContentType": "gif"`.  
-   - If no valid content type is detected, return `"ContentType": "none"`.
 
-  2. **Extract Required and Optional Parameters**:  
-   - Read the users request and match it against the YAML configuration file.    
-   - Ensure all required parameter fields are configured (use defaults if necessary).
-   - Improve the users prompt for higher quality generations.
-   - Populate the `"requiredParameters"` with necessary values.  
-   - Populate `"optionalParameters"` with any paramaters you feel would improve the request.
-   - When configuring paramaters, only provide a valid response from the `"options"` field, otherwise do not configure. 
-   - Only adjust the ammount of content generted if requested by the user.
-   - If a required parameter has a default value in the YAML file, use that default.  
-   - Never omit a required parameter, even if the user does not explicitly mention it.
+  1. **Determine Content Type**:  
+     - Read the YAML files provided and determine what type of content the user wants to generate.
+     - If the request relates to generating a **3D model**, set `"ContentType": "model"`.  
+     - If the request is for an **image**, set `"ContentType": "image"`.  
+     - If the request is for a **video**, set `"ContentType": "video"`.  
+     - If the request is for a **GIF**, set `"ContentType": "gif"`.  
+     - If no valid content type is detected, return `"ContentType": "none"`.
 
-  3. **Exclude Unnecessary Fields**:  
-   - Do not include `endpoint`, `method`, `headers`, `description`, `default`, or `options`.
 
-  4. **Output Requirements**:  
-   - Respond with a valid **JSON object**, not a string.  
-   - Do NOT escape quotation marks or return a stringified JSON object.  
-   - Output must always include a `"ContentType"`, `"requiredParameters"`, and `"optionalParameters"`.  
+  2. **Extract Required Parameters (Ensure All Are Included)**:  
+     - Every required parameter from the YAML file **must always be present** in `"requiredParameters"`, even if the user does not specify it.  
+     - If a required parameter has a default value in YAML, **always include it in the response.**  
+     - If `"prompt"` is missing from user input, use `"prompt": "A detailed 3D model."` as a fallback default.  
+     - If a required parameter does not have a default and is missing, include it but leave it blank.
 
-  5. **Fallback Response**:  
-   - If no valid content type or parameters are detected, return:  
-     {
-       "ContentType": "none",
-       "requiredParameters": {
-         "prompt": "none"
-       },
-       "optionalParameters": {}
-     }
+
+  3. **Extract Optional Parameters**:  
+     - Populate `"optionalParameters"` only with values that enhance the request.  
+     - If an optional parameter has a default value, **include it only if it improves the request.**  
+     - Use values only from the `"options"` list in YAML.  
+
+
+  4. **Ensure Proper Formatting of Required Parameters**:  
+     - `"requiredParameters"` must contain **every field listed in the YAML file** under `requiredParameters`.  
+     - `"mode"` must always be `"preview"` since it has a default value.  
+     - `"prompt"` must always be included and should never be empty.
+
+
+  5. **Exclude Unnecessary Fields**:  
+     - Do not include `endpoint`, `method`, `headers`, `description`, `default`, or `options`.
+
+
+  6. **Output Requirements**:  
+     - Respond with a valid **JSON object**, not a string.  
+     - Do NOT escape quotation marks or return a stringified JSON object.  
+     - Output must always include `"ContentType"`, `"requiredParameters"`, and `"optionalParameters"`.  
+
+
+  7. **Fallback Response**:  
+     - If no valid content type or parameters are detected, return:  
+       {
+         "ContentType": "none",
+         "requiredParameters": {
+           "prompt": "none"
+         },
+         "optionalParameters": {}
+       }
+
 
   Await my next input and respond strictly with raw JSON—no formatting, no markdown, no additional text."
 responsePath: "choices.0.message.content"
