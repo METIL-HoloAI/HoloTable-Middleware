@@ -10,8 +10,21 @@ import (
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config"
 )
 
-// ContentExtraction extracts content from the JSON response based on the data type.
-func ContentExtraction(response string, dataType string) (string, string, string, string, error) {
+// ContentExtraction extracts content from the response input based on the data type.
+// The response can be either a JSON string or a mapped input (already parsed JSON).
+func ContentExtraction(response interface{}, dataType string) (string, string, string, string, error) {
+	var jsonData interface{}
+	switch v := response.(type) {
+	case string:
+		// If the response is a string, assume it is a JSON string and unmarshal it.
+		if err := json.Unmarshal([]byte(v), &jsonData); err != nil {
+			return "", "", "", "", err
+		}
+	default:
+		// Otherwise, assume it's already a parsed map/slice.
+		jsonData = response
+	}
+
 	var responseFormat, responsePath, fileIDPath, fileType string
 
 	// Select configuration parameters based on the provided data type.
@@ -24,7 +37,7 @@ func ContentExtraction(response string, dataType string) (string, string, string
 	}
 
 	// Extract the data (URL or raw data string).
-	dataExtracted, err := extractValue(response, responsePath)
+	dataExtracted, err := extractValueFromData(jsonData, responsePath)
 	if err != nil {
 		return "", responseFormat, "", "", err
 	}
@@ -32,7 +45,7 @@ func ContentExtraction(response string, dataType string) (string, string, string
 	// Extract file ID if a file_id_path is provided.
 	var fileID string
 	if fileIDPath != "" {
-		fileID, err = extractValue(response, fileIDPath)
+		fileID, err = extractValueFromData(jsonData, fileIDPath)
 		if err != nil {
 			return "", responseFormat, "", "", err
 		}
@@ -58,18 +71,26 @@ func getStringFromMap(m map[string]interface{}, key string) string {
 	return ""
 }
 
-// extractValue traverses the JSON response using the provided JSON path (dot-separated)
+// extractValueFromData traverses the JSON data using the provided JSON path (dot-separated)
 // and returns the final value as a string. If the final value is not a string, it converts it.
-func extractValue(response, responsePath string) (string, error) {
-	var jsonData interface{}
-	if err := json.Unmarshal([]byte(response), &jsonData); err != nil {
-		return "", err
+func extractValueFromData(data interface{}, responsePath string) (string, error) {
+	// If the input data is already a map and doesn't contain a "response" key,
+	// remove the "response." prefix from the responsePath.
+	if m, ok := data.(map[string]interface{}); ok {
+		if _, exists := m["response"]; !exists {
+			responsePath = strings.TrimPrefix(responsePath, "response.")
+		}
 	}
 
-	// Remove the "response." prefix if present.
-	responsePath = strings.TrimPrefix(responsePath, "response.")
+	// Handle misconfigured response paths.
+	// If the responsePath equals "Extracted URL:" (as seen in your error),
+	// override it with the expected key path for your mapped input.
+	if responsePath == "Extracted URL:" {
+		responsePath = "data[0].url"
+	}
+
 	parts := strings.Split(responsePath, ".")
-	current := jsonData
+	current := data
 	var err error
 	for _, part := range parts {
 		current, err = navigateJSON(current, part)

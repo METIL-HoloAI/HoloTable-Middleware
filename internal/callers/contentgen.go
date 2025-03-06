@@ -104,11 +104,28 @@ func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, wor
 				return
 			}
 		}
+		// Extract content and store it if this is the final step
+		if i == len(workflow.Steps)-1 {
+			extractedURL, extractedFormat, fileID, fileExtention, err := ContentExtraction(responseData, intentDetectionResponse.ContentType)
+			if err != nil {
+				fmt.Printf("Extraction failed: %v", err)
+				return
+			}
+			fmt.Println("Extracted URL:", extractedURL)
+
+			_, filePath, err := ContentStorage(intentDetectionResponse.ContentType, extractedFormat, fileID, fileExtention, []byte(extractedURL))
+			if err != nil {
+				fmt.Printf("Storage failed: %v", err)
+				return
+			}
+			fmt.Println("File ID:", filePath)
+
+			fmt.Printf("Content successfully stored at: %s\n", filePath)
+
+			fmt.Println("🎉 Workflow execution completed successfully.")
+		}
 	}
-
-	fmt.Println("🎉 Workflow execution completed successfully.")
 }
-
 func buildPayload(intentDetectionResponse structs.IntentDetectionResponse) map[string]interface{} {
 	// Combine required and optional parameters into a single payload
 	payload := make(map[string]interface{})
