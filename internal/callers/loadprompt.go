@@ -111,7 +111,7 @@ func LoadPrompt(prompt string) ([]byte, error) {
 	fmt.Println(string(prettyJSON))
 
 	//extract the message from the intent detection response
-	extractedText := extractByPath(jsonResponse, config.IntentDetection.ResponsePath)
+	extractedText := ExtractByPath(jsonResponse, config.IntentDetection.ResponsePath)
 	if extractedText == "" {
 		return nil, fmt.Errorf("error extracting response using path: %s", config.IntentDetection.ResponsePath)
 	}

@@ -45,7 +45,7 @@ func replacePlaceholders(text, initPrompt, userPrompt string) string {
 }
 
 // Extract intent detections response from the api return using the provided response path
-func extractByPath(data interface{}, path string) string {
+func ExtractByPath(data interface{}, path string) string {
 	keys := strings.Split(path, ".") // Split "choices.0.message.content" into ["choices", "0", "message", "content"]
 	var current interface{} = data   //used to keep track of where we are in the JSON structure
 

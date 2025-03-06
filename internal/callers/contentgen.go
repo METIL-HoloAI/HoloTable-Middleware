@@ -74,7 +74,16 @@ func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, wor
 			return
 		}
 
-		log.Printf("✅ API Response for '%s': %+v\n", step.Name, responseData)
+		// prettyJSON, err := json.MarshalIndent(responseData, "", "    ")
+		// if err != nil {
+		// 	fmt.Printf("error formatting JSON: %v\n", err)
+		// }
+		// fmt.Println(string(prettyJSON))
+
+		//log.Printf("✅ API Response for '%s': %+v\n", step.Name, responseData)
+
+		prettyJSON, _ := json.MarshalIndent(responseData, "", "    ")
+		fmt.Printf("✅ API Response for '%s':\n%s\n", step.Name, string(prettyJSON))
 
 		//TODO
 		//if(this is the final step){
@@ -83,11 +92,12 @@ func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, wor
 
 		// **Extract & Store Response Data for Future Steps**
 		for placeholder, responseKey := range step.ResponsePlaceholders {
-			// Ensure responseKey is a string before using it as a map key
 			if responseKeyStr, ok := responseKey.(string); ok {
-				if val, exists := responseData[responseKeyStr]; exists {
-					dataStore[placeholder] = val
-					log.Printf("🔑 Stored '%s' = %v for future use\n", placeholder, val)
+				// Use ExtractByPath to extract nested values dynamically
+				extractedValue := ExtractByPath(responseData, responseKeyStr)
+				if extractedValue != "" {
+					dataStore[placeholder] = extractedValue
+					log.Printf("🔑 Stored '%s' = %v for future use\n", placeholder, extractedValue)
 				} else {
 					log.Printf("⚠️ Warning: Expected response key '%s' not found in API response for step '%s'\n", responseKeyStr, step.Name)
 				}
@@ -267,26 +277,63 @@ func pollForCompletion(step structs.Step, dataStore map[string]interface{}) erro
 				return fmt.Errorf("❌ Error decoding polling response: %v", err)
 			}
 
-			log.Printf("📊 Polling Response: %+v\n", responseData)
+			prettyJSON, _ := json.MarshalIndent(responseData, "", "    ")
+			fmt.Printf("📊 Polling Response: %+v\n", string(prettyJSON))
 
 			if msg, exists := responseData["message"]; exists {
 				log.Printf("❌ API Error: %v\n", msg)
 				return fmt.Errorf("❌ Polling failed: API error '%v'", msg)
 			}
 
-			currentStatus, exists := responseData["status"]
-			if !exists {
-				log.Printf("⚠️ Warning: Expected polling key 'status' not found in response\n")
-				log.Printf("⏳ Retrying in %.0f seconds...\n", interval)
+			// 🔍 Extract and check polling status dynamically
+			var currentStatus string
+			for placeholder, responseKey := range step.ResponsePlaceholders {
+				if placeholder == "status" { // Only extract "status" for polling
+					if responseKeyStr, ok := responseKey.(string); ok {
+						extractedValue := ExtractByPath(responseData, responseKeyStr)
+						if extractedValue != "" {
+							currentStatus = extractedValue
+							log.Printf("🔑 Extracted status: '%s' = %v for polling comparison\n", placeholder, extractedValue)
+						} else {
+							log.Printf("⚠️ Warning: Expected response key '%s' not found in API response for step '%s'\n", responseKeyStr, step.Name)
+						}
+					} else {
+						log.Printf("❌ Error: Response key for placeholder '%s' is not a string in step '%s'\n", placeholder, step.Name)
+					}
+				}
+			}
+
+			// If no status was extracted, retry
+			if currentStatus == "" {
+				log.Printf("⚠️ Warning: No status extracted, retrying in %.0f seconds...\n", interval)
 				time.Sleep(time.Duration(interval) * time.Second)
 				continue
 			}
 
 			log.Printf("🔍 Current Status: %v | Target: %s\n", currentStatus, targetValue)
 
+			// ✅ If the status matches the "until" condition, extract other placeholders
 			if currentStatus == targetValue {
 				log.Printf("✅ Polling complete! Step '%s' reached status '%s'\n", step.Name, targetValue)
-				return nil
+
+				// Extract and store additional placeholders (like image_id)
+				for placeholder, responseKey := range step.ResponsePlaceholders {
+					if placeholder != "status" { // Ignore status, we already checked it
+						if responseKeyStr, ok := responseKey.(string); ok {
+							extractedValue := ExtractByPath(responseData, responseKeyStr)
+							if extractedValue != "" {
+								dataStore[placeholder] = extractedValue
+								log.Printf("🔑 Stored '%s' = %v for future use\n", placeholder, extractedValue)
+							} else {
+								log.Printf("⚠️ Warning: Expected response key '%s' not found in API response for step '%s'\n", responseKeyStr, step.Name)
+							}
+						} else {
+							log.Printf("❌ Error: Response key for placeholder '%s' is not a string in step '%s'\n", placeholder, step.Name)
+						}
+					}
+				}
+
+				return nil // Exit polling loop
 			}
 
 			log.Printf("⏳ Status: %v | Retrying in %.0f seconds...\n", currentStatus, interval)
