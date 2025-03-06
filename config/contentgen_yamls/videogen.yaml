@@ -3,10 +3,13 @@
 # a (possibly nonexistent) List of options and a (possibly nonexistent) default val.
 #For more details see https://platform.openai.com/docs/api-reference/images/create
 
+#added a workflow section to the yaml, this will be a part of each contentgen yaml. (this particual yaml only has one step)
+#THIS IS NOT VIDEO GEN YAML THIS IS PASTED FROM IMAGEGEN FOR TESTING
+
 endpoint: "https://api.openai.com/v1/images/generations"
 method: "POST"
 headers:
-  Authorization: "Bearer $IMAGE_API_KEY"
+  Authorization: "Bearer &VIDEO_API_KEY"
   Content-Type: "application/json"
 requiredParameters:
   prompt:
@@ -37,4 +40,4 @@ optionalParameters:
     default: "vivid"
     description: "The style of the generated images. Only supported for dall-e-3."
     options: ["vivid", "natural"]
-
+  

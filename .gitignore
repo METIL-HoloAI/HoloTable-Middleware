@@ -7,6 +7,8 @@
 *.dll
 *.so
 *.dylib
+*.bin
+*.bin~
 
 # Test binary, built with `go test -c`
 *.test
@@ -30,5 +32,5 @@ datastorage/
 # Test db
 test.db
 
-# Test frontend
-websocket.html
+#configuration file edited to fix VS debugger issue
+launch.json

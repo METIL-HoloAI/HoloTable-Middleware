@@ -55,6 +55,8 @@ func LoadPrompt(prompt string) ([]byte, error) {
 	// Build the initial prompt with the concatenated YAML contents
 	initPrompt := fmt.Sprintf(config.IntentDetection.InitialPrompt, yamlContents)
 
+	fmt.Println(initPrompt)
+
 	// Build the payload
 	payload, err := BuildPayload(initPrompt, prompt)
 	if err != nil {
@@ -100,6 +102,13 @@ func LoadPrompt(prompt string) ([]byte, error) {
 	if err := json.Unmarshal(body, &jsonResponse); err != nil {
 		return nil, fmt.Errorf("error unmarshalling response: %w", err)
 	}
+
+	// Pretty print jsonResponse
+	prettyJSON, err := json.MarshalIndent(jsonResponse, "", "    ")
+	if err != nil {
+		fmt.Printf("error formatting JSON: %v\n", err)
+	}
+	fmt.Println(string(prettyJSON))
 
 	//extract the message from the intent detection response
 	extractedText := extractByPath(jsonResponse, config.IntentDetection.ResponsePath)

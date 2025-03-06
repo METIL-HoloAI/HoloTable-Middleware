@@ -1,0 +1,43 @@
+video:
+  steps:
+    - name: "authenticate_and_get_token"
+      method: "POST"
+      url: "https://api.klingai.com/auth/token"
+      headers:
+        Content-Type: "application/json"
+      body:
+        access_key: "$ACCESS_KEY"
+        secret_key: "$SECRET_KEY"
+      response_placeholders:
+        api_token: token  # Extract the API token from the response
+
+    - name: "submit_video_generation_task"
+      method: "POST"
+      url: "https://api.klingai.com/v1/video/generate"
+      headers:
+        Authorization: "Bearer {api_token}"
+        Content-Type: "application/json"
+      body:
+        intent_detection_step: true
+      response_placeholders:
+        task_id: task_id        # Extract the task ID from the response
+
+    - name: "poll_video_generation_status"
+      method: "GET"
+      url: "https://api.klingai.com/v1/video/status/{task_id}"
+      headers:
+        Authorization: "Bearer {api_token}"
+      response_placeholders:
+        status: status
+        video_url: result.url   # Extract the URL of the generated video
+      poll:
+        until: "SUCCEEDED"
+        interval: 10            # Poll every 10 seconds until the task succeeds
+
+    - name: "fetch_generated_video"
+      method: "GET"
+      url: "{video_url}"
+      headers:
+        Authorization: "Bearer {api_token}"
+      response_placeholders:
+        video_file: video_content  # The binary content of the video file

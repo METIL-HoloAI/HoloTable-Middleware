@@ -36,5 +36,4 @@ func main() {
 	} else {
 		fmt.Println("Invalid listener option in general.yaml")
 	}
-
 }
