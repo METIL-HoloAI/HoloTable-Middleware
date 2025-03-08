@@ -6,9 +6,6 @@ import (
 	"log"
 	"os"
 
-	//"path/filepath"
-
-	//"github.com/METIL-HoloAI/HoloTable-Middleware/internal/callers"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/database"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/listeners"
@@ -39,5 +36,4 @@ func main() {
 	} else {
 		fmt.Println("Invalid listener option in general.yaml")
 	}
-
 }
