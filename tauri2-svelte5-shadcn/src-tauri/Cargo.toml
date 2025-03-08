@@ -1,0 +1,23 @@
+[package]
+name = "app"
+version = "1.0.0"
+description = "A simple desktop application template combining Tauri 2 with Svelte 5 and shadcn-svelte with a basic ci/cd implemented."
+authors = ["Alysonhower Veras Vieira"]
+license = "MIT"
+edition = "2021"
+rust-version = "1.77.2"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+name = "app_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.0.1", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+# tauri-plugin-shell = "2" # uncomment to use shell
+serde_json = "1"
+serde = { version = "1", features = ["derive"] }
