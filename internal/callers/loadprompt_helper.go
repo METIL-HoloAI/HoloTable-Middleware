@@ -1,10 +1,12 @@
 package callers
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config"
+	"github.com/sirupsen/logrus"
 )
 
 // Build the payload for the intent detection API call
@@ -60,7 +62,7 @@ func ExtractByPath(data interface{}, path string) string {
 		case []interface{}:
 			index, err := parseIndex(key) //convert string to int
 			if err != nil || index < 0 || index >= len(v) {
-				fmt.Println("Error parsing index of intent detection response:", err)
+				logrus.Error("\nError parsing index of intent detection response:", err)
 				return "" // return empty string if index is invalid
 			}
 			current = v[index] //update current to array element
@@ -80,4 +82,13 @@ func parseIndex(s string) (int, error) {
 	var i int
 	_, err := fmt.Sscanf(s, "%d", &i)
 	return i, err
+}
+
+// PrettyPrintJSON converts an object to an indented JSON string
+func MarshalandPretty(obj interface{}) (string, error) {
+	prettyJSON, err := json.MarshalIndent(obj, "", "  ") // Indentation with 2 spaces
+	if err != nil {
+		return "", err
+	}
+	return string(prettyJSON), nil
 }
