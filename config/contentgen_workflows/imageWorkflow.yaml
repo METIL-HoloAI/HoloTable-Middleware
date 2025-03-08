@@ -11,7 +11,7 @@ image:
       body:
         intent_detection_step: true
       response_key: "data"
-      response:
+      response_placeholders:
         response_path: "data.url"
         response_format: "url"
         file_id_path: "created"

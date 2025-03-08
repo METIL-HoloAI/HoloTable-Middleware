@@ -39,7 +39,7 @@ video:
       url: "{video_url}"
       headers:
         Authorization: "Bearer {api_token}"
-      response:
+      response_placeholders:
         response_path: "output.video_url"
         response_format: "url"
         file_id_path: "id"
