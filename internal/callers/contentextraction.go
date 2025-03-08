@@ -14,6 +14,7 @@ import (
 // The response can be either a JSON string or a mapped input (already parsed JSON).
 func ContentExtraction(response interface{}, dataType string) (string, string, string, string, error) {
 	var jsonData interface{}
+	fmt.Printf("response: %v\n", response)
 	switch v := response.(type) {
 	case string:
 		// If the response is a string, assume it is a JSON string and unmarshal it.

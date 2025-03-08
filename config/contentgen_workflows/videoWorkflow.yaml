@@ -39,5 +39,8 @@ video:
       url: "{video_url}"
       headers:
         Authorization: "Bearer {api_token}"
-      response_placeholders:
-        video_file: video_content  # The binary content of the video file
+      response:
+        response_path: "output.video_url"
+        response_format: "url"
+        file_id_path: "id"
+        file_extention: "jpg"  # The binary content of the video file

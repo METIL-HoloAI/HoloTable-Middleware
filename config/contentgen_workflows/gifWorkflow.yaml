@@ -57,5 +57,8 @@ gif:
       url: "{video_url}"
       headers:
         Authorization: "Bearer &LEONARDO_API_KEY"
-      response_placeholders:
-        video_file: video_url  # The final motion video file
+      response:
+        response_path: "output.video_url"
+        response_format: "url"
+        file_id_path: "id"
+        file_extention: "jpg" # The final motion video file
