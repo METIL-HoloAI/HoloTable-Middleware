@@ -137,7 +137,8 @@ func makeAPICall(apiConfig structs.APIConfig, payload map[string]interface{}) (m
 	// Create HTTP request
 	req, err := http.NewRequest(apiConfig.Method, apiConfig.Endpoint, bytes.NewBuffer(payloadBytes))
 	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
+		logrus.WithError(err).Error("\nFailed to create request:")
+		return nil, fmt.Errorf("Failed to create request: %w", err)
 	}
 
 	// Add headers
@@ -148,6 +149,7 @@ func makeAPICall(apiConfig structs.APIConfig, payload map[string]interface{}) (m
 	// Send request
 	resp, err := client.Do(req)
 	if err != nil {
+		logrus.WithError(err).Error("\nFailed to make request:")
 		return nil, fmt.Errorf("failed to make request: %w", err)
 	}
 	defer resp.Body.Close()
@@ -155,23 +157,26 @@ func makeAPICall(apiConfig structs.APIConfig, payload map[string]interface{}) (m
 	// Read response body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
+		logrus.WithError(err).Error("\nFailed to read response body:")
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
 	// Handle non-200 and non-202 status codes
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
+		logrus.WithError(err).Errorf("\nnon-200/202 status: %d, body: %s", resp.StatusCode, body)
 		return nil, fmt.Errorf("non-200/202 status: %d, body: %s", resp.StatusCode, body)
 	}
 
 	// Parse JSON response
 	var responseData map[string]interface{}
 	if err := json.Unmarshal(body, &responseData); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal API response: %w", err)
+		logrus.WithError(err).Error("Failed to unmarshal API response:")
+		return nil, fmt.Errorf("Failed to unmarshal API response: %w", err)
 	}
 
 	// ✅ Handle 202 Accepted: Return response for polling
 	if resp.StatusCode == http.StatusAccepted {
-		log.Printf("🔄 Received 202 Accepted: Task is processing... Storing response.\n")
+		logrus.Info("🔄 Received 202 Accepted: Task is processing... Storing response.\n")
 		return responseData, nil // Let the caller handle polling
 	}
 
@@ -235,7 +240,7 @@ func pollForCompletion(step structs.Step, dataStore map[string]interface{}) erro
 		return fmt.Errorf("❌ Error: Polling interval is not a valid number (got %T) in step '%s'", v, step.Name)
 	}
 
-	log.Printf("🔄 Starting Polling for Step: %s | Target Status: %s | Interval: %.0f seconds\n", step.Name, targetValue, interval)
+	logrus.Debugf("🔄 Starting Polling for Step: %s | Target Status: %s | Interval: %.0f seconds\n", step.Name, targetValue, interval)
 
 	// Create a timeout timer of 2.5 minutes
 	timeout := time.After(500 * time.Second)
@@ -247,7 +252,7 @@ func pollForCompletion(step structs.Step, dataStore map[string]interface{}) erro
 		default:
 			// Replace placeholders in the polling URL
 			pollURL := deepReplace(step.URL, dataStore).(string)
-			log.Printf("🔄 Polling URL: %s\n", pollURL)
+			logrus.Debugf("🔄 Polling URL: %s\n", pollURL)
 
 			req, err := http.NewRequest("GET", pollURL, nil)
 			if err != nil {
@@ -269,7 +274,7 @@ func pollForCompletion(step structs.Step, dataStore map[string]interface{}) erro
 				return fmt.Errorf("❌ Error decoding polling response: %v", err)
 			}
 
-			log.Printf("📊 Polling Response: %+v\n", responseData)
+			logrus.Debugf("📊 Polling Response: %+v\n", responseData)
 
 			if msg, exists := responseData["message"]; exists {
 				log.Printf("❌ API Error: %v\n", msg)
@@ -278,20 +283,20 @@ func pollForCompletion(step structs.Step, dataStore map[string]interface{}) erro
 
 			currentStatus, exists := responseData["status"]
 			if !exists {
-				log.Printf("⚠️ Warning: Expected polling key 'status' not found in response\n")
-				log.Printf("⏳ Retrying in %.0f seconds...\n", interval)
+				logrus.Warnf("⚠️ Warning: Expected polling key 'status' not found in response\n")
+				logrus.Warnf("⏳ Retrying in %.0f seconds...\n", interval)
 				time.Sleep(time.Duration(interval) * time.Second)
 				continue
 			}
 
-			log.Printf("🔍 Current Status: %v | Target: %s\n", currentStatus, targetValue)
+			logrus.Debugf("🔍 Current Status: %v | Target: %s\n", currentStatus, targetValue)
 
 			if currentStatus == targetValue {
-				log.Printf("✅ Polling complete! Step '%s' reached status '%s'\n", step.Name, targetValue)
+				logrus.Debugf("✅ Polling complete! Step '%s' reached status '%s'\n", step.Name, targetValue)
 				return nil
 			}
 
-			log.Printf("⏳ Status: %v | Retrying in %.0f seconds...\n", currentStatus, interval)
+			logrus.Debugf("⏳ Status: %v | Retrying in %.0f seconds...\n", currentStatus, interval)
 			time.Sleep(time.Duration(interval) * time.Second)
 		}
 	}

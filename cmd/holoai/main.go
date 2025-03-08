@@ -29,12 +29,6 @@ func main() {
 
 	database.Init(db)
 
-	logrus.Trace("This is a trace message")
-	logrus.Debug("This is a debug message")
-	logrus.Info("This is an info message")
-	logrus.Warn("This is a warning message")
-	logrus.Error("This is an error message")
-
 	// Check how user wants to listen for input
 	// and start that listener
 	if config.General.Listener == "mic" {
