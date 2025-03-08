@@ -12,6 +12,7 @@ import (
 
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config/structs"
+	"github.com/sirupsen/logrus"
 )
 
 // Loads the intent detection response & selects the appropriate workflow
@@ -19,14 +20,14 @@ func LoadIntentDetectionResponse(JSONData []byte) {
 	// Read JSON data from intent detection
 	var intentDetectionResponse structs.IntentDetectionResponse
 	if err := json.Unmarshal(JSONData, &intentDetectionResponse); err != nil {
-		log.Println("Error unmarshalling intent detection response:", err)
+		logrus.Error("\nError unmarshalling intent detection response:", err)
 		return
 	}
 
 	// Lookup workflow based on content type
 	workflow, exists := config.Workflows[intentDetectionResponse.ContentType]
 	if !exists {
-		log.Println("Workflow not found for content type:", intentDetectionResponse.ContentType)
+		logrus.Error("Workflow not found for content type:", intentDetectionResponse.ContentType)
 		return
 	}
 
@@ -40,7 +41,7 @@ func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, wor
 
 	// Loop through workflow steps
 	for i, step := range workflow.Steps {
-		log.Printf("\n🔹 Executing Step %d: %s\n", i+1, step.Name)
+		logrus.Debugf("\n🔹 Executing Step %d: %s\n", i+1, step.Name)
 
 		// if its the first step store url as is, if not check for and replace placeholders in the URL
 		var apiURL string
@@ -49,7 +50,7 @@ func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, wor
 		} else {
 			apiURL = deepReplace(step.URL, dataStore).(string)
 		}
-		log.Printf("🔄 Updated API URL: %s\n", apiURL)
+		logrus.Debugf("\n🔄 Updated API URL: %s\n", apiURL)
 
 		// put together API request configuration for sending to makeAPICall()
 		workflowConfig := structs.APIConfig{
@@ -65,16 +66,16 @@ func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, wor
 		} else {
 			payload = deepReplace(step.Body, dataStore).(map[string]interface{}) // Replace placeholders for later steps
 		}
-		log.Printf("📦 Final Payload for API Call: %+v\n", payload)
+		logrus.Debugf("\n📦 Final Payload for API Call: %+v\n", PrettyPrintJSON(payload))
 
 		// Make the API call passing what we jsut created above
 		responseData, err := makeAPICall(workflowConfig, payload)
 		if err != nil {
-			log.Printf("❌ Error in step '%s': %v\n", step.Name, err)
+			logrus.Errorf("\n❌ Error in step '%s': %v\n", step.Name, err)
 			return
 		}
 
-		log.Printf("✅ API Response for '%s': %+v\n", step.Name, responseData)
+		logrus.Debugf("\n✅ API Response for '%s': %+v\n", step.Name, responseData)
 
 		//TODO
 		//if(this is the final step){
@@ -87,21 +88,21 @@ func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, wor
 			if responseKeyStr, ok := responseKey.(string); ok {
 				if val, exists := responseData[responseKeyStr]; exists {
 					dataStore[placeholder] = val
-					log.Printf("🔑 Stored '%s' = %v for future use\n", placeholder, val)
+					logrus.Tracef("\n🔑 Stored '%s' = %v for future use\n", placeholder, val)
 				} else {
-					log.Printf("⚠️ Warning: Expected response key '%s' not found in API response for step '%s'\n", responseKeyStr, step.Name)
+					logrus.Warnf("\n⚠️ Warning: Expected response key '%s' not found in API response for step '%s'\n", responseKeyStr, step.Name)
 				}
 			} else {
-				log.Printf("❌ Error: Response key for placeholder '%s' is not a string in step '%s'\n", placeholder, step.Name)
+				logrus.Errorf("\n❌ Error: Response key for placeholder '%s' is not a string in step '%s'\n", placeholder, step.Name)
 			}
 		}
 
 		// Handle polling if required
 		if step.Poll != nil {
-			log.Printf("🔍 DEBUG: Stored Task ID for Polling: %v\n", dataStore["preview_task_id"])
+			logrus.Debugf("\n🔍 Stored Task ID for Polling: %v\n", dataStore["preview_task_id"])
 			err = pollForCompletion(step, dataStore)
 			if err != nil {
-				log.Printf("polling error in step '%s': %v\n", step.Name, err)
+				logrus.Errorf("polling error in step '%s': %v\n", step.Name, err)
 				return
 			}
 		}
@@ -126,7 +127,7 @@ func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, wor
 		}
 	}
 
-	log.Printf("🎉 Workflow execution completed successfully.")
+	logrus.Debugf("🎉 Workflow execution completed successfully.")
 }
 
 func buildPayload(intentDetectionResponse structs.IntentDetectionResponse) map[string]interface{} {
@@ -148,13 +149,15 @@ func makeAPICall(apiConfig structs.APIConfig, payload map[string]interface{}) (m
 	// Convert payload to JSON
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal payload: %w", err)
+		logrus.WithError(err).Error("\nFailed to marshal payload:")
+		return nil, fmt.Errorf("Failed to marshal payload: %w", err)
 	}
 
 	// Create HTTP request
 	req, err := http.NewRequest(apiConfig.Method, apiConfig.Endpoint, bytes.NewBuffer(payloadBytes))
 	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
+		logrus.WithError(err).Error("\nFailed to create request:")
+		return nil, fmt.Errorf("Failed to create request: %w", err)
 	}
 
 	// Add headers
@@ -165,6 +168,7 @@ func makeAPICall(apiConfig structs.APIConfig, payload map[string]interface{}) (m
 	// Send request
 	resp, err := client.Do(req)
 	if err != nil {
+		logrus.WithError(err).Error("\nFailed to make request:")
 		return nil, fmt.Errorf("failed to make request: %w", err)
 	}
 	defer resp.Body.Close()
@@ -172,23 +176,26 @@ func makeAPICall(apiConfig structs.APIConfig, payload map[string]interface{}) (m
 	// Read response body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
+		logrus.WithError(err).Error("\nFailed to read response body:")
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
 	// Handle non-200 and non-202 status codes
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
+		logrus.WithError(err).Errorf("\nnon-200/202 status: %d, body: %s", resp.StatusCode, body)
 		return nil, fmt.Errorf("non-200/202 status: %d, body: %s", resp.StatusCode, body)
 	}
 
 	// Parse JSON response
 	var responseData map[string]interface{}
 	if err := json.Unmarshal(body, &responseData); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal API response: %w", err)
+		logrus.WithError(err).Error("Failed to unmarshal API response:")
+		return nil, fmt.Errorf("Failed to unmarshal API response: %w", err)
 	}
 
 	// ✅ Handle 202 Accepted: Return response for polling
 	if resp.StatusCode == http.StatusAccepted {
-		log.Printf("🔄 Received 202 Accepted: Task is processing... Storing response.\n")
+		logrus.Info("🔄 Received 202 Accepted: Task is processing... Storing response.\n")
 		return responseData, nil // Let the caller handle polling
 	}
 
@@ -252,7 +259,7 @@ func pollForCompletion(step structs.Step, dataStore map[string]interface{}) erro
 		return fmt.Errorf("❌ Error: Polling interval is not a valid number (got %T) in step '%s'", v, step.Name)
 	}
 
-	log.Printf("🔄 Starting Polling for Step: %s | Target Status: %s | Interval: %.0f seconds\n", step.Name, targetValue, interval)
+	logrus.Debugf("🔄 Starting Polling for Step: %s | Target Status: %s | Interval: %.0f seconds\n", step.Name, targetValue, interval)
 
 	// Create a timeout timer of 2.5 minutes
 	timeout := time.After(500 * time.Second)
@@ -264,7 +271,7 @@ func pollForCompletion(step structs.Step, dataStore map[string]interface{}) erro
 		default:
 			// Replace placeholders in the polling URL
 			pollURL := deepReplace(step.URL, dataStore).(string)
-			log.Printf("🔄 Polling URL: %s\n", pollURL)
+			logrus.Debugf("🔄 Polling URL: %s\n", pollURL)
 
 			req, err := http.NewRequest("GET", pollURL, nil)
 			if err != nil {
@@ -286,7 +293,7 @@ func pollForCompletion(step structs.Step, dataStore map[string]interface{}) erro
 				return fmt.Errorf("❌ Error decoding polling response: %v", err)
 			}
 
-			log.Printf("📊 Polling Response: %+v\n", responseData)
+			logrus.Debugf("📊 Polling Response: %+v\n", responseData)
 
 			if msg, exists := responseData["message"]; exists {
 				log.Printf("❌ API Error: %v\n", msg)
@@ -295,21 +302,30 @@ func pollForCompletion(step structs.Step, dataStore map[string]interface{}) erro
 
 			currentStatus, exists := responseData["status"]
 			if !exists {
-				log.Printf("⚠️ Warning: Expected polling key 'status' not found in response\n")
-				log.Printf("⏳ Retrying in %.0f seconds...\n", interval)
+				logrus.Warnf("⚠️ Warning: Expected polling key 'status' not found in response\n")
+				logrus.Warnf("⏳ Retrying in %.0f seconds...\n", interval)
 				time.Sleep(time.Duration(interval) * time.Second)
 				continue
 			}
 
-			log.Printf("🔍 Current Status: %v | Target: %s\n", currentStatus, targetValue)
+			logrus.Debugf("🔍 Current Status: %v | Target: %s\n", currentStatus, targetValue)
 
 			if currentStatus == targetValue {
-				log.Printf("✅ Polling complete! Step '%s' reached status '%s'\n", step.Name, targetValue)
+				logrus.Debugf("✅ Polling complete! Step '%s' reached status '%s'\n", step.Name, targetValue)
 				return nil
 			}
 
-			log.Printf("⏳ Status: %v | Retrying in %.0f seconds...\n", currentStatus, interval)
+			logrus.Debugf("⏳ Status: %v | Retrying in %.0f seconds...\n", currentStatus, interval)
 			time.Sleep(time.Duration(interval) * time.Second)
 		}
 	}
+}
+
+func PrettyPrintJSON(data map[string]interface{}) string {
+	prettyJSON, err := json.MarshalIndent(data, "", "  ") // 2-space indentation
+	if err != nil {
+		logrus.WithError(err).Error("Failed to pretty print JSON payload")
+		return "{}" // Return empty JSON object in case of error
+	}
+	return string(prettyJSON)
 }
