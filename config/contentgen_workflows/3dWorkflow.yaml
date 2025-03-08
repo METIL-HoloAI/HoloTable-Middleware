@@ -51,7 +51,7 @@ model:
       url: "https://api.meshy.ai/openapi/v2/text-to-3d/{refine_task_id}"
       headers:
         Authorization: "Bearer &THREED_MODEL_API_KEY"
-      response:
+      response_placeholders:
         response_path: "model_urls.glb"
         response_format: "url"
         file_id_path: "id"

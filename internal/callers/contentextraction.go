@@ -57,7 +57,7 @@ func ContentExtraction(response interface{}, dataType string) (string, string, s
 
 // getConfigParams retrieves configuration parameters for the given data type and step index.
 func getConfigParams(dataType string, stepIndex int) (string, string, string, string) {
-	workflow := config.Workflows[dataType].Steps[stepIndex].Response
+	workflow := config.Workflows[dataType].Steps[stepIndex].ResponsePlaceholders
 	return getStringFromMap(workflow, "response_format"),
 		getStringFromMap(workflow, "response_path"),
 		getStringFromMap(workflow, "file_id_path"),
