@@ -41,7 +41,7 @@ gif:
         Authorization: "Bearer &GIF_API_KEY"
       response_placeholders:
         status: generations_by_pk.status
-        video_url: generations_by_pk.generated_images.0.urlmotionMP4URL
+        video_url: generations_by_pk.generated_images.0.motionMP4URL
       poll:
         until: "COMPLETE"
         interval: 10

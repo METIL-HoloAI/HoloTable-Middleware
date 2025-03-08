@@ -2,7 +2,7 @@ listener: text
 dataDir: "./datastorage/"
 #log lvl order, from lowest to highest
 #Trace → Debug → Info → Warn → Error → Fatal → Panic
-log_level: "trace"
+log_level: "Trace"
 
 
 

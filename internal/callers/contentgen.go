@@ -66,6 +66,7 @@ func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, wor
 		} else {
 			payload = deepReplace(step.Body, dataStore).(map[string]interface{}) // Replace placeholders for later steps
 		}
+		logrus.Debugf("\n📦 Final Payload for API Call: %+s\n", workflowConfig)
 		logrus.Debugf("\n📦 Final Payload for API Call: %+s\n", PrettyPrintJSON(payload))
 
 		// Make the API call passing what we jsut created above
@@ -163,10 +164,25 @@ func makeAPICall(apiConfig structs.APIConfig, payload map[string]interface{}) (m
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	// Handle non-200 and non-202 status codes
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
-		logrus.WithError(err).Errorf("\nnon-200/202 status: %d, body: %s", resp.StatusCode, body)
-		return nil, fmt.Errorf("non-200/202 status: %d, body: %s", resp.StatusCode, body)
+	// // Handle non-200 and non-202 status codes
+	// if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
+	// 	logrus.WithError(err).Errorf("\nnon-200/202 status: %d, body: %s", resp.StatusCode, body)
+	// 	return nil, fmt.Errorf("non-200/202 status: %d, body: %s", resp.StatusCode, body)
+	// }
+
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted && resp.StatusCode != http.StatusCreated {
+		logrus.Errorf("\n❌ Error in API call: non-200-202 status: %d", resp.StatusCode)
+
+		// Try to pretty-print the response if it's in JSON format
+		var jsonResponse map[string]interface{}
+		if err := json.Unmarshal(body, &jsonResponse); err == nil {
+			logrus.Errorf("\n🔍 Luma AI API Response:\n%s", PrettyPrintJSON(jsonResponse))
+		} else {
+			// If response is not JSON, print it as a raw string
+			logrus.Errorf("\n🔍 Luma AI API Raw Response:\n%s", string(body))
+		}
+
+		return nil, fmt.Errorf("non-200-202 status: %d", resp.StatusCode)
 	}
 
 	// Parse JSON response
@@ -322,12 +338,12 @@ func pollForCompletion(step structs.Step, dataStore map[string]interface{}) erro
 							extractedValue := ExtractByPath(responseData, responseKeyStr)
 							if extractedValue != "" {
 								dataStore[placeholder] = extractedValue
-								log.Printf("🔑 Stored '%s' = %v for future use\n", placeholder, extractedValue)
+								logrus.Debugf("🔑 Stored '%s' = %v for future use\n", placeholder, extractedValue)
 							} else {
-								log.Printf("⚠️ Warning: Expected response key '%s' not found in API response for step '%s'\n", responseKeyStr, step.Name)
+								logrus.Warnf("⚠️ Warning: Expected response key '%s' not found in API response for step '%s'\n", responseKeyStr, step.Name)
 							}
 						} else {
-							log.Printf("❌ Error: Response key for placeholder '%s' is not a string in step '%s'\n", placeholder, step.Name)
+							logrus.Errorf("❌ Error: Response key for placeholder '%s' is not a string in step '%s'\n", placeholder, step.Name)
 						}
 					}
 				}

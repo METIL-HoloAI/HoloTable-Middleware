@@ -1,43 +1,55 @@
-#Paramaters for OpenAI's Image Generation API
-#The APIConfig struct assumes that each required and optional paramater has a description
-# a (possibly nonexistent) List of options and a (possibly nonexistent) default val.
-#For more details see https://platform.openai.com/docs/api-reference/images/create
-
-#added a workflow section to the yaml, this will be a part of each contentgen yaml. (this particual yaml only has one step)
-#THIS IS NOT VIDEO GEN YAML THIS IS PASTED FROM IMAGEGEN FOR TESTING
-
-endpoint: "https://api.openai.com/v1/images/generations"
+endpoint: "https://api.lumalabs.ai/dream-machine/v1/generations"
 method: "POST"
 headers:
-  Authorization: "Bearer &VIDEO_API_KEY"
-  Content-Type: "application/json"
+  accept: "application/json"
+  authorization: "Bearer &VIDEO_API_KEY"
+  content-Type: "application/json"
 requiredParameters:
   prompt:
-    description: "A text description of the desired image(s)."
+    description: "A text description of the desired video."
     options: [] 
-optionalParameters:
   model:
-    default: "dall-e-2"
-    description: "The model to use for image generation."
-    options: ["dall-e-2", "dall-e-3"]
-  n:
-    default: 1
-    description: "The number of images to generate. Must be between 1 and 10. Dall-e 3 Only supports 1 image per call"
-    options: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-  quality:
-    default: "standard"
-    description: "The quality of the generated image. hd Only supported for dall-e-3."
-    options: ["standard", "hd"]
-  response_format:
-    default: "url"
-    description: "The format in which the generated images are returned."
-    options: ["url", "b64_json"]
-  size:
-    default: "1024x1024"
-    description: "The size of the generated images."
-    options: ["256x256", "512x512", "1024x1024", "1024x1024", "1792x1024", "1024x1792"]
-  style:
-    default: "vivid"
-    description: "The style of the generated images. Only supported for dall-e-3."
-    options: ["vivid", "natural"]
-  
+    default: "ray-2"
+  resolution: 
+    default: "540p"
+  duration:
+    default: "5s"
+  generation_type:
+    default: "video"
+# optionalParameters:
+#   width:
+#     default: 1024
+#     description: "Width of the generated video in pixels."
+#     options: [512, 768, 1024]
+#   height:
+#     default: 576
+#     description: "Height of the generated video in pixels."
+#     options: [512, 576, 720]
+#   duration:
+#     default: 4
+#     description: "Duration of the generated video in seconds."
+#     options: [1, 2, 3, 4, 5, 6]
+#   motion:
+#     default: "cinematic"
+#     description: "The style of camera motion applied to the video."
+#     options: ["cinematic", "steady", "handheld"]
+#   model:
+#     default: "gen-1"
+#     description: "The model to use for video generation."
+#     options: ["gen-1", "gen-2"]
+#   aspect_ratio:
+#     default: "16:9"
+#     description: "Aspect ratio of the generated video."
+#     options: ["16:9", "9:16", "1:1"]
+#   fps:
+#     default: 24
+#     description: "Frames per second of the generated video."
+#     options: [12, 24, 30]
+#   seed:
+#     default: null
+#     description: "Seed for randomization; leave null for random results."
+#     options: []
+#   response_format:
+#     default: "url"
+#     description: "The format in which the generated video is returned."
+#     options: ["url"]
