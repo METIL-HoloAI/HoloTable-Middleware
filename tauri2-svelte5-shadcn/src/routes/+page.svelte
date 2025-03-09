@@ -12,6 +12,14 @@
 	const onclick = () => gs.reset();
 </script>
 
+<!-- to do (in order):
+- toggle switch to switch to STT
+- icon to allow user to navigate to config editing
+- allow user to navigate back to prompting area 
+- implement API functionality
+- implement STT functionality
+-->
+
 <div
 	class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 transition-all duration-500"
 >
