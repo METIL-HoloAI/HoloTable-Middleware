@@ -2,9 +2,9 @@ package database
 
 import (
 	"database/sql"
-	"log"
 
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/sirupsen/logrus"
 )
 
 var db *sql.DB
@@ -38,7 +38,7 @@ func Init(userDB *sql.DB) {
 	for _, tableQuery := range tables {
 		_, err := db.Exec(tableQuery)
 		if err != nil {
-			log.Fatal("Error creating tables", err)
+			logrus.Fatal("Error creating tables", err)
 		}
 	}
 }

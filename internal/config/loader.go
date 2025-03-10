@@ -2,12 +2,12 @@ package config
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"runtime"
 
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config/structs"
+	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 )
 
@@ -23,38 +23,38 @@ func LoadYaml() {
 	var err error
 	General, err = getGeneral()
 	if err != nil {
-		log.Fatal("Error parsing general.yaml: ", err)
+		logrus.Fatal("Error parsing general.yaml: ", err)
 	}
 
 	IntentDetection, err = getIntentDetection()
 	if err != nil {
-		log.Fatal("Error parsing intentdetection.yaml: ", err)
+		logrus.Fatal("Error parsing intentdetection.yaml: ", err)
 	}
 	//contentgen yamls
 	ImageGen, err = getImage()
 	if err != nil {
-		log.Fatal("Error parsing imagegen.yaml: ", err)
+		logrus.Fatal("Error parsing imagegen.yaml: ", err)
 	}
 
 	VideoGen, err = getVideo()
 	if err != nil {
-		log.Fatal("Error parsing videogen.yaml: ", err)
+		logrus.Fatal("Error parsing videogen.yaml: ", err)
 	}
 
 	GifGen, err = getGif()
 	if err != nil {
-		log.Fatal("Error parsing gifgen.yaml: ", err)
+		logrus.Fatal("Error parsing gifgen.yaml: ", err)
 	}
 
 	ModelGen, err = get3d()
 	if err != nil {
-		log.Fatal("Error parsing 3dgen.yaml: ", err)
+		logrus.Fatal("Error parsing 3dgen.yaml: ", err)
 	}
 
 	//workflows
 	Workflows, err = loadWorkflowsFromDir()
 	if err != nil {
-		log.Fatalf("Error loading workflows: %v", err)
+		logrus.Fatalf("Error loading workflows: %v", err)
 	}
 
 	loadEnv()
@@ -68,7 +68,8 @@ func getConfigPath(relativePath string) (string, error) {
 	// loader.go, making sure that filepaths remain consistent
 	_, loaderfile, _, ok := runtime.Caller(0)
 	if !ok {
-		return "", fmt.Errorf("unable to retrieve caller information")
+		logrus.Error("\nUnable to retrieve caller information\n")
+		return "", fmt.Errorf("Unable to retrieve caller information")
 	}
 
 	// Get the directory where loader.go is located
@@ -199,20 +200,22 @@ func loadWorkflowsFromDir() (structs.WorkflowCollection, error) {
 
 	workflowDir, err := getConfigPath("contentgen_workflows")
 	if err != nil {
-		return nil, fmt.Errorf("error getting workflow config path: %v", err)
+		logrus.WithError(err).Error("\nError getting workflow config path:")
+		return nil, fmt.Errorf("Error getting workflow config path: %v", err)
 	}
 
 	// Find all YAML files in the directory
 	files, err := filepath.Glob(filepath.Join(workflowDir, "*.yaml"))
 	if err != nil {
-		return nil, fmt.Errorf("error finding YAML files in workflow directory: %v", err)
+		logrus.WithError(err).Error("\nError finding YAML files in workflow directory:")
+		return nil, fmt.Errorf("Error finding YAML files in workflow directory: %v", err)
 	}
 
 	// Process each YAML file
 	for _, file := range files {
 		yamlData, err := os.ReadFile(file)
 		if err != nil {
-			log.Printf("Error reading file %s: %v", file, err)
+			logrus.Errorf("\nError reading file %s: %v", file, err)
 			continue
 		}
 
@@ -220,7 +223,7 @@ func loadWorkflowsFromDir() (structs.WorkflowCollection, error) {
 		var raw map[string]structs.Workflow // Directly unmarshalling into the new struct
 		err = yaml.Unmarshal(yamlData, &raw)
 		if err != nil {
-			log.Printf("Error parsing YAML file %s: %v", file, err)
+			logrus.Errorf("Error parsing YAML file %s: %v", file, err)
 			continue
 		}
 
