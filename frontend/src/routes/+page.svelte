@@ -39,8 +39,11 @@
 				{/if}
 			</Card.Title>
 			<div class="flex flex-row justify-center bg-gradient-to-r from-black to-yellow-400/50 bg-clip-text text-transparent">
-				<span class="mr-2">{gs.inputMode == 'text' ? "Text Input" : "Speech-to-Text"}</span>
-				<Switch/> 
+				<span class="mr-2">{gs.isVoiceInput ? "Speech-to-Text" : "Text Input"}</span>
+				<Switch checked={gs.isVoiceInput}
+				onCheckedChange={(checked) => {
+					gs.isVoiceInput = checked;
+				}}/>
 			</div>
 		</Card.Header>
 		<Card.Content class="p-6">
