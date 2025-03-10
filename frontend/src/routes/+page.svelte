@@ -48,28 +48,23 @@
 		</Card.Header>
 		<Card.Content class="p-6">
 			<form {onsubmit} class="space-y-3">
-				{#if !gs.greet}
 					<Input
 						type="text"
 						placeholder="Enter your prompt"
 						bind:value={gs.name}
 						class="w-full px-4 py-2 rounded-lg outline-none border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-black focus-visible:ring-black focus-visible:ring-offset-2 transition-all duration-200"
 					/>
-				{/if}
-				{#if gs.name && !gs.greet}
 					<Button
 						type="submit"
 						class="w-full bg-gradient-to-r from-black to-yellow-400/50 hover:opacity-90 transition-opacity duration-200"
 					>
 						Submit
 					</Button>
-				{:else if gs.greet}
 					<Button
 						{onclick}
 						class="w-full bg-gradient-to-r from-black to-yellow-900/50 hover:opacity-90 transition-opacity duration-200"
 						>Reset</Button
 					>
-				{/if}
 			</form>
 		</Card.Content>
 	</Card.Root>
