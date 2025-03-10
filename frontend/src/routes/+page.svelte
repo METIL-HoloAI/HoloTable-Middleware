@@ -1,59 +1,73 @@
 <script lang="ts">
-	import Counter from './Counter.svelte';
-	import welcome from '$lib/images/svelte-welcome.webp';
-	import welcomeFallback from '$lib/images/svelte-welcome.png';
+	import { GlobalState, preventDefault } from '$lib';
+	import { Button } from '$lib/components/ui/button/index.js';
+	import { Input } from '$lib/components/ui/input/index.js';
+	import { Switch } from '$lib/components/ui/switch/index.js';
+	import * as Card from '$lib/components/ui/card/index.js';
+
+	const gs = new GlobalState();
+
+	$inspect(gs.greet, gs.name);
+
+	const onsubmit = preventDefault(() => gs.nlen && gs.submit());
+	const onclick = () => gs.reset();
 </script>
 
-<svelte:head>
-	<title>Home</title>
-	<meta name="description" content="Svelte demo app" />
-</svelte:head>
+<!-- to do (in order):
+- toggle switch to switch to STT
+- icon to allow user to navigate to config editing
+- allow user to navigate back to prompting area 
+- implement API functionality
+- implement STT functionality
+-->
 
-<section>
-	<h1>
-		<span class="welcome">
-			<picture>
-				<source srcset={welcome} type="image/webp" />
-				<img src={welcomeFallback} alt="Welcome" />
-			</picture>
-		</span>
-
-		to your new<br />SvelteKit app
-	</h1>
-
-	<h2>
-		try editing <strong>src/routes/+page.svelte</strong>
-	</h2>
-
-	<Counter />
-</section>
-
-<style>
-	section {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		flex: 0.6;
-	}
-
-	h1 {
-		width: 100%;
-	}
-
-	.welcome {
-		display: block;
-		position: relative;
-		width: 100%;
-		height: 0;
-		padding: 0 0 calc(100% * 495 / 2048) 0;
-	}
-
-	.welcome img {
-		position: absolute;
-		width: 100%;
-		height: 100%;
-		top: 0;
-		display: block;
-	}
-</style>
+<div
+	class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-black via-slate-400 to-slate-600 transition-all duration-500"
+>
+	<Card.Root
+		class="w-[380px] bg-white/70 dark:bg-gray-800/90 shadow-xl hover:shadow-2xl transition-all duration-300 rounded-xl [--ring:267_100%_60%]"
+	>
+		<Card.Header class="space-y-2">
+			<Card.Title
+				class="text-3xl font-bold text-center bg-gradient-to-r from-black to-yellow-400/50 bg-clip-text text-transparent"
+			>
+				{#if gs.greet}
+					<p>{gs.greet}</p>
+					<small class="text-sm">(from Rust side)</small>
+				{:else}
+					<p>METIL HoloTable</p>
+				{/if}
+			</Card.Title>
+			<div class="flex flex-row justify-center bg-gradient-to-r from-black to-yellow-400/50 bg-clip-text text-transparent">
+				<span class="mr-2">{gs.inputMode == 'text' ? "Text Input" : "Speech-to-Text"}</span>
+				<Switch/> 
+			</div>
+		</Card.Header>
+		<Card.Content class="p-6">
+			<form {onsubmit} class="space-y-6">
+				{#if !gs.greet}
+					<Input
+						type="text"
+						placeholder="Enter your prompt"
+						bind:value={gs.name}
+						class="w-full px-4 py-2 rounded-lg outline-none border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-black focus-visible:ring-black focus-visible:ring-offset-2 transition-all duration-200"
+					/>
+				{/if}
+				{#if gs.name && !gs.greet}
+					<Button
+						type="submit"
+						class="w-full bg-gradient-to-r from-black to-yellow-400/50 hover:opacity-90 transition-opacity duration-200"
+					>
+						Submit
+					</Button>
+				{:else if gs.greet}
+					<Button
+						{onclick}
+						class="w-full bg-gradient-to-r from-indigo-500 to-pink-500 hover:opacity-90 transition-opacity duration-200"
+						>Reset</Button
+					>
+				{/if}
+			</form>
+		</Card.Content>
+	</Card.Root>
+</div>

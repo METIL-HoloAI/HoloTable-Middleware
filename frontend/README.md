@@ -1,38 +1,42 @@
-# sv
+# Tauri 2 Svelte 5 Boilerplate
+Simple boilerplate for Tauri 2 with Svelte 5 (and shadcn-svelte) using Bun runtime.
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+## Requirements
+In order to run this boilerplate, you need to install Bun and Rust. If you are on Windows I also recommend installing MSVC before the other dependencies (make sure to check the "Desktop development with C++" workload).
 
-## Creating a project
+Some useful links:
+- https://bun.sh/docs/installation
+- https://www.rust-lang.org/tools/install
+- https://visualstudio.microsoft.com/vs/community/
 
-If you're seeing this, you've probably already done this step. Congrats!
-
-```bash
-# create a new project in the current directory
-npx sv create
-
-# create a new project in my-app
-npx sv create my-app
+## Setup
+```
+git clone https://github.com/alysonhower/tauri2-svelte5-shadcn.git
+cd tauri2-svelte5-shadcn
+bun i
+```
+## Useful commands
+### Start dev server
+```
+bun run tauri dev
 ```
 
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+### Build executable
+```
+bun run tauri build
 ```
 
-## Building
+## Other links
+### Svelte 5
+https://svelte.dev/docs
 
-To create a production version of your app:
+### Tauri 2
+https://tauri.app/start/
 
-```bash
-npm run build
-```
+### shadcn-svelte
+https://next.shadcn-svelte.com/
 
-You can preview the production build with `npm run preview`.
+Note: Boilerplate tested on Windows 11 only.
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+## License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
