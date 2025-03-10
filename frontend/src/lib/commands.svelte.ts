@@ -9,7 +9,7 @@ export const preventDefault = <T extends Event>(fn: (e: T) => void): ((e: T) => 
 
 export class GlobalState {
 	private _state = $state({ name: '', greet: '' });
-	private _state2 = $state({ inputMode: 'text' });
+	public isVoiceInput = $state(false);
 
 	get greet() {
 		return this._state.greet;
@@ -25,13 +25,6 @@ export class GlobalState {
 	}
 	get nlen() {
 		return this.name.length;
-	}
-
-	get inputMode() {
-		return this._state2.inputMode;
-	}
-	set inputMode(value: string) {
-		this._state2.inputMode = value;
 	}
 
 	async submit() {
