@@ -76,8 +76,7 @@ func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, wor
 			return
 		}
 
-		prettyJSON, _ := json.MarshalIndent(responseData, "", "    ")
-		logrus.Debugf("\n✅ API Response for '%s': %+s\n", step.Name, string(prettyJSON))
+		logrus.Debugf("\n✅ API Response for '%s': %+s\n", step.Name, responseData)
 
 		//TODO
 		//if(this is the final step){
