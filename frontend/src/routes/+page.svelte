@@ -47,7 +47,7 @@
 			</div>
 		</Card.Header>
 		<Card.Content class="p-6">
-			<form {onsubmit} class="space-y-6">
+			<form {onsubmit} class="space-y-3">
 				{#if !gs.greet}
 					<Input
 						type="text"
@@ -66,7 +66,7 @@
 				{:else if gs.greet}
 					<Button
 						{onclick}
-						class="w-full bg-gradient-to-r from-indigo-500 to-pink-500 hover:opacity-90 transition-opacity duration-200"
+						class="w-full bg-gradient-to-r from-black to-yellow-900/50 hover:opacity-90 transition-opacity duration-200"
 						>Reset</Button
 					>
 				{/if}
