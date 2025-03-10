@@ -2,6 +2,7 @@
 	import { GlobalState, preventDefault } from '$lib';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
+	import { Switch } from '$lib/components/ui/switch/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 
 	const gs = new GlobalState();
@@ -37,6 +38,10 @@
 					<p>METIL HoloTable</p>
 				{/if}
 			</Card.Title>
+			<div class="flex flex-row justify-center bg-gradient-to-r from-black to-yellow-400/50 bg-clip-text text-transparent">
+				<span class="mr-2">{gs.inputMode == 'text' ? "Text Input" : "Speech-to-Text"}</span>
+				<Switch/> 
+			</div>
 		</Card.Header>
 		<Card.Content class="p-6">
 			<form {onsubmit} class="space-y-6">
