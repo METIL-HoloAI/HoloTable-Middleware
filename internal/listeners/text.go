@@ -8,6 +8,7 @@ import (
 
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/callers"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config"
+	"github.com/sirupsen/logrus"
 )
 
 func StartTextListener() {
@@ -19,7 +20,7 @@ func StartTextListener() {
 
 		input, err := reader.ReadString('\n') // Read full line, including spaces
 		if err != nil {
-			fmt.Println("Error reading input:", err)
+			logrus.Warn("Error reading input:", err)
 			continue
 		}
 

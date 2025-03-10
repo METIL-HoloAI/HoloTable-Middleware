@@ -2,7 +2,6 @@ package database_test
 
 import (
 	"database/sql"
-	"log"
 	"os"
 
 	"testing"
@@ -10,6 +9,7 @@ import (
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/database"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/sirupsen/logrus"
 )
 
 // public function for initializing the database
@@ -47,6 +47,6 @@ func TestDatabaseInit(t *testing.T) {
 
 	err = database.DeleteRecordByFilename("image", "test")
 	if err != nil {
-		log.Fatal("Failed to remove test record, ", err)
+		logrus.Fatal("Failed to remove test record, ", err)
 	}
 }
