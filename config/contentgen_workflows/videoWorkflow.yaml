@@ -1,0 +1,30 @@
+video:
+  steps:
+    - name: "submit_text_to_video_generation"
+      method: "POST"
+      url: "https://api.lumalabs.ai/dream-machine/v1/generations"
+      headers:
+        Authorization: "Bearer &VIDEO_API_KEY"
+        Content-Type: "application/json"
+      body:
+        intent_detection_step: true
+      response_placeholders:
+        generation_id: id
+
+    - name: "poll_video_generation_status"
+      method: "GET"
+      url: "https://api.lumalabs.ai/dream-machine/v1/generations/{generation_id}"
+      headers:
+        Authorization: "Bearer &VIDEO_API_KEY"
+      response_placeholders:
+        status: state
+        video_url: generation.output.video_url
+      poll:
+        until: "completed"
+        interval: 10
+
+    # - name: "fetch_final_video"
+    #   method: "GET"
+    #   url: "{video_url}"
+    #   response_placeholders:
+    #     video_file: video_url  # The final generated video file
