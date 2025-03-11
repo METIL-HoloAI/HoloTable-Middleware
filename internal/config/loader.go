@@ -42,7 +42,6 @@ func LoadYaml() {
 		logrus.Fatal("Error parsing speechtotext.yaml: ", err)
 	}
 
-	loadEnv()
 	VideoGen, err = getVideo()
 	if err != nil {
 		logrus.Fatal("Error parsing videogen.yaml: ", err)
