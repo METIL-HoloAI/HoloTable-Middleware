@@ -6,6 +6,7 @@ import (
 
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/database"
+	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/endpoints/restapi"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/listeners"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/sirupsen/logrus"
@@ -28,6 +29,8 @@ func main() {
 	defer db.Close()
 
 	database.Init(db)
+
+	restapi.YamlApi()
 
 	// Check how user wants to listen for input
 	// and start that listener
