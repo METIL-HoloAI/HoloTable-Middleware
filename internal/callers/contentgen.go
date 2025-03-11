@@ -66,7 +66,8 @@ func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, wor
 		} else {
 			payload = deepReplace(step.Body, dataStore).(map[string]interface{}) // Replace placeholders for later steps
 		}
-		logrus.Debugf("\n📦 Final Payload for API Call: %+v\n", PrettyPrintJSON(payload))
+		logrus.Debugf("\n📦 Final Payload for API Call: %+s\n", workflowConfig)
+		logrus.Debugf("\n📦 Final Payload for API Call: %+s\n", PrettyPrintJSON(payload))
 
 		// Make the API call passing what we jsut created above
 		responseData, err := makeAPICall(workflowConfig, payload)
@@ -75,7 +76,7 @@ func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, wor
 			return
 		}
 
-		logrus.Debugf("\n✅ API Response for '%s': %+v\n", step.Name, responseData)
+		logrus.Debugf("\n✅ API Response for '%s': %+s\n", step.Name, responseData)
 
 		//TODO
 		//if(this is the final step){
@@ -84,11 +85,12 @@ func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, wor
 
 		// **Extract & Store Response Data for Future Steps**
 		for placeholder, responseKey := range step.ResponsePlaceholders {
-			// Ensure responseKey is a string before using it as a map key
 			if responseKeyStr, ok := responseKey.(string); ok {
-				if val, exists := responseData[responseKeyStr]; exists {
-					dataStore[placeholder] = val
-					logrus.Tracef("\n🔑 Stored '%s' = %v for future use\n", placeholder, val)
+				// Use ExtractByPath to extract nested values dynamically
+				extractedValue := ExtractByPath(responseData, responseKeyStr)
+				if extractedValue != "" {
+					dataStore[placeholder] = extractedValue
+					logrus.Tracef("🔑 Stored '%s' = %v for future use\n", placeholder, extractedValue)
 				} else {
 					logrus.Warnf("\n⚠️ Warning: Expected response key '%s' not found in API response for step '%s'\n", responseKeyStr, step.Name)
 				}
@@ -150,14 +152,14 @@ func makeAPICall(apiConfig structs.APIConfig, payload map[string]interface{}) (m
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
 		logrus.WithError(err).Error("\nFailed to marshal payload:")
-		return nil, fmt.Errorf("Failed to marshal payload: %w", err)
+		return nil, fmt.Errorf("failed to marshal payload: %w", err)
 	}
 
 	// Create HTTP request
 	req, err := http.NewRequest(apiConfig.Method, apiConfig.Endpoint, bytes.NewBuffer(payloadBytes))
 	if err != nil {
 		logrus.WithError(err).Error("\nFailed to create request:")
-		return nil, fmt.Errorf("Failed to create request: %w", err)
+		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
 	// Add headers
@@ -180,17 +182,32 @@ func makeAPICall(apiConfig structs.APIConfig, payload map[string]interface{}) (m
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	// Handle non-200 and non-202 status codes
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
-		logrus.WithError(err).Errorf("\nnon-200/202 status: %d, body: %s", resp.StatusCode, body)
-		return nil, fmt.Errorf("non-200/202 status: %d, body: %s", resp.StatusCode, body)
+	// // Handle non-200 and non-202 status codes
+	// if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
+	// 	logrus.WithError(err).Errorf("\nnon-200/202 status: %d, body: %s", resp.StatusCode, body)
+	// 	return nil, fmt.Errorf("non-200/202 status: %d, body: %s", resp.StatusCode, body)
+	// }
+
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted && resp.StatusCode != http.StatusCreated {
+		logrus.Errorf("\n❌ Error in API call: non-200-202 status: %d", resp.StatusCode)
+
+		// Try to pretty-print the response if it's in JSON format
+		var jsonResponse map[string]interface{}
+		if err := json.Unmarshal(body, &jsonResponse); err == nil {
+			logrus.Errorf("\n🔍 Luma AI API Response:\n%s", PrettyPrintJSON(jsonResponse))
+		} else {
+			// If response is not JSON, print it as a raw string
+			logrus.Errorf("\n🔍 Luma AI API Raw Response:\n%s", string(body))
+		}
+
+		return nil, fmt.Errorf("non-200-202 status: %d", resp.StatusCode)
 	}
 
 	// Parse JSON response
 	var responseData map[string]interface{}
 	if err := json.Unmarshal(body, &responseData); err != nil {
 		logrus.WithError(err).Error("Failed to unmarshal API response:")
-		return nil, fmt.Errorf("Failed to unmarshal API response: %w", err)
+		return nil, fmt.Errorf("failed to unmarshal API response: %w", err)
 	}
 
 	// ✅ Handle 202 Accepted: Return response for polling
@@ -293,26 +310,63 @@ func pollForCompletion(step structs.Step, dataStore map[string]interface{}) erro
 				return fmt.Errorf("❌ Error decoding polling response: %v", err)
 			}
 
-			logrus.Debugf("📊 Polling Response: %+v\n", responseData)
+			prettyJSON, _ := json.MarshalIndent(responseData, "", "    ")
+			logrus.Debugf("📊 Polling Response: %+s\n", string(prettyJSON))
 
 			if msg, exists := responseData["message"]; exists {
 				log.Printf("❌ API Error: %v\n", msg)
 				return fmt.Errorf("❌ Polling failed: API error '%v'", msg)
 			}
 
-			currentStatus, exists := responseData["status"]
-			if !exists {
-				logrus.Warnf("⚠️ Warning: Expected polling key 'status' not found in response\n")
-				logrus.Warnf("⏳ Retrying in %.0f seconds...\n", interval)
+			// 🔍 Extract and check polling status dynamically
+			var currentStatus string
+			for placeholder, responseKey := range step.ResponsePlaceholders {
+				if placeholder == "status" { // Only extract "status" for polling
+					if responseKeyStr, ok := responseKey.(string); ok {
+						extractedValue := ExtractByPath(responseData, responseKeyStr)
+						if extractedValue != "" {
+							currentStatus = extractedValue
+							logrus.Debugf("🔑 Extracted status: '%s' = %v for polling comparison\n", placeholder, extractedValue)
+						} else {
+							logrus.Warnf("⚠️ Warning: Expected response key '%s' not found in API response for step '%s'\n", responseKeyStr, step.Name)
+						}
+					} else {
+						logrus.Warnf("❌ Error: Response key for placeholder '%s' is not a string in step '%s'\n", placeholder, step.Name)
+					}
+				}
+			}
+
+			// If no status was extracted, retry
+			if currentStatus == "" {
+				logrus.Warnf("⚠️ Warning: No status extracted, retrying in %.0f seconds...\n", interval)
 				time.Sleep(time.Duration(interval) * time.Second)
 				continue
 			}
 
 			logrus.Debugf("🔍 Current Status: %v | Target: %s\n", currentStatus, targetValue)
 
+			// ✅ If the status matches the "until" condition, extract other placeholders
 			if currentStatus == targetValue {
 				logrus.Debugf("✅ Polling complete! Step '%s' reached status '%s'\n", step.Name, targetValue)
-				return nil
+
+				// Extract and store additional placeholders (like image_id)
+				for placeholder, responseKey := range step.ResponsePlaceholders {
+					if placeholder != "status" { // Ignore status, we already checked it
+						if responseKeyStr, ok := responseKey.(string); ok {
+							extractedValue := ExtractByPath(responseData, responseKeyStr)
+							if extractedValue != "" {
+								dataStore[placeholder] = extractedValue
+								logrus.Debugf("🔑 Stored '%s' = %v for future use\n", placeholder, extractedValue)
+							} else {
+								logrus.Warnf("⚠️ Warning: Expected response key '%s' not found in API response for step '%s'\n", responseKeyStr, step.Name)
+							}
+						} else {
+							logrus.Errorf("❌ Error: Response key for placeholder '%s' is not a string in step '%s'\n", placeholder, step.Name)
+						}
+					}
+				}
+
+				return nil // Exit polling loop
 			}
 
 			logrus.Debugf("⏳ Status: %v | Retrying in %.0f seconds...\n", currentStatus, interval)

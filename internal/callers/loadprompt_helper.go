@@ -47,7 +47,7 @@ func replacePlaceholders(text, initPrompt, userPrompt string) string {
 }
 
 // Extract intent detections response from the api return using the provided response path
-func extractByPath(data interface{}, path string) string {
+func ExtractByPath(data interface{}, path string) string {
 	keys := strings.Split(path, ".") // Split "choices.0.message.content" into ["choices", "0", "message", "content"]
 	var current interface{} = data   //used to keep track of where we are in the JSON structure
 
@@ -62,7 +62,7 @@ func extractByPath(data interface{}, path string) string {
 		case []interface{}:
 			index, err := parseIndex(key) //convert string to int
 			if err != nil || index < 0 || index >= len(v) {
-				logrus.Error("\nError parsing index of intent detection response:", err)
+				logrus.Error("\nError parsing index of intent detection response: (This Comment needs to be updated, being used in multiple places)", err)
 				return "" // return empty string if index is invalid
 			}
 			current = v[index] //update current to array element
