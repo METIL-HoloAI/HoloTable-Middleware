@@ -7,5 +7,5 @@ import (
 )
 
 func CheckForKeyword(message string) bool {
-	return strings.Contains(message, config.SpeechToText.LiveTranscription.Keyword)
+	return strings.Contains(message, config.SpeechToText.Keyword)
 }

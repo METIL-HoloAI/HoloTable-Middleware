@@ -31,7 +31,7 @@ func SendAudio(audio []byte) {
 
 func InitializeVosk() {
 	var err error
-	vosk, _, err = websocket.DefaultDialer.Dial(config.SpeechToText.LiveTranscription.WebsocketURL, nil)
+	vosk, _, err = websocket.DefaultDialer.Dial(config.SpeechToText.VoskURL, nil)
 	if err != nil {
 		log.Fatal("Failed to open Vosk WebSocket connection: ", err)
 	}

@@ -1,18 +1,2 @@
-# ask sponsor next meeting if we should even make stt modular or just stick to vosk for the whole thing, not just keyword recognition
-liveTranscription:
-  websocketURL: ws://localhost:2700
-  keyword: "quantum computer"
-speechToTextAPI:
-  # this is currently  for whisper
-  endpoint: "https://api.openai.com/v1/audio/transcriptions"
-  method: "POST"
-  headers:
-    Authorization: "Bearer $SPEECH_TO_TEXT_API_KEY"
-    Content-Type: "multipart/form-data"
-  payload:
-    model: "whisper-1"
-    # file: %audiofile 
-    # temporarily commented out until STT can store the segmented audio after the keyword as a file
-    # then the saved audio file will be sent off to stt api
-
-  responsePath: "text" # for whisper, with default usage, the transcribed text is the only thing in the response object
+VoskURL: ws://localhost:2700
+keyword: "quantum computer"
