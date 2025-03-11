@@ -26,6 +26,12 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Start the vosk client
 	listeners.InitializeVosk()
+	defer listeners.CloseVosk()
+
+	voskResponse := make(chan string)
+	quitVosk := make(chan bool)
+
+	go listeners.GetResponse(voskResponse, quitVosk)
 
 	// Continuously read messages from the client
 	for {
@@ -37,24 +43,28 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 
 		// Process only binary messages (the audio data)
 		if messageType == websocket.BinaryMessage {
-			log.Printf("Received %d bytes of audio data", len(message))
-			keywordDetected := listeners.TranscribeAudio(message)
+			listeners.SendAudio(message)
 
-			if keywordDetected {
-				err = conn.WriteMessage(websocket.TextMessage, []byte("Keyword Detected"))
-				if err != nil {
-					log.Fatal("Failed to send keyword detected message to client, ", err)
+			select {
+			case text := <-voskResponse:
+				log.Printf("Got response from Vosk: %s", text)
+				if listeners.CheckForKeyword(text) {
+					err = conn.WriteMessage(websocket.TextMessage, []byte("Keyword Detected"))
+					if err != nil {
+						log.Println("Failed to send keyword detected message to client:", err)
+					}
 				}
-				// TODO: mark next message to be sent to stt service
+			default:
+				// Keep going
 			}
-			// Here you might decode or forward the audio data for further processing
+		} else if messageType == websocket.TextMessage {
+			log.Println("Text message recieved: ", message)
 		} else {
 			log.Println("Non-binary message received; ignoring.")
 		}
 	}
 
-	// Close the vosk connection
-	listeners.CloseVosk()
+	quitVosk <- true
 }
 
 func EstablishConnection() {
