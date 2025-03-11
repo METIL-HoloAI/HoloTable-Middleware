@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"log"
 	"os"
 
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config"
