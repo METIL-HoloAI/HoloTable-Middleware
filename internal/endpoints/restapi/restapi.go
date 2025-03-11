@@ -15,7 +15,7 @@ import (
 // https://medium.com/better-programming/building-a-simple-rest-api-in-go-with-gorilla-mux-892ceb128c6f
 // send text
 
-func YamlApi() {
+func StartRestAPI() {
 	router := mux.NewRouter()
 	router.HandleFunc("/config/{name}", getYamlHandler).Methods("GET")
 	router.HandleFunc("/config/{name}", putYamlHandler).Methods("PUT")
