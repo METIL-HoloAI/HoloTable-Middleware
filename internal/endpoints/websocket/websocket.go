@@ -47,7 +47,6 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 
 			select {
 			case text := <-voskResponse:
-				log.Printf("Got response from Vosk: %s", text)
 				if listeners.CheckForKeyword(text) {
 					err = conn.WriteMessage(websocket.TextMessage, []byte("Keyword Detected"))
 					if err != nil {
@@ -68,7 +67,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func EstablishConnection() {
-	http.HandleFunc("/ws/audio", wsHandler)
+	http.HandleFunc("/ws", wsHandler)
 	log.Println("Server listening on :8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
