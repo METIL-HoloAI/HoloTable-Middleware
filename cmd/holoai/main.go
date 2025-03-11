@@ -34,7 +34,7 @@ func main() {
 
 	if config.General.OpenWebsocket {
 		go websocket.EstablishConnection()
-		restapi.YamlApi()
+		restapi.StartRestAPI()
 		utils.WaitForInterrupt()
 	} else {
 		listeners.StartTextListener()
