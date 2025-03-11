@@ -70,6 +70,7 @@ func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, wor
 		logrus.Debugf("\n📦 Final Payload for API Call: %+s\n", PrettyPrintJSON(payload))
 
 		// Make the API call passing what we jsut created above
+		var responseData map[string]interface{}
 		responseData, err := makeAPICall(workflowConfig, payload)
 		if err != nil {
 			logrus.Errorf("\n❌ Error in step '%s': %v\n", step.Name, err)
@@ -102,7 +103,7 @@ func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, wor
 		// Handle polling if required
 		if step.Poll != nil {
 			logrus.Debugf("\n🔍 Stored Task ID for Polling: %v\n", dataStore["preview_task_id"])
-			err = pollForCompletion(step, dataStore)
+			err = pollForCompletion(step, dataStore, responseData)
 			if err != nil {
 				logrus.Errorf("polling error in step '%s': %v\n", step.Name, err)
 				return
@@ -121,15 +122,11 @@ func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, wor
 				fmt.Printf("Storage failed: %v", err)
 				return
 			}
-			fmt.Println("File ID:", filePath)
 
-			fmt.Printf("Content successfully stored at: %s\n", filePath)
-
-			fmt.Println("🎉 Workflow execution completed successfully.")
+			logrus.Tracef("Content successfully stored at: %s\n", filePath)
+			logrus.Debugf("🎉 Workflow execution completed successfully.")
 		}
 	}
-
-	logrus.Debugf("🎉 Workflow execution completed successfully.")
 }
 
 func buildPayload(intentDetectionResponse structs.IntentDetectionResponse) map[string]interface{} {
@@ -253,7 +250,7 @@ func deepReplace(data interface{}, dataStore map[string]interface{}) interface{}
 }
 
 // Handles polling for async workflows
-func pollForCompletion(step structs.Step, dataStore map[string]interface{}) error {
+func pollForCompletion(step structs.Step, dataStore map[string]interface{}, responseData map[string]interface{}) error {
 	client := &http.Client{}
 
 	targetValue, ok := step.Poll["until"].(string)
@@ -305,7 +302,7 @@ func pollForCompletion(step structs.Step, dataStore map[string]interface{}) erro
 			}
 			defer resp.Body.Close()
 
-			var responseData map[string]interface{}
+			// var responseData map[string]interface{}
 			if err := json.NewDecoder(resp.Body).Decode(&responseData); err != nil {
 				return fmt.Errorf("❌ Error decoding polling response: %v", err)
 			}
@@ -356,7 +353,7 @@ func pollForCompletion(step structs.Step, dataStore map[string]interface{}) erro
 							extractedValue := ExtractByPath(responseData, responseKeyStr)
 							if extractedValue != "" {
 								dataStore[placeholder] = extractedValue
-								logrus.Debugf("🔑 Stored '%s' = %v for future use\n", placeholder, extractedValue)
+								logrus.Debugf("in polling step 🔑 Stored '%s' = %v for future use\n", placeholder, extractedValue)
 							} else {
 								logrus.Warnf("⚠️ Warning: Expected response key '%s' not found in API response for step '%s'\n", responseKeyStr, step.Name)
 							}

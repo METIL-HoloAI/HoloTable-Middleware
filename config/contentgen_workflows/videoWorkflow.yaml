@@ -19,11 +19,11 @@ video:
       response_placeholders:
         status: state
         video_url: generation.output.video_url
+        response_path: "assets.video"
+        response_format: "url"
+        file_id_path: "id"
+        file_extention: "mp4"
       poll:
         until: "completed"
         interval: 10
-      response_placeholders:
-        response_path: "output.video_url"
-        response_format: "url"
-        file_id_path: "id"
-        file_extention: "jpg"
+        
