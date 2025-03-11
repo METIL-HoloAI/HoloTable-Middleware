@@ -30,7 +30,7 @@ func main() {
 
 	database.Init(db)
 
-	restapi.YamlApi()
+	restapi.StartRestAPI()
 
 	// Check how user wants to listen for input
 	// and start that listener
