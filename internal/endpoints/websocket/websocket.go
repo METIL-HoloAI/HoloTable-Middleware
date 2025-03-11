@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/callers"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/listeners"
 	"github.com/gorilla/websocket"
 )
@@ -31,6 +32,8 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 	voskResponse := make(chan string)
 	quitVosk := make(chan bool)
 
+	keywordActive := false
+
 	go listeners.GetResponse(voskResponse, quitVosk)
 
 	// Continuously read messages from the client
@@ -48,7 +51,18 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 			select {
 			case text := <-voskResponse:
 				if listeners.CheckForKeyword(text) {
-					err = conn.WriteMessage(websocket.TextMessage, []byte("Keyword Detected"))
+					err = conn.WriteMessage(websocket.TextMessage, []byte("Keyword detected"))
+					if err != nil {
+						log.Println("Failed to send keyword detected message to client:", err)
+					}
+
+					keywordActive = true
+				}
+
+				if keywordActive {
+					callers.StartIntentDetection(text)
+					keywordActive = false
+					err = conn.WriteMessage(websocket.TextMessage, []byte("Finished recording"))
 					if err != nil {
 						log.Println("Failed to send keyword detected message to client:", err)
 					}
@@ -57,9 +71,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 				// Keep going
 			}
 		} else if messageType == websocket.TextMessage {
-			log.Println("Text message recieved: ", message)
-		} else {
-			log.Println("Non-binary message received; ignoring.")
+			callers.StartIntentDetection(string(message))
 		}
 	}
 
