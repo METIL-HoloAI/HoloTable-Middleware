@@ -22,9 +22,8 @@ video:
       poll:
         until: "completed"
         interval: 10
-
-    # - name: "fetch_final_video"
-    #   method: "GET"
-    #   url: "{video_url}"
-    #   response_placeholders:
-    #     video_file: video_url  # The final generated video file
+      response_placeholders:
+        response_path: "output.video_url"
+        response_format: "url"
+        file_id_path: "id"
+        file_extention: "jpg"
