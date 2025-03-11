@@ -1,43 +1,30 @@
 video:
   steps:
-    - name: "authenticate_and_get_token"
+    - name: "submit_text_to_video_generation"
       method: "POST"
-      url: "https://api.klingai.com/auth/token"
+      url: "https://api.lumalabs.ai/dream-machine/v1/generations"
       headers:
-        Content-Type: "application/json"
-      body:
-        access_key: "$ACCESS_KEY"
-        secret_key: "$SECRET_KEY"
-      response_placeholders:
-        api_token: token  # Extract the API token from the response
-
-    - name: "submit_video_generation_task"
-      method: "POST"
-      url: "https://api.klingai.com/v1/video/generate"
-      headers:
-        Authorization: "Bearer {api_token}"
+        Authorization: "Bearer &VIDEO_API_KEY"
         Content-Type: "application/json"
       body:
         intent_detection_step: true
       response_placeholders:
-        task_id: task_id        # Extract the task ID from the response
+        generation_id: id
 
     - name: "poll_video_generation_status"
       method: "GET"
-      url: "https://api.klingai.com/v1/video/status/{task_id}"
+      url: "https://api.lumalabs.ai/dream-machine/v1/generations/{generation_id}"
       headers:
-        Authorization: "Bearer {api_token}"
+        Authorization: "Bearer &VIDEO_API_KEY"
       response_placeholders:
-        status: status
-        video_url: result.url   # Extract the URL of the generated video
+        status: state
+        video_url: generation.output.video_url
       poll:
-        until: "SUCCEEDED"
-        interval: 10            # Poll every 10 seconds until the task succeeds
+        until: "completed"
+        interval: 10
 
-    - name: "fetch_generated_video"
-      method: "GET"
-      url: "{video_url}"
-      headers:
-        Authorization: "Bearer {api_token}"
-      response_placeholders:
-        video_file: video_content  # The binary content of the video file
+    # - name: "fetch_final_video"
+    #   method: "GET"
+    #   url: "{video_url}"
+    #   response_placeholders:
+    #     video_file: video_url  # The final generated video file
