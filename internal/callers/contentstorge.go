@@ -50,7 +50,7 @@ func ContentStorage(fileType, format, fileID, fileExtention string, content []by
 	}
 
 	// Create the subdirectory path.
-	directory := filepath.Join(General.DataDir, tableName)
+	directory := filepath.Join("../../content", tableName)
 	// Ensure the directory exists.
 	if err := os.MkdirAll(directory, os.ModePerm); err != nil {
 		return nil, "", fmt.Errorf("failed to create directory: %v", err)
