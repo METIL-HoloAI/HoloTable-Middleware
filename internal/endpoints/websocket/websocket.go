@@ -50,6 +50,15 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 
 			select {
 			case text := <-voskResponse:
+				if keywordActive {
+					go callers.StartIntentDetection(text)
+					keywordActive = false
+					err = conn.WriteMessage(websocket.TextMessage, []byte("Finished recording"))
+					if err != nil {
+						log.Println("Failed to send keyword detected message to client:", err)
+					}
+				}
+
 				if listeners.CheckForKeyword(text) {
 					err = conn.WriteMessage(websocket.TextMessage, []byte("Keyword detected"))
 					if err != nil {
@@ -59,14 +68,6 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 					keywordActive = true
 				}
 
-				if keywordActive {
-					go callers.StartIntentDetection(text)
-					keywordActive = false
-					err = conn.WriteMessage(websocket.TextMessage, []byte("Finished recording"))
-					if err != nil {
-						log.Println("Failed to send keyword detected message to client:", err)
-					}
-				}
 			default:
 				// Keep going
 			}
