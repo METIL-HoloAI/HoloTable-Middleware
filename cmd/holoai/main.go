@@ -7,7 +7,9 @@ import (
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/database"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/endpoints/restapi"
+	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/endpoints/websocket"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/listeners"
+	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/utils"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/sirupsen/logrus"
 )
@@ -30,15 +32,11 @@ func main() {
 
 	database.Init(db)
 
-	restapi.StartRestAPI()
-
-	// Check how user wants to listen for input
-	// and start that listener
-	if config.General.Listener == "mic" {
-		logrus.Info("Microphone Listener")
-	} else if config.General.Listener == "text" {
-		listeners.StartTextListener()
+	if config.General.OpenWebsocket {
+		go websocket.EstablishConnection()
+		restapi.StartRestAPI()
+		utils.WaitForInterrupt()
 	} else {
-		logrus.Error("Invalid listener option in general.yaml")
+		listeners.StartTextListener()
 	}
 }

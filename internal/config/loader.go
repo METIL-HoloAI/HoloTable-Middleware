@@ -12,6 +12,7 @@ import (
 )
 
 var General structs.GeneralSettings
+var SpeechToText structs.SpeechToTextSettings
 var IntentDetection structs.IntentDetection
 var ImageGen structs.APIConfig
 var VideoGen structs.APIConfig
@@ -34,6 +35,11 @@ func LoadYaml() {
 	ImageGen, err = getImage()
 	if err != nil {
 		logrus.Fatal("Error parsing imagegen.yaml: ", err)
+	}
+
+	SpeechToText, err = getSpeechToText()
+	if err != nil {
+		logrus.Fatal("Error parsing speechtotext.yaml: ", err)
 	}
 
 	VideoGen, err = getVideo()
@@ -114,6 +120,25 @@ func getIntentDetection() (structs.IntentDetection, error) {
 	var settings structs.IntentDetection
 	if err := yaml.Unmarshal(file, &settings); err != nil {
 		return structs.IntentDetection{}, err
+	}
+
+	return settings, nil
+}
+
+func getSpeechToText() (structs.SpeechToTextSettings, error) {
+	configPath, err := getConfigPath("speechtotext.yaml")
+	if err != nil {
+		return structs.SpeechToTextSettings{}, err
+	}
+
+	file, err := os.ReadFile(configPath)
+	if err != nil {
+		return structs.SpeechToTextSettings{}, err
+	}
+
+	var settings structs.SpeechToTextSettings
+	if err := yaml.Unmarshal(file, &settings); err != nil {
+		return structs.SpeechToTextSettings{}, err
 	}
 
 	return settings, nil
