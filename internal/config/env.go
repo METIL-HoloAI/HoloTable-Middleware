@@ -1,38 +1,56 @@
 package config
 
 import (
-	"log"
 	"os"
 	"reflect"
 	"regexp"
 	"strings"
 
 	"github.com/joho/godotenv"
+	"github.com/sirupsen/logrus"
 )
 
 func loadEnv() {
 	envLoc, err := getConfigPath("../.env")
 	if err != nil {
-		log.Fatal("Error getting .env file path: ", err)
+		logrus.Fatal("Error getting .env file path: ", err)
 	}
 	// Load API keys
 	err = godotenv.Load(envLoc)
 	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
+		logrus.Fatalf("Error loading .env file: %v", err)
 	}
-
 	replaceEnv(reflect.ValueOf(&General).Elem())
 	replaceEnv(reflect.ValueOf(&IntentDetection).Elem())
+
 	replaceEnv(reflect.ValueOf(&ImageGen).Elem())
 	replaceEnv(reflect.ValueOf(&VideoGen).Elem())
 	replaceEnv(reflect.ValueOf(&GifGen).Elem())
 	replaceEnv(reflect.ValueOf(&ModelGen).Elem())
+
+	// MANUALLY TRAVERSE EACH WORKFLOW & STEP TO REPLACE ENV VARIABLES
+	for workflowKey, workflow := range Workflows {
+		for i := range workflow.Steps { // Iterate by reference to persist changes
+			logrus.Tracef("🔍 Searching for ENV keys within Workflow: '%s', Step: %d\n", workflowKey, i)
+
+			// Replace env variables inside Headers map
+			for headerKey, headerValue := range workflow.Steps[i].Headers {
+				workflow.Steps[i].Headers[headerKey] = os.ExpandEnv(headerValue) // ✅ Direct replacement
+			}
+
+			// Apply `replaceEnv()` for deeper replacements
+			replaceEnv(reflect.ValueOf(&workflow.Steps[i]).Elem())
+
+			// apply changes back into `Workflows`
+			Workflows[workflowKey] = workflow
+		}
+	}
 }
 
 func replaceEnv(reflectedItem reflect.Value) {
 	regex, err := regexp.Compile(`\&[A-Z_]+`)
 	if err != nil {
-		log.Fatal("Failed to compile regex, ", err)
+		logrus.Fatal("Failed to compile regex, ", err)
 	}
 
 	switch reflectedItem.Kind() {
