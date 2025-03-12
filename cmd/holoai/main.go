@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config"
+	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/database"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/endpoints/restapi"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/endpoints/websocket"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/listeners"
@@ -15,7 +16,9 @@ import (
 )
 
 func main() {
-	// config.LoadYaml()
+
+	// Load configuration
+	config.LoadYaml()
 
 	// Initialize logger
 	config.InitLogger()
@@ -30,7 +33,7 @@ func main() {
 	}
 	defer db.Close()
 
-	// database.Init(db)
+	database.Init(db)
 
 	// Start WebSocket server
 	go unityserver.StartWebSocketServer()
