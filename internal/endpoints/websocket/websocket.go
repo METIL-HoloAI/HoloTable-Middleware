@@ -60,7 +60,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 				}
 
 				if keywordActive {
-					callers.StartIntentDetection(text)
+					go callers.StartIntentDetection(text)
 					keywordActive = false
 					err = conn.WriteMessage(websocket.TextMessage, []byte("Finished recording"))
 					if err != nil {
@@ -71,7 +71,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 				// Keep going
 			}
 		} else if messageType == websocket.TextMessage {
-			callers.StartIntentDetection(string(message))
+			go callers.StartIntentDetection(string(message))
 		}
 	}
 
