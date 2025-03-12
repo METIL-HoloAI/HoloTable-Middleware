@@ -29,6 +29,9 @@ go.work.sum
 # Data storage directory
 datastorage/
 
+# Generated Content
+content/
+
 # Test db
 test.db
 

@@ -42,12 +42,11 @@ gif:
       response_placeholders:
         status: generations_by_pk.status
         video_url: generations_by_pk.generated_images.0.motionMP4URL
+        response_path: "generations_by_pk.generated_images.motionMP4URL"
+        response_format: "url"
+        file_id_path: "generations_by_pk.generated_images.id"
+        file_extention: "mp4" 
       poll:
         until: "COMPLETE"
         interval: 10
-
-    # - name: "fetch_final_video"
-    #   method: "GET"
-    #   url: "{video_url}"
-    #   response_placeholders:
-    #     video_file: video_url  # The final motion video file
+        
