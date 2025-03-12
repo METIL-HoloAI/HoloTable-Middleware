@@ -1,10 +1,6 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
-	"os"
-
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/unityserver"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -24,20 +20,11 @@ func main() {
 
 	// database.Init(db)
 
-	// Start WebSocket server
+	// Start WebSocket server // IMPORTANT TO ADD THIS
 	go unityserver.StartWebSocketServer()
 	<-unityserver.ClientReady
 
-	// Loop to call GenerateAndSendContent multiple times
-	reader := bufio.NewReader(os.Stdin)
-	for {
-		fmt.Print("Press Enter to send content to Unity, or type 'exit' to quit: ")
-		input, _ := reader.ReadString('\n')
-		if input == "exit\n" {
-			break
-		}
-		unityserver.GenerateAndSendContent()
-	}
+	// unityserver.ExportAsset(fileName, extension, filePath) // HOW TO call my function
 
 	// Check how user wants to listen for input
 	// and start that listener
