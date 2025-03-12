@@ -24,20 +24,20 @@ func main() {
 
 	// database.Init(db)
 
-    // Start WebSocket server
-    go unityserver.StartWebSocketServer()
-    <-unityserver.ClientReady
+	// Start WebSocket server
+	go unityserver.StartWebSocketServer()
+	<-unityserver.ClientReady
 
-    // Loop to call GenerateAndSendContent multiple times
-    reader := bufio.NewReader(os.Stdin)
-    for {
-        fmt.Print("Press Enter to send content to Unity, or type 'exit' to quit: ")
-        input, _ := reader.ReadString('\n')
-        if input == "exit\n" {
-            break
-        }
-        unityserver.GenerateAndSendContent()
-    }}
+	// Loop to call GenerateAndSendContent multiple times
+	reader := bufio.NewReader(os.Stdin)
+	for {
+		fmt.Print("Press Enter to send content to Unity, or type 'exit' to quit: ")
+		input, _ := reader.ReadString('\n')
+		if input == "exit\n" {
+			break
+		}
+		unityserver.GenerateAndSendContent()
+	}
 
 	// Check how user wants to listen for input
 	// and start that listener
