@@ -32,7 +32,7 @@ func main() {
 
 	// database.Init(db)
 
-	// Start WebSocket server // IMPORTANT TO ADD THIS
+	// Start WebSocket server
 	go unityserver.StartWebSocketServer()
 	<-unityserver.ClientReady
 
