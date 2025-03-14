@@ -8,10 +8,6 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-const (
-	ASSETS_DIR = "./internal/unityserver/3dModelsTest" // Asset directory
-)
-
 func ExportAsset(fileName, extension, filePath string) {
 	assetMsg := assetstruct.AssetMessage{
 		Type:      "asset",
