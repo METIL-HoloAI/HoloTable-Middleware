@@ -9,12 +9,15 @@ import (
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/endpoints/restapi"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/endpoints/websocket"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/listeners"
+	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/unityserver"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/utils"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/sirupsen/logrus"
 )
 
 func main() {
+
+	// Load configuration
 	config.LoadYaml()
 
 	// Initialize logger
@@ -31,6 +34,12 @@ func main() {
 	defer db.Close()
 
 	database.Init(db)
+
+	// Start WebSocket server
+	go unityserver.StartWebSocketServer()
+	<-unityserver.ClientReady
+
+	// unityserver.ExportAsset(fileName, extension, filePath) // HOW TO call my function
 
 	if config.General.OpenWebsocket {
 		go websocket.EstablishConnection()
