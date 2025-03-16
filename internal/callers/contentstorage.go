@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config/structs"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/database"
 )
@@ -50,7 +51,7 @@ func ContentStorage(fileType, format, fileID, fileExtention string, content []by
 	}
 
 	// Create the subdirectory path.
-	directory := filepath.Join("../../content", tableName)
+	directory := filepath.Join(config.General.DataDir, "/content", tableName)
 	// Ensure the directory exists.
 	if err := os.MkdirAll(directory, os.ModePerm); err != nil {
 		return nil, "", fmt.Errorf("failed to create directory: %v", err)
