@@ -27,7 +27,7 @@ func StartWebSocketServer() {
 }
 
 func startWebSocketServer() {
-	http.HandleFunc("/ws", handleWebSocket)
+	http.HandleFunc("/ws/unity", handleWebSocket)
 	log.Println("WebSocket server running on :8081")
 	log.Fatal(http.ListenAndServe(":8081", nil))
 }
