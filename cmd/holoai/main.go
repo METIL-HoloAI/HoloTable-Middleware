@@ -12,8 +12,6 @@ import (
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/endpoints/websocket"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/listeners"
 
-	// "time"
-
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/unityserver"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/utils"
 	_ "github.com/mattn/go-sqlite3"
@@ -44,20 +42,6 @@ func main() {
 	go unityserver.StartWebSocketServer()
 	<-unityserver.ClientReady
 	log.Println("Unity client connected")
-
-	// Manual TESTING of UnityServer
-	// unityserver.ExportAsset("catLion", "PNG", "../test/catLion.PNG")
-	// time.Sleep(3 * time.Second)
-	// unityserver.ExportAsset("table", "glb", "../test/table.glb")
-	// time.Sleep(5 * time.Second)
-	// unityserver.ExportAsset("movingImage", "mp4", "../test/movingImage.mp4")
-	// time.Sleep(5 * time.Second)
-	// unityserver.ExportAsset("Dragonflying2", "mp4", "../test/Dragonflying2.mp4")
-	// time.Sleep(5 * time.Second)
-	// unityserver.ExportAsset("Cat2", "mp4", "../test/Cat2.mp4")
-	// time.Sleep(5 * time.Second)
-	// unityserver.ExportAsset("cat", "mp4", "../test/cat.mp4")
-	// time.Sleep(5 * time.Second)
 
 	if config.General.OpenWebsocket {
 		go websocket.EstablishConnection()
