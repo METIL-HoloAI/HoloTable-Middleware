@@ -9,11 +9,28 @@ import (
 )
 
 func ExportAsset(fileName, extension, filePath string) {
-	assetMsg := assetstruct.AssetMessage{
+	assetMsg := assetstruct.AssetMessageFile{
 		Type:      "asset",
 		Name:      fileName,
 		Extension: extension,
 		FilePath:  filePath,
+	}
+
+	response, err := json.Marshal(assetMsg)
+	if err != nil {
+		log.Println("Failed to marshal asset message:", err)
+		return
+	}
+
+	SendToUnity(response)
+}
+
+func ExportAssetData(fileName, extension, data []byte) {
+	assetMsg := assetstruct.AssetMessageData{
+		Type:      "asset",
+		Name:      fileName,
+		Extension: extension,
+		Data:      data,
 	}
 
 	response, err := json.Marshal(assetMsg)

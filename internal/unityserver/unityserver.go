@@ -15,6 +15,7 @@ var upgrader = websocket.Upgrader{
 
 var ClientReady = make(chan bool)
 var Conn *websocket.Conn
+var isUsingFilepath = false
 
 func StartWebSocketServer() {
 	go startWebSocketServer()
@@ -49,8 +50,15 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if string(msg) == "READY" {
-			log.Println("Unity client is ready")
+		// determines if Unity has connected sucessfully and is ready to receive messages
+		// also determines the input format Unity expects
+		if string(msg) == "FILEPATHS" {
+			isUsingFilepath = true
+			log.Println("Unity client is ready and waiting for file paths")
+			ClientReady <- true
+		} else if string(msg) == "DATA" {
+			isUsingFilepath = false
+			log.Println("Unity client is ready and waiting for data")
 			ClientReady <- true
 		} else {
 			log.Printf("Received message: %s", msg)

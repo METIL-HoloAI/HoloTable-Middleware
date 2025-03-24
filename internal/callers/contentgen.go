@@ -118,7 +118,7 @@ func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, wor
 			}
 			fmt.Println("Extracted URL:", extractedURL)
 
-			_, filePath, err := ContentStorage(intentDetectionResponse.ContentType, extractedFormat, fileID, fileExtention, []byte(extractedURL))
+			dataBytes, filePath, err := ContentStorage(intentDetectionResponse.ContentType, extractedFormat, fileID, fileExtention, []byte(extractedURL))
 			if err != nil {
 				fmt.Printf("Storage failed: %v", err)
 				return
@@ -126,7 +126,13 @@ func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, wor
 			logrus.Tracef("Content successfully stored at: %s\n", filePath)
 			logrus.Debugf("🎉 Workflow execution completed successfully.")
 
-			unityserver.ExportAsset(fileID, fileExtention, filePath)
+			if unityserver.IsUsingFilepath {
+				logrus.Debug("About to send file paths for asset export.")
+				unityserver.ExportAssetFile(fileID, fileExtention, filePath)
+			} else {
+				logrus.Debug("About to send raw data for asset export.")
+				unityserver.ExportAssetData(fileID, fileExtention, dataBytes)
+			}
 		}
 	}
 }
