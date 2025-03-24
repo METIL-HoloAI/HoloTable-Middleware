@@ -8,7 +8,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func ExportAsset(fileName, extension, filePath string) {
+func ExportAssetFile(fileName, extension, filePath string) {
 	assetMsg := assetstruct.AssetMessageFile{
 		Type:      "asset",
 		Name:      fileName,
@@ -25,7 +25,7 @@ func ExportAsset(fileName, extension, filePath string) {
 	SendToUnity(response)
 }
 
-func ExportAssetData(fileName, extension, data []byte) {
+func ExportAssetData(fileName, extension string, data []byte) {
 	assetMsg := assetstruct.AssetMessageData{
 		Type:      "asset",
 		Name:      fileName,

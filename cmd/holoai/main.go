@@ -42,7 +42,6 @@ func main() {
 
 	// Start WebSocket server
 	go unityserver.StartWebSocketServer()
-	log.Println("Waiting for Unity client to connect...")
 	<-unityserver.ClientReady
 	log.Println("Unity client connected")
 
