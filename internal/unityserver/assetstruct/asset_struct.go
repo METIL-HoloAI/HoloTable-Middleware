@@ -11,5 +11,5 @@ type AssetMessageData struct {
 	Type      string `json:"type"`
 	Name      string `json:"name"`
 	Extension string `json:"extension"`
-	Data      []byte `json:"data,omitempty"`
+	FileData  []byte `json:"fileData,omitempty"`
 }

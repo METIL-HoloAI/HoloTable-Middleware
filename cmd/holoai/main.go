@@ -44,6 +44,14 @@ func main() {
 	<-unityserver.ClientReady
 	log.Println("Unity client connected")
 
+	filepath := "C:\\Users\\anala\\Desktop\\WebSocketUnity\\Assets\\catLion.jpeg"
+	data, err := ReadFileBytes(filepath)
+	if err != nil {
+		logrus.Fatalf("Failed to read file bytes: %v", err)
+	}
+	log.Println("File read successfully" + filepath)
+	unityserver.ExportAssetData("catLion", "jpeg", data)
+
 	if config.General.OpenWebsocket {
 		go websocket.EstablishConnection()
 		restapi.StartRestAPI()

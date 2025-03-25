@@ -30,7 +30,7 @@ func ExportAssetData(fileName, extension string, data []byte) {
 		Type:      "asset",
 		Name:      fileName,
 		Extension: extension,
-		Data:      data,
+		FileData:  data,
 	}
 
 	response, err := json.Marshal(assetMsg)
