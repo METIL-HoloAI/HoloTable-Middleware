@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"os"
 
 	"log"
@@ -44,14 +43,6 @@ func main() {
 	<-unityserver.ClientReady
 	log.Println("Unity client connected")
 
-	filepath := "C:\\Users\\anala\\Desktop\\WebSocketUnity\\Assets\\catLion.jpeg"
-	data, err := ReadFileBytes(filepath)
-	if err != nil {
-		logrus.Fatalf("Failed to read file bytes: %v", err)
-	}
-	log.Println("File read successfully" + filepath)
-	unityserver.ExportAssetData("catLion", "jpeg", data)
-
 	if config.General.OpenWebsocket {
 		go websocket.EstablishConnection()
 		restapi.StartRestAPI()
@@ -59,27 +50,4 @@ func main() {
 	} else {
 		listeners.StartTextListener()
 	}
-}
-
-func ReadFileBytes(filePath string) ([]byte, error) {
-	file, err := os.Open(filePath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to open file: %w", err)
-	}
-	defer file.Close()
-
-	fileInfo, err := file.Stat()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get file info: %w", err)
-	}
-
-	fileSize := fileInfo.Size()
-	data := make([]byte, fileSize)
-
-	_, err = file.Read(data)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read file: %w", err)
-	}
-
-	return data, nil
 }
