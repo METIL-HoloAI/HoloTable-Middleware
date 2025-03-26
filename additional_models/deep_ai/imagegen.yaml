@@ -1,0 +1,8 @@
+endpoint: "https://api.deepai.org/api/text2img"
+method: "POST"
+headers:
+  api-key: "&IMAGE_API_KEY"
+requiredParameters:
+  text:
+    description: "A text description of the desired image(s)."
+    options: [] 
