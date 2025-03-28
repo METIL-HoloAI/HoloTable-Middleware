@@ -41,12 +41,12 @@ gif:
         Authorization: "Bearer &GIF_API_KEY"
       response_placeholders:
         status: generations_by_pk.status
-        video_url: generations_by_pk.generated_images.0.motionMP4URL
-        response_path: "generations_by_pk.generated_images.motionMP4URL"
-        response_format: "url"
-        file_id_path: "generations_by_pk.generated_images.id"
-        file_extention: "mp4" 
       poll:
         until: "COMPLETE"
         interval: 10
+      content_extraction:
+        response_path: "generations_by_pk.generated_images.motionMP4URL" #should be this once 0 index gets fixed generations_by_pk.generated_images.0.motionMP4URL
+        response_format: "url"
+        file_id_path: "generations_by_pk.generated_images.id"
+        file_extention: "mp4" 
         
