@@ -51,7 +51,7 @@ func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, wor
 		} else {
 			apiURL = deepReplace(step.URL, dataStore).(string)
 		}
-		logrus.Debugf("\n🔄 Updated API URL: %s\n", apiURL)
+		logrus.Debugf("\n🔄 Updated API URL: %s\n\n", apiURL)
 
 		// put together API request configuration for sending to makeAPICall()
 		workflowConfig := structs.APIConfig{
@@ -67,8 +67,8 @@ func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, wor
 		} else {
 			payload = deepReplace(step.Body, dataStore).(map[string]interface{}) // Replace placeholders for later steps
 		}
-		logrus.Debugf("\n📦 Final Payload for API Call: %+s\n", workflowConfig)
-		logrus.Debugf("\n📦 Final Payload for API Call: %+s\n", PrettyPrintJSON(payload))
+		logrus.Debugf("\n📦 API Call Configuration for Step '%s': \nURL: %s,\n Method: %s,\n Headers: %+s\n\n", step.Name, workflowConfig.Endpoint, workflowConfig.Method, workflowConfig.Headers)
+		logrus.Debugf("\n📦 API Call Paylowd for Step '%s': %+s\n\n", step.Name, PrettyPrintJSON(payload))
 
 		// Make the API call passing what we jsut created above
 		var responseData map[string]interface{}
@@ -78,7 +78,7 @@ func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, wor
 			return
 		}
 
-		logrus.Debugf("\n✅ API Response for '%s': %+s\n", step.Name, responseData)
+		logrus.Debugf("\n✅ API Response for '%s': %+s\n\n", step.Name, PrettyPrintJSON(responseData))
 
 		//TODO
 		//if(this is the final step){
@@ -87,16 +87,16 @@ func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, wor
 
 		// **Extract & Store Response Data for Future Steps**
 		for placeholder, responseKey := range step.ResponsePlaceholders {
-			if responseKeyStr, ok := responseKey.(string); ok {
+			if responseKeyStr, ok := responseKey.(string); ok && step.Poll == nil {
 				// Use ExtractByPath to extract nested values dynamically
 				extractedValue := ExtractByPath(responseData, responseKeyStr)
-				if extractedValue != "" {
+				if extractedValue != "" && i != len(workflow.Steps)-1 {
 					dataStore[placeholder] = extractedValue
 					logrus.Tracef("🔑 Stored '%s' = %v for future use\n", placeholder, extractedValue)
 				} else {
 					logrus.Warnf("\n⚠️ Warning: Expected response key '%s' not found in API response for step '%s'\n", responseKeyStr, step.Name)
 				}
-			} else {
+			} else if step.Poll == nil {
 				logrus.Errorf("\n❌ Error: Response key for placeholder '%s' is not a string in step '%s'\n", placeholder, step.Name)
 			}
 		}
@@ -106,17 +106,18 @@ func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, wor
 			logrus.Debugf("\n🔍 Stored Task ID for Polling: %v\n", dataStore["preview_task_id"])
 			err = pollForCompletion(step, dataStore, responseData)
 			if err != nil {
-				logrus.Errorf("polling error in step '%s': %v\n", step.Name, err)
+				logrus.Errorf("\npolling error in step '%s': %v\n", step.Name, err)
 				return
 			}
 		}
+
 		if i == len(workflow.Steps)-1 {
 			extractedURL, extractedFormat, fileID, fileExtention, err := ContentExtraction(responseData, intentDetectionResponse.ContentType)
 			if err != nil {
 				fmt.Printf("Extraction failed: %v", err)
 				return
 			}
-			fmt.Println("Extracted URL:", extractedURL)
+			//fmt.Println("Extracted URL:", extractedURL)
 
 			dataBytes, filePath, err := ContentStorage(intentDetectionResponse.ContentType, extractedFormat, fileID, fileExtention, []byte(extractedURL))
 			if err != nil {
@@ -156,15 +157,15 @@ func makeAPICall(apiConfig structs.APIConfig, payload map[string]interface{}) (m
 	// Convert payload to JSON
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
-		logrus.WithError(err).Error("\nFailed to marshal payload:")
-		return nil, fmt.Errorf("failed to marshal payload: %w", err)
+		logrus.WithError(err).Error("\nFailed to marshal payload:\n")
+		return nil, fmt.Errorf("failed to marshal payload: %w\n", err)
 	}
 
 	// Create HTTP request
 	req, err := http.NewRequest(apiConfig.Method, apiConfig.Endpoint, bytes.NewBuffer(payloadBytes))
 	if err != nil {
 		logrus.WithError(err).Error("\nFailed to create request:")
-		return nil, fmt.Errorf("failed to create request: %w", err)
+		return nil, fmt.Errorf("failed to create request: %w\n", err)
 	}
 
 	// Add headers
@@ -176,7 +177,7 @@ func makeAPICall(apiConfig structs.APIConfig, payload map[string]interface{}) (m
 	resp, err := client.Do(req)
 	if err != nil {
 		logrus.WithError(err).Error("\nFailed to make request:")
-		return nil, fmt.Errorf("failed to make request: %w", err)
+		return nil, fmt.Errorf("failed to make request: %w\n", err)
 	}
 	defer resp.Body.Close()
 
@@ -184,7 +185,7 @@ func makeAPICall(apiConfig structs.APIConfig, payload map[string]interface{}) (m
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		logrus.WithError(err).Error("\nFailed to read response body:")
-		return nil, fmt.Errorf("failed to read response body: %w", err)
+		return nil, fmt.Errorf("failed to read response body: %w\n", err)
 	}
 
 	// // Handle non-200 and non-202 status codes
@@ -199,10 +200,10 @@ func makeAPICall(apiConfig structs.APIConfig, payload map[string]interface{}) (m
 		// Try to pretty-print the response if it's in JSON format
 		var jsonResponse map[string]interface{}
 		if err := json.Unmarshal(body, &jsonResponse); err == nil {
-			logrus.Errorf("\n🔍 Luma AI API Response:\n%s", PrettyPrintJSON(jsonResponse))
+			logrus.Errorf("\n🔍 API Response:\n%s\n", PrettyPrintJSON(jsonResponse))
 		} else {
 			// If response is not JSON, print it as a raw string
-			logrus.Errorf("\n🔍 Luma AI API Raw Response:\n%s", string(body))
+			logrus.Errorf("\n🔍 API Raw Response:\n%s\n", string(body))
 		}
 
 		return nil, fmt.Errorf("non-200-202 status: %d", resp.StatusCode)
@@ -381,10 +382,14 @@ func pollForCompletion(step structs.Step, dataStore map[string]interface{}, resp
 }
 
 func PrettyPrintJSON(data map[string]interface{}) string {
-	prettyJSON, err := json.MarshalIndent(data, "", "  ") // 2-space indentation
-	if err != nil {
+	var buf bytes.Buffer
+	encoder := json.NewEncoder(&buf)
+	encoder.SetEscapeHTML(false) // Prevents escaping of slashes and other HTML characters
+	encoder.SetIndent("", "  ")  // 2-space indentation
+
+	if err := encoder.Encode(data); err != nil {
 		logrus.WithError(err).Error("Failed to pretty print JSON payload")
-		return "{}" // Return empty JSON object in case of error
+		return "{}"
 	}
-	return string(prettyJSON)
+	return buf.String()
 }

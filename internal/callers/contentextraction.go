@@ -14,7 +14,6 @@ import (
 // The response can be either a JSON string or a mapped input (already parsed JSON).
 func ContentExtraction(response interface{}, dataType string) (string, string, string, string, error) {
 	var jsonData interface{}
-	fmt.Printf("response: %v\n", response)
 	switch v := response.(type) {
 	case string:
 		// If the response is a string, assume it is a JSON string and unmarshal it.
@@ -57,7 +56,7 @@ func ContentExtraction(response interface{}, dataType string) (string, string, s
 
 // getConfigParams retrieves configuration parameters for the given data type and step index.
 func getConfigParams(dataType string, stepIndex int) (string, string, string, string) {
-	workflow := config.Workflows[dataType].Steps[stepIndex].ResponsePlaceholders
+	workflow := config.Workflows[dataType].Steps[stepIndex].ContentExtraction
 	return getStringFromMap(workflow, "response_format"),
 		getStringFromMap(workflow, "response_path"),
 		getStringFromMap(workflow, "file_id_path"),

@@ -9,6 +9,7 @@ type Step struct {
 	Body                 map[string]interface{} `yaml:"body,omitempty"`                  // Request payload (now fully dynamic)
 	ResponsePlaceholders map[string]interface{} `yaml:"response_placeholders,omitempty"` // Mapping placeholders -> response field names
 	Poll                 map[string]interface{} `yaml:"poll,omitempty"`                  // Fully dynamic polling config
+	ContentExtraction    map[string]interface{} `yaml:"content_extraction,omitempty"`
 }
 
 // Represents a full API workflow (multiple steps)
