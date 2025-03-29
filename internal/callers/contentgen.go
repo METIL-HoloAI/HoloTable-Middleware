@@ -16,7 +16,7 @@ import (
 )
 
 // Loads the intent detection response & selects the appropriate workflow
-func LoadIntentDetectionResponse(JSONData []byte) {
+func LoadIntentDetectionResponse(JSONData []byte, originalInput string) {
 	// Read JSON data from intent detection
 	var intentDetectionResponse structs.IntentDetectionResponse
 	if err := json.Unmarshal(JSONData, &intentDetectionResponse); err != nil {
@@ -32,10 +32,10 @@ func LoadIntentDetectionResponse(JSONData []byte) {
 	}
 
 	// Pass intent detection response & workflow to HandleWorkflow
-	HandleWorkflow(intentDetectionResponse, workflow)
+	HandleWorkflow(intentDetectionResponse, workflow, originalInput)
 }
 
-func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, workflow structs.Workflow) {
+func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, workflow structs.Workflow, originalInput string) {
 	// Storage for previous step results (ensures placeholders are accessible)
 	dataStore := make(map[string]interface{})
 
@@ -67,11 +67,11 @@ func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, wor
 			payload = deepReplace(step.Body, dataStore).(map[string]interface{}) // Replace placeholders for later steps
 		}
 		logrus.Debugf("\n📦 API Call Configuration for Step '%s': \nURL: %s,\n Method: %s,\n Headers: %+s\n\n", step.Name, workflowConfig.Endpoint, workflowConfig.Method, workflowConfig.Headers)
-		logrus.Debugf("\n📦 API Call Paylowd for Step '%s': %+s\n\n", step.Name, PrettyPrintJSON(payload))
+		logrus.Debugf("\n📦 API Call Payload for Step '%s': %+s\n\n", step.Name, PrettyPrintJSON(payload))
 
 		// Make the API call passing what we jsut created above
 		var responseData map[string]interface{}
-		responseData, err := makeAPICall(workflowConfig, payload)
+		responseData, err := makeAPICall(workflowConfig, payload, originalInput)
 		if err != nil {
 			logrus.Errorf("\n❌ Error in step '%s': %v\n", step.Name, err)
 			return
@@ -143,7 +143,7 @@ func buildPayload(intentDetectionResponse structs.IntentDetectionResponse) map[s
 }
 
 // Makes the API request & returns the response
-func makeAPICall(apiConfig structs.APIConfig, payload map[string]interface{}) (map[string]interface{}, error) {
+func makeAPICall(apiConfig structs.APIConfig, payload map[string]interface{}, originalInput string) (map[string]interface{}, error) {
 	client := &http.Client{}
 
 	// Convert payload to JSON
@@ -193,6 +193,11 @@ func makeAPICall(apiConfig structs.APIConfig, payload map[string]interface{}) (m
 		var jsonResponse map[string]interface{}
 		if err := json.Unmarshal(body, &jsonResponse); err == nil {
 			logrus.Errorf("\n🔍 API Response:\n%s\n", PrettyPrintJSON(jsonResponse))
+			// Retry intent detection
+			logrus.Warn("🔄 Unnecessary data detected. Retrying intent detection...")
+			go StartIntentDetection(originalInput)
+			return nil, fmt.Errorf("retrying due to unnecessary data")
+
 		} else {
 			// If response is not JSON, print it as a raw string
 			logrus.Errorf("\n🔍 API Raw Response:\n%s\n", string(body))

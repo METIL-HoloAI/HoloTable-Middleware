@@ -20,7 +20,8 @@ func StartIntentDetection(input string) {
 		return
 	}
 	// Pass JSON data from intent detection to contentget.go for the call
-	LoadIntentDetectionResponse(jsonData)
+	// Also pass user text input through for potential retrying in makeAPICall in contentgen.go
+	LoadIntentDetectionResponse(jsonData, input)
 }
 
 // LoadPrompt sends the prompt to chat ai, then saves and returns the JSON response
