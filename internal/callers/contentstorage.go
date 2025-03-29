@@ -69,7 +69,17 @@ func ContentStorage(fileType, format, fileID, fileExtention string, content []by
 		return nil, "", fmt.Errorf("failed to insert record into database: %v", err)
 	}
 
-	return content, filePath, nil
+	// filePath = "my_file.txt" // Could be a relative or absolute path
+
+	absPath, err := filepath.Abs(filePath)
+	if err != nil {
+		fmt.Println("Error getting absolute path:", err)
+		return nil, "", err
+	}
+
+	fmt.Println("Absolute path:", absPath)
+
+	return content, absPath, nil
 }
 
 // downloadContent downloads the content from the given URL and returns the downloaded data.
