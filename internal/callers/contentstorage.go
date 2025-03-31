@@ -11,6 +11,7 @@ import (
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config/structs"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/database"
+	"github.com/google/uuid"
 )
 
 var General structs.GeneralSettings
@@ -20,7 +21,7 @@ const filePerm = 0644
 // ContentStorage saves the content to local storage under a subdirectory based on the file type.
 // If the provided content represents a URL (i.e. format == "url"), the function downloads the file from that URL before storing it.
 // It assumes that the provided filename already includes the proper file extension.
-func ContentStorage(fileType, format, fileID, fileExtention string, content []byte) ([]byte, string, error) {
+func ContentStorage(fileType, format, fileExtention string, content []byte) ([]byte, string, error) {
 	// Map file types to database table names.
 	tableMap := map[string]string{
 		"image": "image",
@@ -36,9 +37,9 @@ func ContentStorage(fileType, format, fileID, fileExtention string, content []by
 	}
 
 	// Combine fileID and fileExtention into a single file name.
-	fileName := fileID
-	if fileID != "" && fileExtention != "" {
-		fileName = fmt.Sprintf("%s.%s", fileID, fileExtention)
+	fileName := uuid.New().String()
+	if fileExtention != "" {
+		fileName = fmt.Sprintf("%s.%s", uuid.New().String(), fileExtention)
 	}
 
 	// If the format indicates that the content is a URL, download the file.

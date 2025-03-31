@@ -12,54 +12,46 @@ import (
 
 // ContentExtraction extracts content from the response input based on the data type.
 // The response can be either a JSON string or a mapped input (already parsed JSON).
-func ContentExtraction(response interface{}, dataType string) (string, string, string, string, error) {
+func ContentExtraction(response interface{}, dataType string) (string, string, string, error) {
 	var jsonData interface{}
 	switch v := response.(type) {
 	case string:
 		// If the response is a string, assume it is a JSON string and unmarshal it.
 		if err := json.Unmarshal([]byte(v), &jsonData); err != nil {
-			return "", "", "", "", err
+			return "", "", "", err
 		}
 	default:
 		// Otherwise, assume it's already a parsed map/slice.
 		jsonData = response
 	}
 
-	var responseFormat, responsePath, fileIDPath, fileType string
+	var responseFormat, responsePath, fileType string
 
 	// Select configuration parameters based on the provided data type.
 	lastStep := len(config.Workflows[dataType].Steps) - 1
 	switch dataType {
 	case "image", "video", "gif", "model":
-		responseFormat, responsePath, fileIDPath, fileType = getConfigParams(dataType, lastStep)
+		responseFormat, responsePath, fileType = getConfigParams(dataType, lastStep)
 	default:
-		return "", "", "", "", errors.New("unknown data type: " + dataType)
+		return "", "", "", errors.New("unknown data type: " + dataType)
 	}
 
 	// Extract the data (URL or raw data string).
 	dataExtracted, err := extractValueFromData(jsonData, responsePath)
 	if err != nil {
-		return "", responseFormat, "", "", err
+		return "", responseFormat, "", err
 	}
 
 	// Extract file ID if a file_id_path is provided.
-	var fileID string
-	if fileIDPath != "" {
-		fileID, err = extractValueFromData(jsonData, fileIDPath)
-		if err != nil {
-			return "", responseFormat, "", "", err
-		}
-	}
 
-	return dataExtracted, responseFormat, fileID, fileType, nil
+	return dataExtracted, responseFormat, fileType, nil
 }
 
 // getConfigParams retrieves configuration parameters for the given data type and step index.
-func getConfigParams(dataType string, stepIndex int) (string, string, string, string) {
+func getConfigParams(dataType string, stepIndex int) (string, string, string) {
 	workflow := config.Workflows[dataType].Steps[stepIndex].ContentExtraction
 	return getStringFromMap(workflow, "response_format"),
 		getStringFromMap(workflow, "response_path"),
-		getStringFromMap(workflow, "file_id_path"),
 		getStringFromMap(workflow, "file_extention")
 }
 

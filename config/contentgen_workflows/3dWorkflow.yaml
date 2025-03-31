@@ -54,5 +54,4 @@ model:
       content_extraction:
         response_path: "model_urls.glb"
         response_format: "url"
-        file_id_path: "id"
         file_extention: "glb"
