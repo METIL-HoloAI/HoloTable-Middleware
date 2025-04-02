@@ -15,8 +15,28 @@ import (
 // https://medium.com/better-programming/building-a-simple-rest-api-in-go-with-gorilla-mux-892ceb128c6f
 // send text
 
+func enableCORS(router *mux.Router) {
+	router.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Set CORS headers
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+			// If it's a preflight OPTIONS request, exit here.
+			if r.Method == "OPTIONS" {
+				w.WriteHeader(http.StatusOK)
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	})
+}
+
 func StartRestAPI() {
 	router := mux.NewRouter()
+	// Enable CORS for the router
+	enableCORS(router)
+
 	router.HandleFunc("/config/{name}", getYamlHandler).Methods("GET")
 	router.HandleFunc("/config/{name}", putYamlHandler).Methods("PUT")
 	router.HandleFunc("/database/list", useListAllFilenames).Methods("PUT")
