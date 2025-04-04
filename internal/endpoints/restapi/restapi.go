@@ -40,9 +40,12 @@ func StartRestAPI() {
 
 	// New endpoint for keyword
 	router.HandleFunc("/config/keyword", getKeywordHandler).Methods("GET", "OPTIONS")
-	router.HandleFunc("/config/{name}", getYamlHandler).Methods("GET")
-	router.HandleFunc("/config/{name}", putYamlHandler).Methods("PUT")
-	router.HandleFunc("/database/list", useListAllFilenames).Methods("PUT")
+
+	// ({name: .*} essentially is a "catch-all route" meaning it will catch the rest of the route after "/config"
+	// This ensures that config files in lower directories can still be fetched, i.e. "/config/contentgen_yamls" is all captured
+	router.HandleFunc("/config/{name:.*}", getYamlHandler).Methods("GET", "OPTIONS")
+	router.HandleFunc("/config/{name:.*}", putYamlHandler).Methods("PUT", "OPTIONS")
+	router.HandleFunc("/database/list", useListAllFilenames).Methods("PUT", "OPTIONS")
 
 	// start serv
 	log.Fatal(http.ListenAndServe(":8000", router))
