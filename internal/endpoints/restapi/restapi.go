@@ -37,6 +37,8 @@ func StartRestAPI() {
 	// Enable CORS for the router
 	enableCORS(router)
 
+	// New endpoint for keyword
+	router.HandleFunc("/config/keyword", getKeywordHandler).Methods("GET", "OPTIONS")
 	router.HandleFunc("/config/{name}", getYamlHandler).Methods("GET")
 	router.HandleFunc("/config/{name}", putYamlHandler).Methods("PUT")
 	router.HandleFunc("/database/list", useListAllFilenames).Methods("PUT")
