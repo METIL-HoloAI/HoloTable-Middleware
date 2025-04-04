@@ -64,23 +64,38 @@ func getKeywordHandler(w http.ResponseWriter, r *http.Request) {
 func getYamlHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	yamlName := vars["name"]
-	yamlPath := "../../config/" + yamlName + ".yaml"
 
-	data, err := os.ReadFile(yamlPath)
-	if err != nil {
-		yamlPath = "../../config/contentgen/" + yamlName + ".yaml"
-		data2, err := os.ReadFile(yamlPath)
-		if err != nil {
-			http.Error(w, "Failed to read file", http.StatusInternalServerError)
-			return
+	var searchPaths []string
+	if strings.Contains(yamlName, "/") {
+		// If the client included a directory in the path,
+		// assume they provided the relative path from the base config folder.
+		searchPaths = []string{
+			"config/" + yamlName + ".yaml",
 		}
-		data = data2
+	} else {
+		// Otherwise, try the base config and common subdirectories.
+		searchPaths = []string{
+			"config/" + yamlName + ".yaml",
+			"config/contentgen_yamls/" + yamlName + ".yaml",
+			"config/contentgen_workflows/" + yamlName + ".yaml",
+		}
 	}
 
-	dataString := string(data)
+	var data []byte
+	var err error
+	for _, path := range searchPaths {
+		data, err = os.ReadFile(path)
+		if err == nil {
+			break
+		}
+	}
+	if err != nil {
+		http.Error(w, "Failed to read file", http.StatusNotFound)
+		return
+	}
 
 	w.Header().Set("Content-Type", "text/plain")
-	_, err = w.Write([]byte(dataString))
+	_, err = w.Write(data)
 	if err != nil {
 		log.Fatal("Failed to write response:", err)
 	}
