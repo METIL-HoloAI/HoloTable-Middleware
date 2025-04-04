@@ -105,8 +105,9 @@ func putYamlHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	yamlName := vars["name"]
 	yamlPaths := []string{
-		"../../config/" + yamlName + ".yaml",
-		"../../config/contentgen/" + yamlName + ".yaml",
+		"config/" + yamlName + ".yaml",
+		"config/contentgen_yamls/" + yamlName + ".yaml",
+		"config/contentgen_workflows/" + yamlName + ".yaml",
 	}
 
 	body, err := io.ReadAll(r.Body)
