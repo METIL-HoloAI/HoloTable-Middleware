@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/database"
 	"github.com/gorilla/mux"
 )
