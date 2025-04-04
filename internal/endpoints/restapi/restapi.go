@@ -51,6 +51,16 @@ func StartRestAPI() {
 	log.Fatal(http.ListenAndServe(":8000", router))
 }
 
+func getKeywordHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(http.StatusOK)
+	// Return the keyword from the SpeechToText configuration
+	_, err := w.Write([]byte(config.SpeechToText.Keyword))
+	if err != nil {
+		log.Fatal("Failed to write response:", err)
+	}
+}
+
 func getYamlHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	yamlName := vars["name"]
