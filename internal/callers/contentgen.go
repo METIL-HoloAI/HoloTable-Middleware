@@ -119,8 +119,7 @@ func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, wor
 			}
 			//fmt.Println("Extracted URL:", extractedURL)
 
-
-			_, filePath, err := ContentStorage(intentDetectionResponse.ContentType, extractedFormat, fileExtention, []byte(extractedURL))
+			dataBytes, filePath, fileID, err := ContentStorage(intentDetectionResponse.ContentType, extractedFormat, fileExtention, []byte(extractedURL))
 
 			if err != nil {
 				fmt.Printf("Storage failed: %v", err)
