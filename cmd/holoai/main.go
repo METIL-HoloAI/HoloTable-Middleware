@@ -4,17 +4,23 @@ import (
 	"database/sql"
 	"os"
 
+	"log"
+
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/database"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/endpoints/restapi"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/endpoints/websocket"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/listeners"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/utils"
+
+	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/unityserver"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/sirupsen/logrus"
 )
 
 func main() {
+
+	// Load configuration
 	config.LoadYaml()
 
 	// Initialize logger
@@ -31,6 +37,11 @@ func main() {
 	defer db.Close()
 
 	database.Init(db)
+
+	// Start WebSocket server
+	go unityserver.StartWebSocketServer()
+	<-unityserver.ClientReady
+	log.Println("Unity client connected")
 
 	if config.General.OpenWebsocket {
 		go websocket.EstablishConnection()
