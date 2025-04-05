@@ -12,7 +12,6 @@ image:
         intent_detection_step: true
       response_key: "data"
       content_extraction:
-        response_path: "data.url"
+        response_path: "data.0.url"
         response_format: "url"
-        file_id_path: "created"
         file_extention: "png"

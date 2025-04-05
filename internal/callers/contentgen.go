@@ -112,14 +112,15 @@ func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, wor
 		}
 
 		if i == len(workflow.Steps)-1 {
-			extractedURL, extractedFormat, fileID, fileExtention, err := ContentExtraction(responseData, intentDetectionResponse.ContentType)
+			extractedURL, extractedFormat, fileExtention, err := ContentExtraction(responseData, intentDetectionResponse.ContentType)
 			if err != nil {
 				fmt.Printf("Extraction failed: %v", err)
 				return
 			}
 			//fmt.Println("Extracted URL:", extractedURL)
 
-			dataBytes, filePath, err := ContentStorage(intentDetectionResponse.ContentType, extractedFormat, fileID, fileExtention, []byte(extractedURL))
+			dataBytes, filePath, fileID, err := ContentStorage(intentDetectionResponse.ContentType, extractedFormat, fileExtention, []byte(extractedURL))
+
 			if err != nil {
 				fmt.Printf("Storage failed: %v", err)
 				return
@@ -158,14 +159,14 @@ func makeAPICall(apiConfig structs.APIConfig, payload map[string]interface{}) (m
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
 		logrus.WithError(err).Error("\nFailed to marshal payload:\n")
-		return nil, fmt.Errorf("failed to marshal payload: %w\n", err)
+		return nil, fmt.Errorf("failed to marshal payload: %w", err)
 	}
 
 	// Create HTTP request
 	req, err := http.NewRequest(apiConfig.Method, apiConfig.Endpoint, bytes.NewBuffer(payloadBytes))
 	if err != nil {
 		logrus.WithError(err).Error("\nFailed to create request:")
-		return nil, fmt.Errorf("failed to create request: %w\n", err)
+		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
 	// Add headers
@@ -177,7 +178,7 @@ func makeAPICall(apiConfig structs.APIConfig, payload map[string]interface{}) (m
 	resp, err := client.Do(req)
 	if err != nil {
 		logrus.WithError(err).Error("\nFailed to make request:")
-		return nil, fmt.Errorf("failed to make request: %w\n", err)
+		return nil, fmt.Errorf("failed to make request: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -185,7 +186,7 @@ func makeAPICall(apiConfig structs.APIConfig, payload map[string]interface{}) (m
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		logrus.WithError(err).Error("\nFailed to read response body:")
-		return nil, fmt.Errorf("failed to read response body: %w\n", err)
+		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
 	// // Handle non-200 and non-202 status codes

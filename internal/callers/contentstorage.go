@@ -11,6 +11,7 @@ import (
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config/structs"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/database"
+	"github.com/google/uuid"
 )
 
 var General structs.GeneralSettings
@@ -20,7 +21,7 @@ const filePerm = 0644
 // ContentStorage saves the content to local storage under a subdirectory based on the file type.
 // If the provided content represents a URL (i.e. format == "url"), the function downloads the file from that URL before storing it.
 // It assumes that the provided filename already includes the proper file extension.
-func ContentStorage(fileType, format, fileID, fileExtention string, content []byte) ([]byte, string, error) {
+func ContentStorage(fileType, format, fileExtention string, content []byte) ([]byte, string, string, error) {
 	// Map file types to database table names.
 	tableMap := map[string]string{
 		"image": "image",
@@ -32,12 +33,13 @@ func ContentStorage(fileType, format, fileID, fileExtention string, content []by
 	// Get the corresponding database table name.
 	tableName, ok := tableMap[fileType]
 	if !ok {
-		return nil, "", fmt.Errorf("invalid file type: %s", fileType)
+		return nil, "", "", fmt.Errorf("invalid file type: %s", fileType)
 	}
 
 	// Combine fileID and fileExtention into a single file name.
-	fileName := fileID
-	if fileID != "" && fileExtention != "" {
+	fileID := uuid.New().String()
+	fileName := ""
+	if fileExtention != "" {
 		fileName = fmt.Sprintf("%s.%s", fileID, fileExtention)
 	}
 
@@ -46,7 +48,7 @@ func ContentStorage(fileType, format, fileID, fileExtention string, content []by
 		var err error
 		content, err = downloadContent(string(content))
 		if err != nil {
-			return nil, "", err
+			return nil, "", "", err
 		}
 	}
 
@@ -54,19 +56,19 @@ func ContentStorage(fileType, format, fileID, fileExtention string, content []by
 	directory := filepath.Join(config.General.DataDir, "/content", tableName)
 	// Ensure the directory exists.
 	if err := os.MkdirAll(directory, os.ModePerm); err != nil {
-		return nil, "", fmt.Errorf("failed to create directory: %v", err)
+		return nil, "", "", fmt.Errorf("failed to create directory: %v", err)
 	}
 
 	// Create the full file path.
 	filePath := filepath.Join(directory, fileName)
 	// Write the content to the file.
 	if err := os.WriteFile(filePath, content, filePerm); err != nil {
-		return nil, "", fmt.Errorf("failed to write file: %v", err)
+		return nil, "", "", fmt.Errorf("failed to write file: %v", err)
 	}
 
 	// Insert a record into the database.
 	if err := database.Insert(tableName, fileName, filePath); err != nil {
-		return nil, "", fmt.Errorf("failed to insert record into database: %v", err)
+		return nil, "", "", fmt.Errorf("failed to insert record into database: %v", err)
 	}
 
 	// filePath = "my_file.txt" // Could be a relative or absolute path
@@ -74,12 +76,12 @@ func ContentStorage(fileType, format, fileID, fileExtention string, content []by
 	absPath, err := filepath.Abs(filePath)
 	if err != nil {
 		fmt.Println("Error getting absolute path:", err)
-		return nil, "", err
+		return nil, "", "", err
 	}
 
 	fmt.Println("Absolute path:", absPath)
 
-	return content, absPath, nil
+	return content, absPath, fileID, nil
 }
 
 // downloadContent downloads the content from the given URL and returns the downloaded data.

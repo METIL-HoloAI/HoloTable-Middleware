@@ -24,6 +24,5 @@ video:
       content_extraction:
          response_path: "assets.video"
          response_format: "url"
-         file_id_path: "id"
          file_extention: "mp4"
 
