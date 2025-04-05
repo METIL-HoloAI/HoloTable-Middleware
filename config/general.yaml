@@ -3,5 +3,5 @@ openWebsocket: false
 #log lvl order, from lowest to highest
 #Trace → Debug → Info → Warn → Error → Fatal → Panic
 log_level: "Trace"
-yaml:"numIntentDetectionRetries: 1
+numIntentDetectionRetries: 1
 

@@ -1,9 +1,5 @@
 # endpoint: "https://api.lumalabs.ai/dream-machine/v1/generations"
-# method: "POST"
-# headers:
-#   accept: "application/json"
-#   authorization: "Bearer &VIDEO_API_KEY"
-#   content-Type: "application/json"
+
 requiredParameters:
   prompt:
     description: "A text description of the desired video."
