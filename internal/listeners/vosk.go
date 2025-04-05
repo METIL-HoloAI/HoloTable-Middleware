@@ -26,6 +26,8 @@ func SendAudio(audio []byte) {
 	err := vosk.WriteMessage(websocket.BinaryMessage, audio)
 	if err != nil {
 		//log.Print("Failed to send audio to vosk, ", err)
+		//This error keep popping up when we temporatrily shutdown the mic and floods the logs so we are ignoring it for now
+		_ = err
 	}
 }
 
