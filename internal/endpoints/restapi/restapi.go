@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/database"
 	"github.com/gorilla/mux"
 )
@@ -15,36 +16,86 @@ import (
 // https://medium.com/better-programming/building-a-simple-rest-api-in-go-with-gorilla-mux-892ceb128c6f
 // send text
 
+func enableCORS(router *mux.Router) {
+	router.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Set CORS headers
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+			// If it's a preflight OPTIONS request, exit here.
+			if r.Method == "OPTIONS" {
+				w.WriteHeader(http.StatusOK)
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	})
+}
+
 func StartRestAPI() {
 	router := mux.NewRouter()
-	router.HandleFunc("/config/{name}", getYamlHandler).Methods("GET")
-	router.HandleFunc("/config/{name}", putYamlHandler).Methods("PUT")
-	router.HandleFunc("/database/list", useListAllFilenames).Methods("PUT")
+	// Enable CORS for the router
+	enableCORS(router)
+
+	// New endpoint for keyword
+	router.HandleFunc("/config/keyword", getKeywordHandler).Methods("GET", "OPTIONS")
+
+	// ({name: .*} essentially is a "catch-all route" meaning it will catch the rest of the route after "/config"
+	// This ensures that config files in lower directories can still be fetched, i.e. "/config/contentgen_yamls" is all captured
+	router.HandleFunc("/config/{name:.*}", getYamlHandler).Methods("GET", "OPTIONS")
+	router.HandleFunc("/config/{name:.*}", putYamlHandler).Methods("PUT", "OPTIONS")
+	router.HandleFunc("/database/list", useListAllFilenames).Methods("PUT", "OPTIONS")
 
 	// start serv
 	log.Fatal(http.ListenAndServe(":8000", router))
 }
 
+func getKeywordHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(http.StatusOK)
+	// Return the keyword from the SpeechToText configuration
+	_, err := w.Write([]byte(config.SpeechToText.Keyword))
+	if err != nil {
+		log.Fatal("Failed to write response:", err)
+	}
+}
+
 func getYamlHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	yamlName := vars["name"]
-	yamlPath := "../../config/" + yamlName + ".yaml"
 
-	data, err := os.ReadFile(yamlPath)
-	if err != nil {
-		yamlPath = "../../config/contentgen/" + yamlName + ".yaml"
-		data2, err := os.ReadFile(yamlPath)
-		if err != nil {
-			http.Error(w, "Failed to read file", http.StatusInternalServerError)
-			return
+	var searchPaths []string
+	if strings.Contains(yamlName, "/") {
+		// If the client included a directory in the path,
+		// assume they provided the relative path from the base config folder.
+		searchPaths = []string{
+			"config/" + yamlName + ".yaml",
 		}
-		data = data2
+	} else {
+		// Otherwise, try the base config and common subdirectories.
+		searchPaths = []string{
+			"config/" + yamlName + ".yaml",
+			"config/contentgen_yamls/" + yamlName + ".yaml",
+			"config/contentgen_workflows/" + yamlName + ".yaml",
+		}
 	}
 
-	dataString := string(data)
+	var data []byte
+	var err error
+	for _, path := range searchPaths {
+		data, err = os.ReadFile(path)
+		if err == nil {
+			break
+		}
+	}
+	if err != nil {
+		http.Error(w, "Failed to read file", http.StatusNotFound)
+		return
+	}
 
 	w.Header().Set("Content-Type", "text/plain")
-	_, err = w.Write([]byte(dataString))
+	_, err = w.Write(data)
 	if err != nil {
 		log.Fatal("Failed to write response:", err)
 	}
@@ -54,8 +105,9 @@ func putYamlHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	yamlName := vars["name"]
 	yamlPaths := []string{
-		"../../config/" + yamlName + ".yaml",
-		"../../config/contentgen/" + yamlName + ".yaml",
+		"config/" + yamlName + ".yaml",
+		"config/contentgen_yamls/" + yamlName + ".yaml",
+		"config/contentgen_workflows/" + yamlName + ".yaml",
 	}
 
 	body, err := io.ReadAll(r.Body)
