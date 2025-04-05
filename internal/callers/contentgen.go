@@ -12,6 +12,7 @@ import (
 
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config"
 	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/config/structs"
+	"github.com/METIL-HoloAI/HoloTable-Middleware/internal/unityserver"
 	"github.com/sirupsen/logrus"
 )
 
@@ -118,14 +119,23 @@ func HandleWorkflow(intentDetectionResponse structs.IntentDetectionResponse, wor
 			}
 			//fmt.Println("Extracted URL:", extractedURL)
 
+
 			_, filePath, err := ContentStorage(intentDetectionResponse.ContentType, extractedFormat, fileExtention, []byte(extractedURL))
+
 			if err != nil {
 				fmt.Printf("Storage failed: %v", err)
 				return
 			}
-
 			logrus.Tracef("Content successfully stored at: %s\n", filePath)
-			logrus.Debugf("🎉 Workflow execution completed successfully.\n")
+			logrus.Debugf("🎉 Workflow execution completed successfully.")
+
+			if unityserver.IsUsingFilepath {
+				logrus.Debug("About to send file paths for asset export.")
+				unityserver.ExportAssetFile(fileID, fileExtention, filePath)
+			} else {
+				logrus.Debug("About to send raw data for asset export.")
+				unityserver.ExportAssetData(fileID, fileExtention, dataBytes)
+			}
 		}
 	}
 }
