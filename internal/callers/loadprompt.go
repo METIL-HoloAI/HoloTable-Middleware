@@ -13,7 +13,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func StartIntentDetection(input string) {
+func StartIntentDetection(input string, numRetrys int) {
 	jsonData, err := LoadPrompt(input)
 	if err != nil {
 		logrus.Warn("Error running intent detection:", err)
@@ -21,7 +21,7 @@ func StartIntentDetection(input string) {
 	}
 	// Pass JSON data from intent detection to contentget.go for the call
 	// Also pass user text input through for potential retrying in makeAPICall in contentgen.go
-	LoadIntentDetectionResponse(jsonData, input)
+	LoadIntentDetectionResponse(jsonData, input, numRetrys)
 }
 
 // LoadPrompt sends the prompt to chat ai, then saves and returns the JSON response

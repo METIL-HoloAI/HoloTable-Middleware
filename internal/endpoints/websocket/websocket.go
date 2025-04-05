@@ -51,7 +51,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 			select {
 			case text := <-voskResponse:
 				if keywordActive {
-					go callers.StartIntentDetection(text)
+					go callers.StartIntentDetection(text, 0)
 					keywordActive = false
 					err = conn.WriteMessage(websocket.TextMessage, []byte("Finished recording"))
 					if err != nil {
@@ -72,7 +72,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 				// Keep going
 			}
 		} else if messageType == websocket.TextMessage {
-			go callers.StartIntentDetection(string(message))
+			go callers.StartIntentDetection(string(message), 0)
 		}
 	}
 

@@ -34,7 +34,7 @@ func StartTextListener() {
 			config.LoadYaml()
 			fmt.Println("Reloaded yaml...")
 		} else { // Call intent detection
-			go callers.StartIntentDetection(input)
+			go callers.StartIntentDetection(input, 0)
 		}
 
 		fmt.Println()
