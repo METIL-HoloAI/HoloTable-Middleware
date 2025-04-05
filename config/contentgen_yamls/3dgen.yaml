@@ -3,11 +3,11 @@
 # a (possibly nonexistent) List of options and a (possibly nonexistent) default val.
 #For more details see https://platform.openai.com/docs/api-reference/images/create
 
-endpoint: "https://api.meshy.ai/openapi/v2/text-to-3d"
-method: "POST"
-headers:
-  Authorization: "Bearer &THREED_MODEL_API_KEY"
-  Content-Type: "application/json"
+# endpoint: "https://api.meshy.ai/openapi/v2/text-to-3d"
+# method: "POST"
+# headers:
+#   Authorization: "Bearer &THREED_MODEL_API_KEY"
+#   Content-Type: "application/json"
 requiredParameters:
   mode:
     default: "preview"

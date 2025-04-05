@@ -3,12 +3,12 @@
 # a (possibly nonexistent) List of options and a (possibly nonexistent) default val.
 #For more details see https://docs.leonardo.ai/docs/generate-images-using-leonardo-phoenix-model#sample-output
 
-endpoint: "https://cloud.leonardo.ai/api/rest/v1/generations"
-method: "POST"
-headers:
-  accept: "application/json"
-  authorization: "Bearer &GIF_API_KEY"
-  content-Type: "application/json"
+# endpoint: "https://cloud.leonardo.ai/api/rest/v1/generations"
+# method: "POST"
+# headers:
+#   accept: "application/json"
+#   authorization: "Bearer &GIF_API_KEY"
+#   content-Type: "application/json"
 requiredParameters:
   prompt:
     description: "A text description of the desired gif(s)."

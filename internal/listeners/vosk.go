@@ -25,7 +25,7 @@ var vosk *websocket.Conn
 func SendAudio(audio []byte) {
 	err := vosk.WriteMessage(websocket.BinaryMessage, audio)
 	if err != nil {
-		log.Print("Failed to send audio to vosk, ", err)
+		//log.Print("Failed to send audio to vosk, ", err)
 	}
 }
 
