@@ -1,0 +1,4 @@
+requiredParameters:
+  text:
+    description: "A text description of the desired image(s)."
+    options: [] 

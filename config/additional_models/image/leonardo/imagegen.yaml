@@ -1,0 +1,27 @@
+#Paramaters for Leonardos Image Gen API, we need to make an image to then make a gif
+#The APIConfig struct assumes that each required and optional paramater has a description
+# a (possibly nonexistent) List of options and a (possibly nonexistent) default val.
+#For more details see https://docs.leonardo.ai/docs/generate-images-using-leonardo-phoenix-model#sample-output
+
+requiredParameters:
+  prompt:
+    description: "A text description of the desired gif(s)."
+    options: [] 
+  modelId:
+    default: "de7d3faf-762f-48e0-b3b7-9d0ac3a3fcf3"
+    options: ["de7d3faf-762f-48e0-b3b7-9d0ac3a3fcf3"]
+    description: "The model to use for image generation, currently Leonardo Phoenix 1.0"
+  contrast:
+    default: 2.5
+    description: "The contrast of the generated gif, If alchemy is true, contrast needs to be 2.5 or higher."
+    options: [1.0, 1.3, 1.8, 2.5, 3, 3.5, 4, 4.5]
+optionalParameters:
+  alchemy:
+    default: false
+    description: "If true, the output will be generated with an alchemy effect."
+    options: [true, false]
+  enhancePrompt:
+    default: true
+    description: "If true, the prompt will be enhanced."
+    options: [true, false]
+   

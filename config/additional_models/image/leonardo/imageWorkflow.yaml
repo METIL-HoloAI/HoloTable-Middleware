@@ -1,0 +1,28 @@
+image:
+  steps:
+    - name: "submit_image_generation"
+      method: "POST"
+      url: "https://cloud.leonardo.ai/api/rest/v1/generations"
+      headers:
+        Authorization: "Bearer &LEONARDO_API_KEY"
+        Content-Type: "application/json"
+      body:
+        intent_detection_step: true
+      response_placeholders:
+        generation_id: sdGenerationJob.generationId
+
+    - name: "poll_image_generation_status"
+      method: "GET"
+      url: "https://cloud.leonardo.ai/api/rest/v1/generations/{generation_id}"
+      headers:
+        Authorization: "Bearer &LEONARDO_API_KEY"
+      response_placeholders:
+        status: generations_by_pk.status
+        image_id: generations_by_pk.generated_images.id
+        response_format: "url"
+        file_id_path: "generations_by_pk.generated_images.id"
+        file_extention: "jpg" 
+        response_path: "generations_by_pk.generated_images.url"
+      poll:
+        until: "COMPLETE"
+        interval: 10

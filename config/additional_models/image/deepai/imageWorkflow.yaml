@@ -4,14 +4,15 @@ image:
   steps:
     - name: "generate_image"
       method: "POST"
-      url: "https://api.openai.com/v1/images/generations"
+      url: "https://api.deepai.org/api/text2img"
       headers:
-        Authorization: "Bearer &OPENAI_API_KEY"
+        api-key: "&DEEPAI_API_KEY"
         Content-Type: "application/json"
       body:
         intent_detection_step: true
       response_key: "data"
-      content_extraction:
-        response_path: "data.0.url"
+      response_placeholders:
+        response_path: "output_url"
         response_format: "url"
-        file_extention: "png"
+        file_id_path: "id"
+        file_extention: "jpg"
