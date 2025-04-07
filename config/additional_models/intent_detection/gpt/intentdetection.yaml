@@ -25,9 +25,9 @@ initialPrompt: |
 
   2. **Extract Required Parameters (Ensure All Are Included)**:  
      - Every required parameter from the YAML file **must always be present** in `"requiredParameters"`, even if the user does not specify it.  
-     - If a required parameter has a default value in YAML, **always include it in the response.**    
+     - If a required parameter has a default value in YAML, **always include it in the response.**  
+     - If `"prompt"` is missing from user input, use `"prompt": "A detailed 3D model."` as a fallback default.  
      - If a required parameter does not have a default and is missing, include it but leave it blank.
-     - Ensure to always extract the prompt from the users input and include it in the relevant field. Note that the prompt should never be empty.
 
 
   3. **Extract Optional Parameters**:  
