@@ -1,5 +1,5 @@
 dataDir: "./datastorage/"
-openWebsocket: false
+openWebsocket: true
 #log lvl order, from lowest to highest
 #Trace → Debug → Info → Warn → Error → Fatal → Panic
 log_level: "Trace"
