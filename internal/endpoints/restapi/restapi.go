@@ -135,6 +135,7 @@ func putYamlHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	config.LoadYaml()
 	w.WriteHeader(http.StatusOK)
 
 	_, err = w.Write([]byte("YAML updated"))
